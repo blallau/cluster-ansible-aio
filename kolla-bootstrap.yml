@@ -2,6 +2,5 @@
 - name: Boostrap Kolla VMs
   hosts: kolla-nodes
   become: True
-#  serial: 1
   roles:
     - kolla_ansible_bootstrap

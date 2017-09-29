@@ -41,11 +41,11 @@ Options:
 
 Commands:
     nodes-bootstrap           Bootstrap hypervisor and create virtual nodes
-    nodes-cleanup             Cleanup hypervisor and remove virtual nodes
-    kolla-ansible-bootstrap   Bootstrap all virtual nodes
+    kolla-bootstrap           Bootstrap all virtual nodes
     kolla-build               Build Kolla images
     kolla-ansible-deploy      Deploy Openstack on nodes using Kolla-ansible
     kolla-ansible-cleanup     Cleanup all deployed Kolla containers and volumes
+    nodes-cleanup             Cleanup hypervisor and remove virtual nodes
 EOF
 }
 
@@ -60,11 +60,11 @@ cat <<EOF
 --limit
 --verbose -v
 nodes-boostrap
-nodes-cleanup
-kolla-ansible-bootstrap
+kolla-bootstrap
 kolla-build
 kolla-ansible-deploy
 kolla-ansible-cleanup
+nodes-cleanup
 EOF
 }
 
@@ -155,10 +155,10 @@ EOF
         fi
 
         ;;
-(kolla-ansible-bootstrap)
+(kolla-bootstrap)
         ACTION="Bootstrap all virtual nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e action=create"
-        PLAYBOOK="${BASEDIR}/kolla-ansible-bootstrap.yml"
+        PLAYBOOK="${BASEDIR}/kolla-bootstrap.yml"
         ;;
 (kolla-build)
         ACTION="Build Kolla images"
