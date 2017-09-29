@@ -3,4 +3,4 @@
   hosts: kolla-nodes
   become: True
   roles:
-    - kolla_ansible_bootstrap
+    - kolla_bootstrap
