@@ -1,0 +1,31 @@
+---
+#################
+# Build default #
+#################
+tmp_dir: /tmp
+
+build_overrides:
+  - section: DEFAULT
+    option: push
+    value: true
+  - section: DEFAULT
+    option: registry
+    value: "{{ docker_registry_ip }}:{{ docker_registry_port }}"
+  - section: DEFAULT
+    option: base
+    value: "{{ kolla_vm_os_distro }}"
+  - section: DEFAULT
+    option: install_type
+    value: "{{ kolla_install_type }}"
+  - section: DEFAULT
+    option: tag
+    value: "{{ kolla_build_tag }}"
+  - section: DEFAULT
+    option: debug
+    value: "{{ kolla_build_debug }}"
+  - section: DEFAULT
+    option: namespace
+    value: "{{ kolla_image_namespace }}"
+  - section: profiles
+    option: myprofile
+    value: chrony,cron,etcd,kibana,kolla-toolbox,tgtd,fluentd,glance,cinder,iscsi,haproxy,heat,horizon,keepalived,keystone,mariadb,memcached,neutron,nova-,openvswitch,rabbitmq,skydive,elasticsearch,barbican,mistral,redis,blazar,designate,freezer,influxdb,magnum,octavia,searchlight,tacker,telegraf,zun

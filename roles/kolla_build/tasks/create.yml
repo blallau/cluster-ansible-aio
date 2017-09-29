@@ -1,0 +1,62 @@
+---
+- name: Ensure source code checkout directory exists
+  become: True
+  file:
+    path: "{{ tmp_dir }}/kolla"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Clone Kolla repository
+  git:
+    repo: https://github.com/openstack/kolla
+    dest: "{{ tmp_dir }}/kolla"
+
+- name: Install Kolla
+  become: True
+  pip:
+    name: "file://{{ tmp_dir }}/kolla"
+
+- name: Generate kolla-build.conf file
+  command: "tox -e genconfig"
+  args:
+    chdir: "{{ tmp_dir }}/kolla"
+    creates: "{{ tmp_dir }}/kolla/etc/kolla/kolla-build.conf"
+
+- name: Ensure the Kolla Ansible configuration directores exist
+  become: True
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0750
+  with_items:
+    - "{{ kolla_config_path }}"
+    - "{{ kolla_config_path }}/inventory"
+
+- name: Copy kolla-build.conf file to Kolla conf dir
+  copy:
+    src: "{{ tmp_dir }}/kolla/etc/kolla/kolla-build.conf"
+    dest: "{{ kolla_config_path }}/kolla-build.conf"
+    remote_src: True
+
+- name: Override build variables in kolla-build.conf
+  ini_file:
+    path: "{{ kolla_config_path }}/kolla-build.conf"
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  with_items: "{{ build_overrides }}"
+
+- name: Set PIP cache proxy variable in kolla-build.conf
+  ini_file:
+    path: "{{ kolla_config_path }}/kolla-build.conf"
+    section: DEFAULT
+    option: build-args
+    value: "PIP_INDEX_URL=http://{{ pip_cache_proxy_ip }}:3141/root/pypi/+simple/"
+  when: pip_cache_enabled | bool
+
+- name: Build all containers
+  command: "kolla-build --profile {{ kolla_build_profile }}"
+  changed_when: False

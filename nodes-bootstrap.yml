@@ -1,0 +1,13 @@
+---
+- name: Create Kolla VMs
+  hosts: hypervisors
+  roles:
+    - nodes_bootstrap
+
+- name: Wait for Python 2 to be installed
+  hosts: created_nodes
+  gather_facts: false
+  become: True
+  tasks:
+    - raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      when: ansible_distribution|lower == "ubuntu"

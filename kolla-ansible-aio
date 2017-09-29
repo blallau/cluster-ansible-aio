@@ -1,0 +1,173 @@
+#!/bin/bash
+#set -e
+#set -x
+
+function find_base_dir {
+    local real_path=$(python -c "import os;print(os.path.realpath('$0'))")
+    local dir_name="$(dirname "$real_path")"
+    if [[ ${dir_name} == "/usr/bin" ]]; then
+        BASEDIR=/usr/share/kolla-ansible-aio
+    elif [[ ${dir_name} == "/usr/local/bin" ]]; then
+        BASEDIR=/usr/local/share/kolla-ansible-aio
+    elif [[ -n ${VIRTUAL_ENV} ]] && [[ ${dir_name} == "${VIRTUAL_ENV}/bin" ]]; then
+        BASEDIR="${VIRTUAL_ENV}/share/kolla-ansible-aio"
+    else
+        BASEDIR="${dir_name}"
+    fi
+}
+
+function process_cmd {
+    echo "$ACTION : $CMD"
+    $CMD
+    if [[ $? -ne 0 ]]; then
+        echo "Command failed $CMD"
+        exit 1
+    fi
+}
+
+function usage {
+    cat <<EOF
+Usage: $0 COMMAND [options]
+
+Options:
+    --inventory, -i <inventory_path>   Specify path to ansible inventory file
+    --playbook, -p <playbook_path>     Specify path to ansible playbook file
+    --help, -h                         Show this usage information
+    --tags, -t <tags>                  Only run plays and tasks tagged with these values
+    --skip-tags, -s <tags>             Skip plays and tasks tagged with these values
+    --extra, -e <ansible variables>    Set additional variables as key=value or YAML/JSON passed to ansible-playbook
+    --limit <host>                     Specify host to run plays
+    --verbose, -v                      Increase verbosity of ansible-playbook
+
+Commands:
+    nodes-bootstrap           Bootstrap hypervisor and create virtual nodes
+    nodes-cleanup             Cleanup hypervisor and remove virtual nodes
+    kolla-ansible-bootstrap   Bootstrap all virtual nodes
+    kolla-build               Build Kolla images
+    kolla-ansible-deploy      Deploy Openstack on nodes using Kolla-ansible
+    kolla-ansible-cleanup     Cleanup all deployed Kolla containers and volumes
+EOF
+}
+
+function bash_completion {
+cat <<EOF
+--inventory -i
+--playbook -p
+--help -h
+--tags -t
+--skip-tags -s
+--extra -e
+--limit
+--verbose -v
+nodes-boostrap
+nodes-cleanup
+kolla-ansible-bootstrap
+kolla-build
+kolla-ansible-deploy
+kolla-ansible-cleanup
+EOF
+}
+
+SHORT_OPTS="hi:p:s:t:e:v"
+LONG_OPTS="help,inventory:,playbook:,skip-tags:,tags:,extra:,verbose,limit:"
+ARGS=$(getopt -o "${SHORT_OPTS}" -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }
+
+eval set -- "$ARGS"
+
+find_base_dir
+
+INVENTORY="${BASEDIR}/inventory/"
+PLAYBOOK=""
+VERBOSITY=
+EXTRA_OPTS=${EXTRA_OPTS}
+echo "$1"
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+    (--inventory|-i)
+            INVENTORY="$2"
+            shift 2
+            ;;
+    (--playbook|-p)
+            PLAYBOOK="$2"
+            shift 2
+            ;;
+    (--tags|-t)
+            EXTRA_OPTS="$EXTRA_OPTS --tags $2"
+            shift 2
+            ;;
+    (--skip-tags|-s)
+            EXTRA_OPTS="$EXTRA_OPTS --skip-tags $2"
+            shift 2
+            ;;
+    (--verbose|-v)
+            VERBOSITY="$VERBOSITY --verbose"
+            shift 1
+            ;;
+    (--extra|-e)
+            EXTRA_OPTS="$EXTRA_OPTS -e $2"
+            shift 2
+            ;;
+    (--limit)
+            EXTRA_OPTS="$EXTRA_OPTS --limit $2"
+            shift 2
+            ;;
+    (--help|-h)
+            echo "toto"
+            usage
+            shift
+            exit 0
+            ;;
+    (--)
+            shift
+            break
+            ;;
+    (*)
+            echo "error"
+            exit 3
+            ;;
+esac
+done
+
+case "$1" in
+(nodes-bootstrap)
+        ACTION="Bootstrap hypervisor and create virtual nodes"
+        EXTRA_OPTS="$EXTRA_OPTS -e action=create"
+        PLAYBOOK="${BASEDIR}/nodes-bootstrap.yml"
+        ;;
+(nodes-cleanup)
+        ACTION="Cleanup hypervisor and remove virtual nodes"
+        EXTRA_OPTS="$EXTRA_OPTS -e action=destroy"
+        PLAYBOOK="${BASEDIR}/nodes-bootstrap.yml"
+        ;;
+(kolla-ansible-bootstrap)
+        ACTION="Bootstrap all virtual nodes"
+        EXTRA_OPTS="$EXTRA_OPTS -e action=create"
+        PLAYBOOK="${BASEDIR}/kolla-ansible-bootstrap.yml"
+        ;;
+(kolla-build)
+        ACTION="Build Kolla images"
+        EXTRA_OPTS="$EXTRA_OPTS -e action=create"
+        PLAYBOOK="${BASEDIR}/kolla-build.yml"
+        ;;
+(kolla-ansible-deploy)
+        ACTION="Deploy Openstack using kolla-ansible"
+        EXTRA_OPTS="$EXTRA_OPTS -e action=create"
+        PLAYBOOK="${BASEDIR}/kolla-ansible-deploy.yml"
+        ;;
+(kolla-ansible-cleanup)
+        ACTION="Cleanup Kolla containers and volumes"
+        EXTRA_OPTS="$EXTRA_OPTS -e action=destroy"
+        PLAYBOOK="${BASEDIR}/kolla-ansible-deploy.yml"
+        ;;
+(bash-completion)
+        bash_completion
+        exit 0
+        ;;
+(*)
+        usage
+        exit 0
+        ;;
+esac
+
+CMD="ansible-playbook -i $INVENTORY $EXTRA_OPTS $PLAYBOOK $VERBOSITY"
+process_cmd

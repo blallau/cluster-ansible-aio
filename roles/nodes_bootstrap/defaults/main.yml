@@ -1,0 +1,110 @@
+---
+#####################
+# Docker containers #
+#####################
+docker_registry_name: "registry"
+docker_registry_image: "registry:2"
+
+docker_pip_cache_name: "devpi_proxy"
+docker_pip_cache_image: "127.0.0.1:5000/devpi"
+
+docker_apt_cache_name: "apt-cacher-ng_proxy"
+docker_apt_cache_image: "127.0.0.1:5000/apt-cacher-ng"
+
+####################
+# Host OS variables
+####################
+home_dir: "{{ ansible_user_dir }}"
+tmp_dir: "{{ home_dir}}/tmp"
+libvirt_dir: "/var/lib/libvirt/images"
+host_interfaces:
+  - name: kolla-nat-br
+    role: nat
+    cidr: 10.100.100.0/24
+    bridge: kolla-nat-br
+    vnic: ens3
+  - name: kolla-host-br
+    role: host
+    cidr: 10.150.150.0/24
+    bridge: kolla-host-br
+    vnic: ens4
+  - name: kolla-ext-br
+    role: ext
+    cidr: 10.200.200.0/24
+    bridge: kolla-ext-br
+    vnic: ens5
+
+yum_dependencies:
+  - libvirt
+  - libvirt-devel
+  - bridge-utils
+  - genisoimage
+  - qemu-kvm
+
+apt_dependencies:
+  - openssh-server
+  - libvirt-bin
+  - bridge-utils
+  - genisoimage
+  - qemu-kvm
+
+pip_dependencies:
+  - docker
+  - libvirt-python
+  - lxml
+  - pip
+
+##################################
+# Ubuntu/CentOS OS image variables
+##################################
+destroy_images: "no"
+ubuntu_os_image_url: https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img
+ubuntu_os_image: "{{ ubuntu_os_image_url.split('/')[-1] }}"
+centos_os_image_xz_url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2.xz
+centos_os_image_xz: "{{ centos_os_image_xz_url.split('/')[-1] }}"
+centos_os_image: "{{ centos_os_image_xz.split('.')[:-1] | join('.') }}"
+
+kolla_vm_os_image: "{{ centos_os_image if kolla_vm_os_distro == 'centos' else ubuntu_os_image }}"
+kolla_os_default_user: "{{ kolla_vm_os_distro }}"
+kolla_os_default_pass: admin
+
+######################
+# Kolla VMs variables
+######################
+kolla_nodes:
+  - name: controller-1
+    ram: 4096
+    vcpu: 2
+    role: controller-deploy
+    interfaces:
+      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'nat') | map(attribute='vnic') | join }}"
+        mode: dhcp
+        role: ilo
+      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='vnic') | join }}"
+        mode: static
+        address: "{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='cidr') | join | ipaddr('100') | ipaddr('address') }}"
+        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='cidr') | join | ipaddr('netmask') }}"
+        role: mgmt
+      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='vnic') | join }}"
+        mode: static
+        address: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('100') | ipaddr('address') }}"
+        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('netmask') }}"
+        role: ext
+  - name: compute-1
+    ram: 1024
+    vcpu: 1
+    role: compute
+    interfaces:
+      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'nat') | map(attribute='vnic') | join }}"
+        mode: dhcp
+        role: ilo
+      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='vnic') | join }}"
+        mode: static
+        address: "{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='cidr') | join | ipaddr('101') | ipaddr('address') }}"
+        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='cidr') | join | ipaddr('netmask') }}"
+        role: mgmt
+      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='vnic') | join }}"
+        mode: static
+        address: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('101') | ipaddr('address') }}"
+        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('netmask') }}"
+        role: ext

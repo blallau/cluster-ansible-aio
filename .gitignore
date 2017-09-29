@@ -1,0 +1,5 @@
+retry-files/
+ansible.log
+*.pyc
+.*
+!/.gitignore

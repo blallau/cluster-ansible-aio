@@ -1,0 +1,129 @@
+---
+- include: enable_nested_virt.yml
+  become: True
+
+- name: Install CentOS packages
+  become: True
+  yum:
+    name: "{{ item }}"
+  with_items: "{{ yum_dependencies }}"
+  when: ansible_distribution|lower == "centos"
+
+- name: Install Ubuntu packages
+  become: True
+  apt:
+    name: "{{ item }}"
+  with_items: "{{ apt_dependencies }}"
+  when: ansible_distribution|lower == "ubuntu"
+
+- include: enable_docker.yml
+  become: True
+
+- name: Create a local Docker registry
+  docker_container:
+    name: "{{ docker_registry_name }}"
+    image: "{{ docker_registry_image }}"
+    restart_policy: always
+    published_ports:
+      - "5000:5000"
+    volumes:
+      - "registry:/var/lib/registry"
+
+- include: enable_apt_proxy.yml
+  when: ansible_distribution|lower == "ubuntu" and apt_cache_enabled | bool
+
+- include: enable_pip_proxy.yml
+  when: pip_cache_enabled | bool
+
+- name: Install/Update pip packages
+  become: True
+  pip:
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ pip_dependencies }}"
+
+- name: Starting Libvirt service
+  become: True
+  service:
+    name: "{{ 'libvirt-bin' if ansible_distribution|lower == 'ubuntu' else 'libvirtd' }}"
+    state: started
+    enabled: yes
+
+- include: setup_libvirt_networks.yml
+  become: True
+
+- include: retrieve_os_image.yml
+
+- name: Instantiate meta-data file
+  template:
+    src: "meta-data.j2"
+    dest: "{{ tmp_dir }}/{{ item.name }}/meta-data"
+  with_items: "{{ kolla_nodes }}"
+
+- name: Instantiate user-data file
+  template:
+    src: "user-data.j2"
+    dest: "{{ tmp_dir}}/{{ item.name }}/user-data"
+  with_items: "{{ kolla_nodes }}"
+
+- name: Create config drive
+  command: "genisoimage -input-charset utf-8 \
+           -o {{ tmp_dir }}/{{ item.name }}/config.iso \
+           -V cidata -r -J {{ tmp_dir }}/{{ item.name }}/meta-data \
+           {{ tmp_dir }}/{{ item.name }}/user-data"
+  with_items: "{{ kolla_nodes }}"
+
+- name: Define a VM
+  virt:
+    name: "{{ item.name }}"
+    command: define
+    xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
+  with_items: "{{ kolla_nodes }}"
+
+- name: Start a VM
+  virt:
+    name: "{{ item.name }}"
+    state: running
+  with_items: "{{ kolla_nodes }}"
+
+- name: Wait for VMs to boot
+  wait_for:
+    host: "{{ item.1.address }}"
+    port: 22
+    delay: 10
+    timeout: 250
+  with_subelements:
+    - "{{ kolla_nodes }}"
+    - interfaces
+  when: item.1.address is defined and item.1.role == "mgmt"
+
+- name: Insert Kolla nodes into ssh_config
+  become: True
+  blockinfile:
+    block: "{{ lookup('template', 'ssh_config.j2') }}"
+    dest: "/etc/ssh/ssh_config"
+
+- name: Add new Kolla nodes to created_nodes Ansible group
+  add_host:
+    name: "{{ item.1.address }}"
+    ansible_distribution: "{{ kolla_vm_os_distro }}"
+    ansible_user: "{{ kolla_vm_os_distro }}"
+    groups: created_nodes
+  with_subelements:
+    - "{{ kolla_nodes }}"
+    - interfaces
+  when: ansible_distribution|lower == "ubuntu" and item.1.address is defined and item.1.role == "mgmt"
+
+- name: Populate /etc/hosts file
+  become: True
+  lineinfile:
+    path: /etc/hosts
+    insertafter: EOF
+    line: "{{ item.1.address }}  {{ item.0.name }}"
+  with_subelements:
+    - "{{ kolla_nodes }}"
+    - interfaces
+  when: item.1.address is defined and item.1.role == "mgmt"
+
+# - include: disable_pip_proxy.yml
+#   when: pip_cache_enabled | bool

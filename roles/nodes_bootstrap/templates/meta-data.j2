@@ -1,0 +1,16 @@
+instance-id: {{ item.name }}
+local-hostname: {{ item.name }}
+public-keys:
+  - "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+network-interfaces: |
+{% for intf in item.interfaces %}
+  auto {{ intf.name }}
+  iface {{ intf.name }} inet {{ intf.mode }}
+{% if intf.address is defined %}
+  address {{ intf.address }}
+  netmask {{ intf.netmask }}
+{% endif %}
+{% if intf.gateway is defined %}
+  gateway {{ intf.gateway }}
+{% endif %}
+{% endfor %}

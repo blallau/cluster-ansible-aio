@@ -1,0 +1,7 @@
+---
+- name: Destroy APT cache proxy
+  docker_container:
+    name: "{{ docker_apt_cache_name }}"
+    image: "{{ docker_apt_cache_image }}"
+    state: absent
+  ignore_errors: True

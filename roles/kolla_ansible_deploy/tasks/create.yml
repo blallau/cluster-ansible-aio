@@ -1,0 +1,96 @@
+---
+- name: Clone kolla-ansible repository
+  git:
+    repo: https://github.com/openstack/kolla-ansible
+    dest: "{{ tmp_dir }}/kolla-ansible"
+
+- name: Install kolla-ansible
+  become: True
+  pip:
+    name: "file://{{ tmp_dir }}/kolla-ansible"
+
+- name: Ensure the Kolla Ansible configuration directories exist
+  become: True
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0750
+  with_items:
+    - "{{ kolla_config_path }}"
+    - "{{ kolla_config_path }}/inventory"
+
+- name: Copy globals.yml and passwords.yml conf files to Kolla conf dir
+  copy:
+    dest: "{{ kolla_config_path }}/{{ item }}"
+    remote_src: true
+    src: "{{ tmp_dir }}/kolla-ansible/etc/kolla/{{ item }}"
+  with_items:
+    - globals.yml
+    - passwords.yml
+
+- name: Override globals.yml options
+  lineinfile:
+    path: "{{ kolla_config_path }}/globals.yml"
+    regexp: "{{ item.key }}:"
+    line: "{{ item.key }}: \"{{ item.value }}\""
+    create: yes
+    state: present
+  with_dict: "{{ globals_override }}"
+
+- name: Generate random passwords
+  command: kolla-genpwd
+
+- name: Override passwords
+  lineinfile:
+    path: "{{ kolla_config_path }}/passwords.yml"
+    regexp: "{{ item.key }}"
+    line: "{{ item.key }}: {{ item.value }}"
+  with_dict: "{{ password_overrides }}"
+  when: password_overrides is defined
+
+- name: Copy multinode inventory file
+  copy:
+    src: "/usr/share/kolla-ansible/ansible/inventory/multinode"
+    remote_src: true
+    dest: "{{ kolla_node_home_dir }}/multinode"
+  when: ansible_distribution|lower == "centos"
+
+- name: Copy multinode inventory file
+  copy:
+    src: "/usr/local/share/kolla-ansible/ansible/inventory/multinode"
+    remote_src: true
+    dest: "{{ kolla_node_home_dir }}/multinode"
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Update inventory file
+  lineinfile:
+    path: "{{ kolla_node_home_dir }}/multinode"
+    regexp: "^{{ item.key }}"
+    line: "{{ item.value }}"
+  with_dict: "{{ inventory_override }}"
+
+- name: Create ansible.cfg file
+  blockinfile:
+    path: "{{ kolla_node_home_dir }}/ansible.cfg"
+    create: yes
+    block: |
+      [defaults]
+      remote_user = {{ ansible_user }}
+      retry_files_enabled = False
+      [privilege_escalation]
+      become = True
+
+- name: Kolla-ansible pull images
+  command: "kolla-ansible pull -i {{ kolla_node_home_dir }}/multinode"
+
+- name: Kolla-ansible prechecks
+  command: "kolla-ansible prechecks -i {{ kolla_node_home_dir }}/multinode"
+
+- name: Kolla-ansible deploy
+  command: "kolla-ansible deploy -i {{ kolla_node_home_dir }}/multinode"
+
+- name: Kolla-ansible post-deploy
+  become: True
+  command: "kolla-ansible post-deploy"

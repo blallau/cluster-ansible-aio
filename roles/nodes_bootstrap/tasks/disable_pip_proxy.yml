@@ -1,0 +1,25 @@
+---
+- name: Destroy PIP cache proxy
+  docker_container:
+    name: "{{ docker_pip_cache_name }}"
+    image: "{{ docker_pip_cache_image }}"
+    state: absent
+  ignore_errors: True
+
+# - name: Remove PIP config
+#   blockinfile:
+#     path: "{{ home_dir }}/.pip/pip.conf"
+#     state: absent
+#     block: |
+#       [global]
+#       index-url = http://{{ pip_cache_proxy_ip }}:3141/root/pypi/+simple/
+#       trusted-host = {{ pip_cache_proxy_ip }}
+
+# - name: Remove setuptools config
+#   blockinfile:
+#     path: "{{ home_dir }}/.pydistutils.cfg"
+#     state: absent
+#     block: |
+#       [easy_install]
+#       index_url = http://{{ pip_cache_proxy_ip }}:3141/root/pypi/+simple/
+#       trusted-host = {{ pip_cache_proxy_ip }}

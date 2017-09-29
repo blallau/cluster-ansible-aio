@@ -1,0 +1,45 @@
+---
+home_dir: "{{ ansible_user_dir }}"
+#####################
+# Kolla dependencies
+####################
+yum_packages:
+  - device-mapper-persistent-data
+  - docker-ce
+  - gcc
+  - git
+  - libffi-devel
+  - lvm2
+  - ntp
+  - openssl-devel
+  - python-devel
+  - python-pip
+  - python-tox
+  - redhat-rpm-config
+  - yum-utils
+
+apt_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - docker-ce
+  - gcc
+  - libffi-dev
+  - libssl-dev
+  - lvm2
+  - ntp
+  - openssl
+  - python-dev
+  - python-pip
+  - software-properties-common
+  - thin-provisioning-tools
+  - tox
+
+pip_packages:
+  - pip
+  - ansible
+  - docker
+  - tox
+  # - python-openstackclient
+  # - python-neutronclient
+  # - networking-bgpvpn

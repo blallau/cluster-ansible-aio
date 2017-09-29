@@ -1,0 +1,28 @@
+---
+- name: List virtual bridges
+  virt_net:
+    command: list_nets
+  register: bridge_exists
+
+- name: Define virtual bridges
+  virt_net:
+    command: define
+    name: "{{ item.name }}"
+    xml: '{{ lookup("template", "{{ item.role }}.xml.j2") }}'
+  when: item.name not in bridge_exists.list_nets
+  with_items: "{{ host_interfaces }}"
+
+- name: Autostart virtual bridges
+  virt_net:
+    autostart: yes
+    name: "{{ item.name }}"
+  when: item.name not in bridge_exists.list_nets
+  with_items: "{{ host_interfaces }}"
+
+- name: Start virtual bridges
+  virt_net:
+    state: active
+    autostart: yes
+    name: "{{ item.name }}"
+  when: item.name not in bridge_exists.list_nets
+  with_items: "{{ host_interfaces }}"
