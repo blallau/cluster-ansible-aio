@@ -39,7 +39,7 @@ Bootstrap all virtual nodes (install packages, configure Docker, configure SSH..
 
 ::
 
-    kolla-ansible-aio kolla-ansible-boostrap
+    kolla-ansible-aio kolla-boostrap
 
 Build Kolla Docker images.
 
