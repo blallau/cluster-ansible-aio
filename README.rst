@@ -2,12 +2,13 @@
 Kolla-ansible-aio
 =================
 
-Multinode deployment of Kolla-ansible using Libvirt and Ansible.
+Multi-node deployment of Kolla-ansible using Libvirt and Ansible.
 
 Kolla-ansible-aio is an open source tool for automating deployment
-of Kolla-ansible in multi nodes scenario, on a single machine using Libvirt.
+of Kolla-ansible in multi-node scenario, on a single machine.
 Kolla-ansible-aio is composed of Ansible playbooks, and makes heavy use
-of the OpenStack Kolla and Kolla-ansible project.
+of Libvirt, OpenStack Kolla and Kolla-ansible project.
+
 Kolla-ansible-aio aims to test, use and develop on Kolla and Kolla-ansible projects.
 
 * Source: https://github.com/blallau/kolla-ansible-aio
@@ -15,12 +16,12 @@ Kolla-ansible-aio aims to test, use and develop on Kolla and Kolla-ansible proje
 Features
 --------
 
-- Multi nodes (1 controller and 1 compute)
+- Multi-node (1 controller and 1 compute)
 - Multi OS (CentOS and Ubuntu compliancy)
 - Heavily automated using Ansible
-- Quick deployment:
-- using PIP cache proxy (Devpi)
-- APT cache proxy (apt-cacher-ng) for Ubuntu
+
+- Quick deployment: using PIP cache proxy (Devpi)
+- Quick deployment: using APT cache proxy (apt-cacher-ng) on Ubuntu
 
 Quickstart guide
 ----------------
