@@ -35,19 +35,19 @@ Bootstrap hypervisor, Docker registry, proxies (PIP and APT), and create virtual
 
     kolla-ansible-aio nodes-boostrap
 
-Bootstrap all virtual nodes.
+Bootstrap all virtual nodes (install packages, configure Docker, configure SSH...).
 
 ::
 
     kolla-ansible-aio kolla-ansible-boostrap
 
-Build Kolla images.
+Build Kolla Docker images.
 
 ::
 
     kolla-ansible-aio kolla-build
 
-Deploy Openstack on nodes using Kolla-ansible.
+Deploy multi-node Openstack using Kolla-ansible.
 
 ::
 
@@ -56,14 +56,14 @@ Deploy Openstack on nodes using Kolla-ansible.
 Clean up
 --------
 
+Cleanup Kolla Docker containers and Docker volumes
+
+::
+
+   kolla-ansible-aio kolla-ansible-cleanup
+
 Cleanup hypervisor and remove virtual nodes.
 
 ::
 
-    kolla-ansible-aio nodes-cleanup
-
-Cleanup Kolla containers and volumes
-
-::
-
-    kolla-ansible-aio kolla-ansible-cleanup
+    kolla-ansible-aio nodes-cleanup --yes-i-really-really-mean-it

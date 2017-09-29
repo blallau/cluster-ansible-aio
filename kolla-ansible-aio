@@ -69,7 +69,7 @@ EOF
 }
 
 SHORT_OPTS="hi:p:s:t:e:v"
-LONG_OPTS="help,inventory:,playbook:,skip-tags:,tags:,extra:,verbose,limit:"
+LONG_OPTS="help,inventory:,playbook:,skip-tags:,tags:,extra:,verbose,limit:,yes-i-really-really-mean-it"
 ARGS=$(getopt -o "${SHORT_OPTS}" -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }
 
 eval set -- "$ARGS"
@@ -80,6 +80,7 @@ INVENTORY="${BASEDIR}/inventory/"
 PLAYBOOK=""
 VERBOSITY=
 EXTRA_OPTS=${EXTRA_OPTS}
+DANGER_CONFIRM=
 echo "$1"
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -101,6 +102,10 @@ while [ "$#" -gt 0 ]; do
             ;;
     (--verbose|-v)
             VERBOSITY="$VERBOSITY --verbose"
+            shift 1
+            ;;
+    (--yes-i-really-really-mean-it)
+            DANGER_CONFIRM="$1"
             shift 1
             ;;
     (--extra|-e)
@@ -138,6 +143,17 @@ case "$1" in
         ACTION="Cleanup hypervisor and remove virtual nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e action=destroy"
         PLAYBOOK="${BASEDIR}/nodes-bootstrap.yml"
+        if [[ "${DANGER_CONFIRM}" != "--yes-i-really-really-mean-it" ]]; then
+            cat << EOF
+WARNING:
+    This will PERMANENTLY DESTROY all virtual nodes: so all deployed Kolla containers,
+    volumes and host configuration.
+    There is no way to recover from this action. To confirm, please add the following option:
+    --yes-i-really-really-mean-it
+EOF
+            exit 1
+        fi
+
         ;;
 (kolla-ansible-bootstrap)
         ACTION="Bootstrap all virtual nodes"
