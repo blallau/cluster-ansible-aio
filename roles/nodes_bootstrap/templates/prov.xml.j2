@@ -1,7 +1,8 @@
-{% set ip = host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='cidr') | join | ipaddr('1') | ipaddr('address') %}
-{% set netmask = host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='cidr') | join | ipaddr('netmask') %}
-{% set dhcp_range_start = host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='cidr') | join | ipaddr('128') | ipaddr('address') %}
-{% set dhcp_range_end = host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='cidr') | join | ipaddr('254') | ipaddr('address') %}
+{% set cidr = host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='cidr') | join %}
+{% set ip = cidr | ipaddr('1') | ipaddr('address') %}
+{% set netmask = cidr | ipaddr('netmask') %}
+{% set dhcp_range_start = cidr | ipaddr('128') | ipaddr('address') %}
+{% set dhcp_range_end = cidr | ipaddr('254') | ipaddr('address') %}
 
 <network>
   <name>{{ item.name }}</name>
