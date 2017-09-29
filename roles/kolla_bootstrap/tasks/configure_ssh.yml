@@ -21,7 +21,6 @@
   delegate_to: "{{ hostvars[item]['ansible_host'] }}"
   remote_user: "{{ hostvars[item]['ansible_user'] }}"
   with_items: "{{ groups['kolla-nodes'] }}"
-  when: hostvars[item]['ansible_host'] != ansible_host
 
 - name: Disable SSH host key checking in /etc/ssh/ssh_config
   blockinfile:
@@ -31,18 +30,3 @@
       StrictHostKeyChecking no
       UserKnownHostsFile=/dev/null
     dest: "/etc/ssh/ssh_config"
-
-# - name: Scan for SSH public key on nodes
-#   shell: "ssh-keyscan {{ item }},`dig +short {{ item }}`"
-#   with_items: "{{ groups['kolla-nodes'] }}"
-#   register: ssh_known_host
-#   ignore_errors: yes
-#   when: hostvars[item]['ansible_host'] != ansible_host
-
-# - name: Add/Update the SSH public key in .ssh/known_hosts file
-#   known_hosts:
-#     name: "{{ item.item }}"
-#     key: "{{ item.stdout }}"
-#     state: "present"
-#     path: "~/.ssh/known_hosts"
-#   with_items: "{{ ssh_known_host.results }}"
