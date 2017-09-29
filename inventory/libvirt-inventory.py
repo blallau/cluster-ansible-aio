@@ -125,10 +125,10 @@ class LibvirtInventory(object):
             _push(inventory, 'kolla-nodes', domain_name)
             interfaces = root.findall("./devices/interface[@type='bridge']")
             if interfaces is not None:
-                # interface ilo(DHCP)
-                interface_ilo = interfaces[0]
-                source_elem = interface_ilo.find('source')
-                mac_elem = interface_ilo.find('mac')
+                # interface prov(DHCP)
+                interface_prov = interfaces[0]
+                source_elem = interface_prov.find('source')
+                mac_elem = interface_prov.find('mac')
                 if source_elem is not None and mac_elem is not None:
                     dhcp_leases = conn.networkLookupByName(source_elem.get('bridge')) \
                                       .DHCPLeases(mac_elem.get('address'))

@@ -18,15 +18,15 @@ home_dir: "{{ ansible_user_dir }}"
 tmp_dir: "{{ home_dir}}/tmp"
 libvirt_dir: "/var/lib/libvirt/images"
 host_interfaces:
-  - name: kolla-nat-br
-    role: nat
+  - name: kolla-prov-br
+    role: prov
     cidr: 10.100.100.0/24
-    bridge: kolla-nat-br
+    bridge: kolla-prov-br
     vnic: ens3
-  - name: kolla-host-br
-    role: host
+  - name: kolla-mgmt-br
+    role: mgmt
     cidr: 10.150.150.0/24
-    bridge: kolla-host-br
+    bridge: kolla-mgmt-br
     vnic: ens4
   - name: kolla-ext-br
     role: ext
@@ -77,13 +77,13 @@ kolla_nodes:
     vcpu: 2
     role: controller-deploy
     interfaces:
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'nat') | map(attribute='vnic') | join }}"
+      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='vnic') | join }}"
         mode: dhcp
-        role: ilo
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='vnic') | join }}"
+        role: prov
+      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='vnic') | join }}"
         mode: static
-        address: "{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='cidr') | join | ipaddr('100') | ipaddr('address') }}"
-        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='cidr') | join | ipaddr('netmask') }}"
+        address: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('100') | ipaddr('address') }}"
+        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('netmask') }}"
         role: mgmt
       - name: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='vnic') | join }}"
         mode: static
@@ -95,13 +95,13 @@ kolla_nodes:
     vcpu: 1
     role: compute
     interfaces:
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'nat') | map(attribute='vnic') | join }}"
+      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='vnic') | join }}"
         mode: dhcp
-        role: ilo
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='vnic') | join }}"
+        role: prov
+      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='vnic') | join }}"
         mode: static
-        address: "{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='cidr') | join | ipaddr('101') | ipaddr('address') }}"
-        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='cidr') | join | ipaddr('netmask') }}"
+        address: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('101') | ipaddr('address') }}"
+        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('netmask') }}"
         role: mgmt
       - name: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='vnic') | join }}"
         mode: static

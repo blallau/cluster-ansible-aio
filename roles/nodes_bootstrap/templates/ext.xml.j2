@@ -1,9 +1,3 @@
-<!--
-WARNING: THIS IS AN AUTO-GENERATED FILE. CHANGES TO IT ARE LIKELY TO BE
-OVERWRITTEN AND LOST. Changes to this xml configuration should be made using:
-  virsh net-edit external-nat
-or other application using the libvirt API.
--->
 {% set ip = host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('1') | ipaddr('address') %}
 {% set netmask = host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('netmask') %}
 {% set dhcp_range_start = host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('2') | ipaddr('address') %}

@@ -1,0 +1,16 @@
+{% set ip = host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='cidr') | join | ipaddr('1') | ipaddr('address') %}
+{% set netmask = host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='cidr') | join | ipaddr('netmask') %}
+{% set dhcp_range_start = host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='cidr') | join | ipaddr('128') | ipaddr('address') %}
+{% set dhcp_range_end = host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='cidr') | join | ipaddr('254') | ipaddr('address') %}
+
+<network>
+  <name>{{ item.name }}</name>
+  <forward mode='nat'/>
+  <bridge name='{{ item.bridge }}' stp='on' delay='0'/>
+  <mac address='52:54:00:e3:3c:3f'/>
+  <ip address='{{ ip }}' netmask='{{ netmask }}'>
+    <dhcp>
+      <range start='{{ dhcp_range_start }}' end='{{ dhcp_range_end }}'/>
+    </dhcp>
+  </ip>
+</network>

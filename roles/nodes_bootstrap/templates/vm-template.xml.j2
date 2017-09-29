@@ -54,14 +54,14 @@
       <address type='pci' domain='0x0000' bus='0x00' slot='0x06' function='0x0'/>
     </controller>
     <interface type='bridge'>
-      <source bridge='{{ host_interfaces | selectattr('role', 'equalto', 'nat') | map(attribute='bridge') | join }}'/>
+      <source bridge='{{ host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='bridge') | join }}'/>
       <target dev='vnet0'/>
       <model type='rtl8139'/>
       <alias name='net0'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
     </interface>
     <interface type='bridge'>
-      <source bridge='{{ host_interfaces | selectattr('role', 'equalto', 'host') | map(attribute='bridge') | join }}'/>
+      <source bridge='{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='bridge') | join }}'/>
       <target dev='vnet1'/>
       <model type='rtl8139'/>
       <alias name='net1'/>
