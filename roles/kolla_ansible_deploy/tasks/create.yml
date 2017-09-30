@@ -84,12 +84,15 @@
 
 - name: Kolla-ansible pull images
   command: "kolla-ansible pull -i {{ kolla_node_home_dir }}/multinode"
+  tags: deploy
 
 - name: Kolla-ansible prechecks
   command: "kolla-ansible prechecks -i {{ kolla_node_home_dir }}/multinode"
+  tags: deploy
 
 - name: Kolla-ansible deploy
   command: "kolla-ansible deploy -i {{ kolla_node_home_dir }}/multinode"
+  tags: deploy
 
 - name: Kolla-ansible post-deploy
   become: True
