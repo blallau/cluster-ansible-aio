@@ -28,4 +28,4 @@ build_overrides:
     value: "{{ kolla_image_namespace }}"
   - section: profiles
     option: myprofile
-    value: chrony,cron,etcd,kibana,kolla-toolbox,tgtd,fluentd,glance,cinder,iscsi,haproxy,heat,horizon,keepalived,keystone,mariadb,memcached,neutron,nova-,openvswitch,rabbitmq,skydive,elasticsearch,barbican,mistral,redis,blazar,designate,freezer,influxdb,magnum,octavia,searchlight,tacker,telegraf,zun
+    value: chrony,cinder,cron,designate,elasticsearch,etcd,fluentd,glance,haproxy,heat,horizon,influxdb,iscsi,keepalived,keystone,kibana,kolla-toolbox,magnum,mariadb,memcached,mistral,mongodb,neutron,nova-,octavia,openvswitch,qdrouterd,rabbitmq,redis,searchlight,skydive,tacker,telegraf,tgtd,zookeeper,zun
