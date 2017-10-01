@@ -72,7 +72,7 @@ kolla_os_default_user: "{{ kolla_vm_os_distro }}"
 ######################
 kolla_nodes:
   - name: controller-1
-    ram: 4096
+    ram: 8192
     vcpu: 2
     role: controller-deploy
     interfaces:
