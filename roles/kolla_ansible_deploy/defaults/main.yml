@@ -8,7 +8,6 @@ password_overrides:
   haproxy_password: admin
   keystone_admin_password: admin
   kibana_password: admin
-  opendaylight_password: admin
   osprofiler_secret: admin
   rabbitmq_password: guest
 
