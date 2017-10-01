@@ -40,6 +40,5 @@ pip_packages:
   - ansible
   - docker
   - tox
-  # - python-openstackclient
-  # - python-neutronclient
-  # - networking-bgpvpn
+  - python-openstackclient
+  - python-neutronclient
