@@ -51,13 +51,20 @@
   with_items: "{{ build_overrides }}"
   tags: build
 
-- name: Set PIP cache proxy variable in kolla-build.conf
+- name: Copy template-overrides.j2 file to Kolla conf dir
+  template:
+    src: "template-overrides.j2"
+    dest: "{{ kolla_config_path }}/template-overrides.j2"
+  when: pip_cache_enabled | bool or apt_cache_enabled | bool
+  tags: build
+
+- name: Add [DEFAULT]/template-override option to kolla-build.conf
   ini_file:
     path: "{{ kolla_config_path }}/kolla-build.conf"
-    section: DEFAULT
-    option: build-args
-    value: "PIP_INDEX_URL=http://{{ pip_cache_proxy_ip }}:3141/root/pypi/+simple/"
-  when: pip_cache_enabled | bool
+    section: "DEFAULT"
+    option: "template-override"
+    value: "template-overrides.j2"
+  when: pip_cache_enabled | bool or apt_cache_enabled | bool
   tags: build
 
 - name: Build all containers

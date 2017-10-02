@@ -1,0 +1,17 @@
+{% set devpi_proxy = "http://{{ pip_cache_proxy_ip }}:3141/root/pypi/+simple/" %}
+{% raw %}
+{% extends parent_template %}
+{% block base_header %}
+{% endraw %}
+
+  {% if pip_cache_enabled %}
+    RUN echo -en "[global]\ntimeout = 60\nindex-url = {{ devpi_proxy }}\ntrusted-host = {{ pip_cache_proxy_ip }}" > /etc/pip.conf
+  {% endif %}
+  {% if ansible_distribution|lower == "ubuntu" and apt_cache_enabled %}
+    RUN echo 'Acquire::http { Proxy "http://{{ apt_cache_proxy_ip }}:3142"; };' >> /etc/apt/apt.conf.d/01proxy
+    RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99allow-unauthenticated
+  {% endif %}
+
+{% raw %}
+{% endblock %}
+{% endraw %}
