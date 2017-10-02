@@ -8,8 +8,8 @@ kolla_node_external_intf: ens5
 kolla_vm_os_distro: "{{ ansible_distribution | lower }}"
 kolla_os_default_user: "{{ kolla_vm_os_distro }}"
 pip_cache_enabled: "yes"
-destroy_pip_cache: "yes"
-apt_cache_enabled: "no"
+destroy_pip_cache: "no"
+apt_cache_enabled: "{{ 'yes' if kolla_vm_os_distro == 'ubuntu' else 'no' }}"
 destroy_apt_cache: "no"
 destroy_local_registry: "no"
 
