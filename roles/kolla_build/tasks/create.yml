@@ -51,7 +51,7 @@
   with_items: "{{ build_overrides }}"
   tags: build
 
-- name: Copy template-overrides.j2 file to Kolla conf dir
+- name: Copy template-overrides.j2 file to Kolla dir [{{ kolla_config_path }}]
   template:
     src: "template-overrides.j2"
     dest: "{{ kolla_config_path }}/template-overrides.j2"
@@ -69,5 +69,7 @@
 
 - name: Build all containers
   command: "kolla-build --profile {{ kolla_build_profile }}"
+  args:
+    chdir: "{{ kolla_config_path }}"
   changed_when: False
   tags: build
