@@ -14,7 +14,7 @@ destroy_apt_cache: "no"
 destroy_local_registry: "no"
 
 # Path to Kolla configuration directory.
-kolla_config_path: "{{ lookup('env', 'KOLLA_CONFIG_PATH') | default('/etc/kolla', true) }}"
+kolla_config_path: "{{ lookup('env', 'KOLLA_CONFIG_PATH') | default('/etc/kolla') }}"
 
 ########################
 # Kolla build defaults #
