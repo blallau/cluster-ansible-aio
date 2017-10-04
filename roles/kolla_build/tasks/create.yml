@@ -62,7 +62,7 @@
   ini_file:
     path: "{{ kolla_config_path }}/kolla-build.conf"
     section: "DEFAULT"
-    option: "template-override"
+    option: "template_override"
     value: "template-overrides.j2"
   when: pip_cache_enabled | bool or apt_cache_enabled | bool
   tags: build
