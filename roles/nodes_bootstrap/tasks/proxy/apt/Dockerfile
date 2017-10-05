@@ -7,4 +7,11 @@ VOLUME ["/var/cache/apt-cacher-ng"]
 
 EXPOSE 3142
 
-CMD chmod 777 /var/cache/apt-cacher-ng && /etc/init.d/apt-cacher-ng start && tail -f /var/log/apt-cacher-ng/*
+COPY ./acng.sh /acng.sh
+COPY ./kolla_mirrors /etc/apt-cacher-ng/kolla_mirrors
+
+RUN chmod 777 /var/cache/apt-cacher-ng /var/log/apt-cacher-ng
+RUN sed -i -e '/Remap-gentoo: / a Remap-kolla: file:kolla_mirrors # Kolla' /etc/apt-cacher-ng/acng.conf
+
+ENTRYPOINT ["/acng.sh"]
+CMD ["VerboseLog=1","Debug=3","ForeGround=1","PassThroughPattern=.*"]
