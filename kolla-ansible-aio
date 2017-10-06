@@ -59,7 +59,7 @@ cat <<EOF
 --extra -e
 --limit
 --verbose -v
-nodes-boostrap
+nodes-bootstrap
 kolla-bootstrap
 kolla-build
 kolla-ansible-deploy
