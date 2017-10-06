@@ -71,7 +71,7 @@
   when: ansible_distribution|lower == "centos"
 
 - include: enable_apt_proxy.yml
-  when: ansible_distribution|lower == "ubuntu" and apt_cache_enabled | bool
+  when: apt_cache_enabled | bool
   tags: apt_cache
 
 - name: Wait for automatic Ubuntu system updates

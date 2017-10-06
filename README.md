@@ -1,12 +1,12 @@
 Kolla-ansible-aio
 =================
 
-Multi-node deployment of Kolla-ansible using Libvirt and Ansible.
+Multi-node deployment of Openstack Kolla-ansible using Libvirt and Ansible.
 
 ![kolla-ansible-aio](https://user-images.githubusercontent.com/9655027/31175714-6e453b1e-a910-11e7-8a60-f7c6d2114b1a.png)
 
 Kolla-ansible-aio is an open source tool for automating deployment of
-Kolla-ansible in multi-node scenario, on a single machine.
+Openstack Kolla-ansible in multi-node scenario, on a single machine.
 Kolla-ansible-aio is composed of Ansible playbooks, and makes heavy use
 of Libvirt, OpenStack Kolla and Kolla-ansible project.
 
