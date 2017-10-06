@@ -32,28 +32,34 @@ Install dependencies
 
 Make sure the PIP package manager is installed and upgraded to the latest version:
 
->    #CentOS
->    yum install epel-release
->    yum install python-pip
->    pip install -U pip
->
->    #Ubuntu
->    apt-get update
->    apt-get install python-pip
->    pip install -U pip
+```
+#CentOS
+yum install epel-release
+yum install python-pip
+pip install -U pip
+
+#Ubuntu
+apt-get update
+apt-get install python-pip
+pip install -U pip
+```
 
 Install dependencies needed to build the code with PIP package manager:
 
->    #CentOS
->    yum install python-devel libffi-devel gcc openssl-devel libselinux-python
->
->    #Ubuntu
->    apt-get install python-dev libffi-dev gcc libssl-dev python-selinux
+```
+#CentOS
+yum install python-devel libffi-devel gcc openssl-devel libselinux-python
+
+#Ubuntu
+apt-get install python-dev libffi-dev gcc libssl-dev python-selinux
+```
 
 Install Ansible (> 2.3) using PIP:
 
->    #CentOS & Ubuntu
->    pip install -U ansible
+```
+#CentOS & Ubuntu
+pip install -U ansible
+```
 
 Deployment
 ----------
@@ -79,7 +85,7 @@ Deploy multi-node Openstack using Kolla-ansible.
 Clean up
 --------
 
-Cleanup Kolla Docker containers and Docker volumes
+Cleanup Kolla Docker containers and Docker volumes.
 
     kolla-ansible-aio kolla-ansible-cleanup
 
