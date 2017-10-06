@@ -50,13 +50,10 @@ Install dependencies needed to build the code with PIP package manager:
 >    #Ubuntu
 >    apt-get install python-dev libffi-dev gcc libssl-dev python-selinux
 
-Install Ansible:
+Install Ansible (> 2.3) using PIP:
 
->    #CentOS
->    yum install ansible
->
->    #Ubuntu
->    apt-get install ansible
+>    #CentOS & Ubuntu
+>    pip install -U ansible
 
 Deployment
 ----------
