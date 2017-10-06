@@ -33,12 +33,12 @@ Deployment
 Bootstrap hypervisor, Docker registry, proxies (PIP and APT), and create
 virtual nodes.
 
-    kolla-ansible-aio nodes-boostrap
+    kolla-ansible-aio nodes-bootstrap
 
 Bootstrap all virtual nodes (install packages, configure Docker,
 configure SSH...).
 
-    kolla-ansible-aio kolla-boostrap
+    kolla-ansible-aio kolla-bootstrap
 
 Build Kolla Docker images.
 
