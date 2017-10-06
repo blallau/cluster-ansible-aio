@@ -27,6 +27,37 @@ Features
 Quickstart guide
 ----------------
 
+Install dependencies
+--------------------
+
+Make sure the PIP package manager is installed and upgraded to the latest version:
+
+>    #CentOS
+>    yum install epel-release
+>    yum install python-pip
+>    pip install -U pip
+>
+>    #Ubuntu
+>    apt-get update
+>    apt-get install python-pip
+>    pip install -U pip
+
+Install dependencies needed to build the code with PIP package manager:
+
+>    #CentOS
+>    yum install python-devel libffi-devel gcc openssl-devel libselinux-python
+>
+>    #Ubuntu
+>    apt-get install python-dev libffi-dev gcc libssl-dev python-selinux
+
+Install Ansible:
+
+>    #CentOS
+>    yum install ansible
+>
+>    #Ubuntu
+>    apt-get install ansible
+
 Deployment
 ----------
 
