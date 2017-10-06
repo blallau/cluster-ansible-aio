@@ -11,7 +11,8 @@ COPY ./acng.sh /acng.sh
 COPY ./kolla_mirrors /etc/apt-cacher-ng/kolla_mirrors
 
 RUN chmod 777 /var/cache/apt-cacher-ng /var/log/apt-cacher-ng
-RUN sed -i -e '/Remap-gentoo: / a Remap-kolla: file:kolla_mirrors # Kolla' /etc/apt-cacher-ng/acng.conf
+RUN sed -i -e '/Remap-gentoo: / a Remap-kollaubuntu: file:backends_kolla-ubuntu # Kolla' /etc/apt-cacher-ng/acng.conf
+#RUN sed -i -e '/Remap-gentoo: / a Remap-kollacentos: file:backends_kolla-centos # Kolla' /etc/apt-cacher-ng/acng.conf
 
 ENTRYPOINT ["/acng.sh"]
 CMD ["VerboseLog=1","Debug=3","ForeGround=1","PassThroughPattern=.*"]

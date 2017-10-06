@@ -30,10 +30,12 @@
       - "registry:/var/lib/registry"
 
 - include: enable_apt_proxy.yml
-  when: ansible_distribution|lower == "ubuntu" and apt_cache_enabled | bool
+  when: apt_cache_enabled | bool
+  tags: apt_cache
 
 - include: enable_pip_proxy.yml
   when: pip_cache_enabled | bool
+  tags: pip_cache
 
 - name: Install/Update pip packages
   become: True

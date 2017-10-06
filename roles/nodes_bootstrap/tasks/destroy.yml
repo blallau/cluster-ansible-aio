@@ -12,6 +12,7 @@
 
 - include: disable_apt_proxy.yml
   when: apt_cache_enabled | bool and destroy_apt_cache | bool
+  tags: apt_cache
 
 - name: Destroy VMs
   virt:

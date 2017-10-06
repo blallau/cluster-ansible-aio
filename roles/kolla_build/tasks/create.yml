@@ -65,7 +65,9 @@
     option: "template_override"
     value: "template-overrides.j2"
   when: pip_cache_enabled | bool or apt_cache_enabled | bool
-  tags: build
+  tags:
+    - build
+    - apt_cache
 
 - name: Build all containers
   command: "kolla-build --profile {{ kolla_build_profile }}"
