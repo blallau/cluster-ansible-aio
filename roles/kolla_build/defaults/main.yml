@@ -28,7 +28,7 @@ build_overrides:
     value: "{{ kolla_image_namespace }}"
   - section: DEFAULT
     option: retries
-    value: 0
+    value: 1
   - section: profiles
     option: myprofile
     value: chrony,cinder,cron,designate,elasticsearch,etcd,fluentd,glance,haproxy,heat,horizon,influxdb,iscsi,keepalived,keystone,kibana,kolla-toolbox,magnum,mariadb,memcached,mistral,mongodb,neutron,nova-,octavia,openvswitch,qdrouterd,rabbitmq,redis,searchlight,skydive,tacker,telegraf,tgtd,zookeeper,zun
