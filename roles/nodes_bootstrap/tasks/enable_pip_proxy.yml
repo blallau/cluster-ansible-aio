@@ -41,6 +41,6 @@
 
 - name: Wait for PIP cache proxy ready
   wait_for:
-    port: {{ pip_cache_proxy_port }}
+    port: '{{ pip_cache_proxy_port }}'
     delay: 10
     timeout: 250
