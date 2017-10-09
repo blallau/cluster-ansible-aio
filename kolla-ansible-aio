@@ -16,6 +16,17 @@ function find_base_dir {
     fi
 }
 
+function check_ansible {
+    command -v ansible-playbook >/dev/null 2>&1 || { echo >&2 "Ansible must be installed."; exit 1; }
+
+    version=$(ansible --version 2>&1 | head -1 | cut -d ' ' -f2)
+    echo version "ansible $version"
+    if [[ "$version" < "2.4.0.0" ]]; then
+        echo -e "Ansible version < 2.4.0.0"
+        echo -e "Install it using: sudo pip install -U ansible" && exit 1
+    fi
+}
+
 function process_cmd {
     echo "$ACTION : $CMD"
     $CMD
@@ -183,6 +194,8 @@ EOF
         exit 0
         ;;
 esac
+
+check_ansible
 
 CMD="ansible-playbook -i $INVENTORY $EXTRA_OPTS $PLAYBOOK $VERBOSITY"
 process_cmd

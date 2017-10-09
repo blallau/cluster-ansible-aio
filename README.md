@@ -55,7 +55,7 @@ yum install python-devel libffi-devel gcc openssl-devel libselinux-python
 apt-get install python-dev libffi-dev gcc libssl-dev python-selinux
 ```
 
-Install Ansible (> 2.3) using PIP:
+Install Ansible (>= 2.4) using PIP:
 
 ```
 #CentOS & Ubuntu
