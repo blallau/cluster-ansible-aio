@@ -65,11 +65,13 @@ Deployment
 ----------
 
 1. Bootstrap hypervisor, Docker registry, proxies (PIP and APT), and create
-virtual nodes. By default, virtual nodes OS will be same as hypervisor OS.
+virtual nodes.
+
+By default, virtual nodes OS will be same as hypervisor OS.
 
     ./kolla-ansible-aio nodes-bootstrap
 
-Virtual nodes OS can be override using "kolla_vm_os_distro" variable.
+Virtual nodes OS can be override using **kolla_vm_os_distro** variable.
 Example: in case of Ubuntu hypervisor and CentOS virtual nodes wanted.
 
     ./kolla-ansible-aio nodes-bootstrap -e kolla_vm_os_distro=centos
@@ -77,13 +79,19 @@ Example: in case of Ubuntu hypervisor and CentOS virtual nodes wanted.
 2. Bootstrap all virtual nodes (install packages, configure Docker,
 configure SSH...).
 
+Command:
+
     ./kolla-ansible-aio kolla-bootstrap
 
 3. Build Kolla Docker images.
 
+Command:
+
     ./kolla-ansible-aio kolla-build
 
 4. Deploy multi-node Openstack using Kolla-ansible.
+
+Command:
 
     ./kolla-ansible-aio kolla-ansible-deploy
 
