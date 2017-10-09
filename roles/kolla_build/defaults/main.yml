@@ -22,7 +22,7 @@ build_overrides:
     value: "{{ kolla_build_tag }}"
   - section: DEFAULT
     option: debug
-    value: "{{ kolla_build_debug }}"
+    value: true
   - section: DEFAULT
     option: namespace
     value: "{{ kolla_image_namespace }}"

@@ -1,17 +1,16 @@
 ---
-##################
-# Kolla defaults #
-##################
+##############################
+# Kolla-ansible-aio defaults #
+##############################
+
+# virtual nodes params
+kolla_vm_os_distro: "{{ ansible_distribution | lower }}"
+kolla_os_default_user: "{{ kolla_vm_os_distro }}"
+
+# Network params
 host_ip: 10.100.100.1
 kolla_node_internal_intf: ens4
 kolla_node_external_intf: ens5
-kolla_vm_os_distro: "{{ ansible_distribution | lower }}"
-kolla_os_default_user: "{{ kolla_vm_os_distro }}"
-pip_cache_enabled: "yes"
-destroy_pip_cache: "no"
-apt_cache_enabled: "yes"
-destroy_apt_cache: "no"
-destroy_local_registry: "no"
 
 # Path to Kolla configuration directory.
 kolla_config_path: "{{ lookup('env', 'KOLLA_CONFIG_PATH') | default('/etc/kolla', true) }}"
@@ -19,18 +18,44 @@ kolla_config_path: "{{ lookup('env', 'KOLLA_CONFIG_PATH') | default('/etc/kolla'
 ########################
 # Kolla build defaults #
 ########################
+
+# When building Kolla images, there are two methods of the OpenStack install.
+# One is "binary". Another is "source". The "binary" means that OpenStack will be
+# installed from apt/yum. And the "source" means that OpenStack will be
+# installed from source code.
 kolla_install_type: "source"
+
+# Docker image tag and namespace
 kolla_build_tag: "5.0.0"
-kolla_image_namespace: "kolla-aio"
+kolla_image_namespace: "kolla-ansible-aio"
+
+# The set of Kolla images built can be defined as a profile
+# Kolla provides some pre-defined profiles:
+# - "infra" infrastructure-related images
+# - "main" core OpenStack images
+# - "aux" auxiliary images such as trove, magnum, ironic
+# - "default" minimal set of images for a working deploy
 kolla_build_profile: "myprofile"
-kolla_build_debug: true
 
 ############################
 # Docker registry defaults #
 ############################
 docker_registry_ip: "{{ host_ip }}"
 docker_registry_port: 5000
+destroy_docker_registry: "no"
+
+############################
+# Devpi PIP proxy defaults #
+############################
+pip_cache_enabled: "yes"
+destroy_pip_cache: "no"
 pip_cache_proxy_ip: "{{ host_ip }}"
 pip_cache_proxy_port: 3141
+
+############################
+# APT cache proxy defaults #
+############################
+apt_cache_enabled: "yes"
+destroy_apt_cache: "no"
 apt_cache_proxy_ip: "{{ host_ip }}"
 apt_cache_proxy_port: 3142

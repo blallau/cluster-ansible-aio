@@ -5,7 +5,7 @@
     image: registry:2
     state: absent
   ignore_errors: True
-  when: destroy_local_registry | bool
+  when: destroy_docker_registry | bool
 
 - include: disable_pip_proxy.yml
   when: pip_cache_enabled | bool and destroy_pip_cache | bool
