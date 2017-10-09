@@ -10,4 +10,4 @@
   become: True
   tasks:
     - raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
-      when: ansible_distribution|lower == "ubuntu"
+      when: method == "create" and ansible_distribution|lower == "ubuntu"
