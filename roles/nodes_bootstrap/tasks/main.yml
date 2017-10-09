@@ -1,2 +1,2 @@
 ---
-- include: "{{ method }}.yml"
+- import_tasks: "{{ method }}.yml"

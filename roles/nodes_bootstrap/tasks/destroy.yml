@@ -7,10 +7,10 @@
   ignore_errors: True
   when: destroy_docker_registry | bool
 
-- include: disable_pip_proxy.yml
+- import_tasks: disable_pip_proxy.yml
   when: pip_cache_enabled | bool and destroy_pip_cache | bool
 
-- include: disable_apt_proxy.yml
+- import_tasks: disable_apt_proxy.yml
   when: apt_cache_enabled | bool and destroy_apt_cache | bool
   tags: apt_cache
 

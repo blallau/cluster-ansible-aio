@@ -1,5 +1,5 @@
 ---
-- include: enable_nested_virt.yml
+- import_tasks: enable_nested_virt.yml
 
 - name: Populate /etc/hosts file
   lineinfile:
@@ -70,7 +70,7 @@
   with_items: "{{ yum_packages }}"
   when: ansible_distribution|lower == "centos"
 
-- include: enable_apt_proxy.yml
+- import_tasks: enable_apt_proxy.yml
   when: apt_cache_enabled | bool
   tags: apt_cache
 
@@ -86,7 +86,7 @@
   with_items: "{{ apt_packages }}"
   when: ansible_distribution|lower == "ubuntu"
 
-- include: enable_pip_proxy.yml
+- import_tasks: enable_pip_proxy.yml
   when: pip_cache_enabled | bool
 
 - name: Install/Update PIP packages
@@ -95,7 +95,7 @@
     state: latest
   with_items: "{{ pip_packages }}"
 
-- include: enable_docker.yml
+- import_tasks: enable_docker.yml
 
 - name: Start NTP
   systemd:
@@ -103,5 +103,5 @@
     enabled: yes
     state: started
 
-- include: configure_ssh.yml
+- import_tasks: configure_ssh.yml
   tags: ssh
