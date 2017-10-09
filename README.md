@@ -22,7 +22,7 @@ Features
 -   Multi OS (CentOS and Ubuntu compliancy)
 -   Heavily automated using Ansible
 -   Quick deployment: using PIP cache proxy (Devpi)
--   Quick deployment: using APT cache proxy (apt-cacher-ng) on Ubuntu
+-   Quick deployment: using APT cache proxy (apt-cacher-ng)
 
 Quickstart guide
 ----------------
@@ -64,31 +64,36 @@ pip install -U ansible
 Deployment
 ----------
 
-Bootstrap hypervisor, Docker registry, proxies (PIP and APT), and create
-virtual nodes.
+1. Bootstrap hypervisor, Docker registry, proxies (PIP and APT), and create
+virtual nodes. By default, virtual nodes OS will be same as hypervisor OS.
 
-    kolla-ansible-aio nodes-bootstrap
+    ./kolla-ansible-aio nodes-bootstrap
 
-Bootstrap all virtual nodes (install packages, configure Docker,
+Virtual nodes OS can be override using "kolla_vm_os_distro" variable.
+Example: in case of Ubuntu hypervisor and CentOS virtual nodes wanted.
+
+    ./kolla-ansible-aio nodes-bootstrap -e kolla_vm_os_distro=centos
+
+2. Bootstrap all virtual nodes (install packages, configure Docker,
 configure SSH...).
 
-    kolla-ansible-aio kolla-bootstrap
+    ./kolla-ansible-aio kolla-bootstrap
 
-Build Kolla Docker images.
+3. Build Kolla Docker images.
 
-    kolla-ansible-aio kolla-build
+    ./kolla-ansible-aio kolla-build
 
-Deploy multi-node Openstack using Kolla-ansible.
+4. Deploy multi-node Openstack using Kolla-ansible.
 
-    kolla-ansible-aio kolla-ansible-deploy
+    ./kolla-ansible-aio kolla-ansible-deploy
 
 Clean up
 --------
 
 Cleanup Kolla Docker containers and Docker volumes.
 
-    kolla-ansible-aio kolla-ansible-cleanup
+    ./kolla-ansible-aio kolla-ansible-cleanup
 
 Cleanup hypervisor and remove virtual nodes.
 
-    kolla-ansible-aio nodes-cleanup --yes-i-really-really-mean-it
+    ./kolla-ansible-aio nodes-cleanup --yes-i-really-really-mean-it
