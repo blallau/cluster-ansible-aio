@@ -7,6 +7,7 @@ Multi-node deployment of Openstack Kolla-ansible using Libvirt and Ansible.
 
 Kolla-ansible-aio is an open source tool for automating deployment of
 Openstack Kolla-ansible in multi-node scenario, on a single machine.
+
 Kolla-ansible-aio is composed of Ansible playbooks, and makes heavy use
 of Libvirt, OpenStack Kolla and Kolla-ansible project.
 
@@ -72,11 +73,12 @@ By default, virtual nodes OS will be same as hypervisor OS.
     ./kolla-ansible-aio nodes-bootstrap
 
 Virtual nodes OS can be override using **kolla_vm_os_distro** variable.
+
 Example: in case of Ubuntu hypervisor and CentOS virtual nodes wanted.
 
     ./kolla-ansible-aio nodes-bootstrap -e kolla_vm_os_distro=centos
 
-Any of the default role variables can be easily overidden with group or host variables using **group_vars/all.yml**
+Any of the default role variables can be easily overridden with variables from **group_vars/all.yml**
 
 2. Bootstrap all virtual nodes (install packages, configure Docker,
 configure SSH...).
