@@ -76,6 +76,8 @@ Example: in case of Ubuntu hypervisor and CentOS virtual nodes wanted.
 
     ./kolla-ansible-aio nodes-bootstrap -e kolla_vm_os_distro=centos
 
+Any of the default role variables can be easily overidden with group or host variables using **group_vars/all.yml**
+
 2. Bootstrap all virtual nodes (install packages, configure Docker,
 configure SSH...).
 

@@ -12,7 +12,7 @@
 #     state: absent
 #     block: |
 #       [global]
-#       index-url = http://{{ pip_cache_proxy_ip }}:3141/root/pypi/+simple/
+#       index-url = http://{{ pip_cache_proxy_ip }}:{{ pip_cache_proxy_port }}/root/pypi/+simple/
 #       trusted-host = {{ pip_cache_proxy_ip }}
 
 # - name: Remove setuptools config
@@ -21,5 +21,5 @@
 #     state: absent
 #     block: |
 #       [easy_install]
-#       index_url = http://{{ pip_cache_proxy_ip }}:3141/root/pypi/+simple/
+#       index_url = http://{{ pip_cache_proxy_ip }}:{{ pip_cache_proxy_port }}/root/pypi/+simple/
 #       trusted-host = {{ pip_cache_proxy_ip }}
