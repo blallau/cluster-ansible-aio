@@ -35,37 +35,44 @@ Make sure the PIP package manager is installed and upgraded to the latest versio
 
 ```
 #CentOS
-yum install epel-release
-yum install python-pip
-pip install -U pip
+sudo yum install epel-release
+sudo yum install python-pip
+sudo pip install -U pip
 
 #Ubuntu
-apt-get update
-apt-get install python-pip
-pip install -U pip
+sudo apt-get update
+sudo apt-get install python-pip
+sudo pip install -U pip
 ```
 
 Install dependencies needed to build the code with PIP package manager:
 
 ```
 #CentOS
-yum install python-devel libffi-devel gcc openssl-devel libselinux-python
+sudo yum install python-devel libffi-devel gcc openssl-devel libselinux-python
 
 #Ubuntu
-apt-get install python-dev libffi-dev gcc libssl-dev python-selinux
+sudo apt-get install python-dev libffi-dev gcc libssl-dev python-selinux
 ```
 
 Install Ansible (>= 2.4) using PIP:
 
 ```
 #CentOS & Ubuntu
-pip install -U ansible
+sudo pip install -U ansible
 ```
 
 Deployment
 ----------
 
-1. Bootstrap hypervisor, Docker registry, proxies (PIP and APT), and create
+1. Clone kolla-ansible-aio.
+
+Command:
+
+    git clone https://github.com/blallau/kolla-ansible-aio
+    cd kolla-ansible-aio
+
+2. Bootstrap hypervisor, Docker registry, proxies (PIP and APT), and create
 virtual nodes.
 
 By default, virtual nodes OS will be same as hypervisor OS.
@@ -80,20 +87,20 @@ Example: in case of Ubuntu hypervisor and CentOS virtual nodes wanted.
 
 Any of the default role variables can be easily overridden with variables from **group_vars/all.yml**
 
-2. Bootstrap all virtual nodes (install packages, configure Docker,
+3. Bootstrap all virtual nodes (install packages, configure Docker,
 configure SSH...).
 
 Command:
 
     ./kolla-ansible-aio kolla-bootstrap
 
-3. Build Kolla Docker images.
+4. Build Kolla Docker images.
 
 Command:
 
     ./kolla-ansible-aio kolla-build
 
-4. Deploy multi-node Openstack using Kolla-ansible.
+5. Deploy multi-node Openstack using Kolla-ansible.
 
 Command:
 
