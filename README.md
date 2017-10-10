@@ -22,8 +22,7 @@ Features
 -   Multi-node (1 controller and 1 compute)
 -   Multi OS (CentOS and Ubuntu compliancy)
 -   Heavily automated using Ansible
--   Quick deployment: using PIP cache proxy (Devpi)
--   Quick deployment: using APT cache proxy (apt-cacher-ng)
+-   Quick deployment: using PIP cache proxy (Devpi) and APT cache proxy (apt-cacher-ng)
 
 Quickstart guide
 ----------------
