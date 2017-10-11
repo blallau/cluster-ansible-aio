@@ -48,6 +48,35 @@
   with_dict: "{{ password_overrides }}"
   when: password_overrides is defined
 
+- name: Create kolla group
+  become: True
+  group:
+    name: kolla
+
+- name: Create kolla user
+  become: True
+  user:
+    name: kolla
+    group: kolla
+
+#- name: Create config directory for Nova
+#  become: True
+#  file:
+#    path: "{{ kolla_config_path }}/config/nova"
+#    state: directory
+#    owner: "{{ ansible_user }}"
+#    group: "{{ ansible_user }}"
+#    mode: 0750
+
+#- name: Configure nova-compute to use QEMU
+#  become: True
+#  ini_file:
+#    path: "{{ kolla_config_path }}/config/nova/nova-compute.conf"
+#    section: libvirt
+#    option: "{{ item.key }}"
+#    value: "{{ item.value }}"
+#  with_dict: "{{ libvirt_override }}"
+
 - name: Copy multinode inventory file
   copy:
     src: "/usr/share/kolla-ansible/ansible/inventory/multinode"
