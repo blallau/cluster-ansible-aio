@@ -97,7 +97,7 @@ Command:
 
 Command:
 
-    ./kolla-ansible-aio kolla-build
+    ./kolla-ansible-aio kolla-build [-e install_type=binary] [-e kolla_build_profile=default]
 
 5. Deploy multi-node Openstack using Kolla-ansible.
 
