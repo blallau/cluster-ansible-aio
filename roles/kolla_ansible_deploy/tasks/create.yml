@@ -48,17 +48,6 @@
   with_dict: "{{ password_overrides }}"
   when: password_overrides is defined
 
-- name: Create kolla group
-  become: True
-  group:
-    name: kolla
-
-- name: Create kolla user
-  become: True
-  user:
-    name: kolla
-    group: kolla
-
 #- name: Create config directory for Nova
 #  become: True
 #  file:
