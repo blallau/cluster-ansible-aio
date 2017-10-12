@@ -103,5 +103,16 @@
     enabled: yes
     state: started
 
+- name: Create kolla group
+  group:
+    name: kolla
+  tags: user
+
+- name: Create kolla user
+  user:
+    name: kolla
+    group: kolla
+  tags: user
+
 - import_tasks: configure_ssh.yml
   tags: ssh
