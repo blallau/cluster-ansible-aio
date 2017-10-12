@@ -111,5 +111,4 @@
   tags: deploy
 
 - name: Kolla-ansible post-deploy
-  become: True
   command: "kolla-ansible post-deploy"
