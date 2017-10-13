@@ -15,6 +15,9 @@ kolla_node_external_intf: ens5
 # Path to Kolla configuration directory.
 kolla_config_path: "{{ lookup('env', 'KOLLA_CONFIG_PATH') | default('/etc/kolla', true) }}"
 
+config_owner_group: "kolla"
+config_owner_user: "kolla"
+
 ########################
 # Kolla build defaults #
 ########################
