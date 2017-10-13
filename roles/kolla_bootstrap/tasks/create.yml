@@ -103,14 +103,14 @@
     enabled: yes
     state: started
 
-- name: Create kolla group
+- name: Create '{{ config_owner_group }}' group
   group:
-    name: kolla
+    name: "{{ config_owner_group }}"
   tags: user
 
-- name: Create kolla user
+- name: Create '{{ config_owner_user }}' user
   user:
-    name: kolla
+    name: "{{ config_owner_user }}"
     group: kolla
   tags: user
 
