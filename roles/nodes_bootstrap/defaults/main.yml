@@ -39,6 +39,7 @@ yum_dependencies:
   - libvirt-devel
   - bridge-utils
   - genisoimage
+  - python-requests
   - qemu-kvm
 
 apt_dependencies:
@@ -46,6 +47,7 @@ apt_dependencies:
   - libvirt-bin
   - bridge-utils
   - genisoimage
+  - python-requests
   - qemu-kvm
 
 pip_dependencies:
