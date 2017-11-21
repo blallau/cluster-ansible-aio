@@ -17,6 +17,7 @@
   when: ansible_distribution|lower == "ubuntu"
 
 - import_tasks: enable_docker.yml
+  when: docker_enabled | bool
   become: True
 
 - name: Create a local Docker registry

@@ -43,6 +43,7 @@ kolla_build_profile: "myprofile"
 ############################
 # Docker registry defaults #
 ############################
+docker_enabled: "yes"
 docker_registry_ip: "{{ host_ip }}"
 docker_registry_port: 5000
 destroy_docker_registry: "no"
