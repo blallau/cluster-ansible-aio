@@ -66,15 +66,15 @@ centos_os_image_xz_url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64
 centos_os_image_xz: "{{ centos_os_image_xz_url.split('/')[-1] }}"
 centos_os_image: "{{ centos_os_image_xz.split('.')[:-1] | join('.') }}"
 
-kolla_vm_os_image: "{{ centos_os_image if kolla_vm_os_distro == 'centos' else ubuntu_os_image }}"
-kolla_os_default_user: "{{ kolla_vm_os_distro }}"
+kolla_vm_os_image: "{{ centos_os_image if vm_os_distro == 'centos' else ubuntu_os_image }}"
+os_default_user: "{{ vm_os_distro }}"
 
 ######################
-# Kolla VMs variables
+# VMs variables
 ######################
-kolla_nodes:
+cluster_nodes:
   - name: controller-1
-    ram: 8192
+    ram: 2048
     vcpu: 2
     role: controller-deploy
     interfaces:
@@ -92,7 +92,7 @@ kolla_nodes:
         netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('netmask') }}"
         role: ext
   - name: compute-1
-    ram: 1024
+    ram: 4096
     vcpu: 1
     role: compute
     interfaces:

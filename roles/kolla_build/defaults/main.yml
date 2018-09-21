@@ -13,7 +13,7 @@ build_overrides:
     value: "{{ docker_registry_ip }}:{{ docker_registry_port }}"
   - section: DEFAULT
     option: base
-    value: "{{ kolla_vm_os_distro }}"
+    value: "{{ vm_os_distro }}"
   - section: DEFAULT
     option: install_type
     value: "{{ kolla_install_type }}"

@@ -78,11 +78,11 @@ By default, virtual nodes OS will be same as hypervisor OS.
 
     ./kolla-ansible-aio nodes-bootstrap
 
-Virtual nodes OS can be override using **kolla_vm_os_distro** variable.
+Virtual nodes OS can be override using **vm_os_distro** variable.
 
 Example: in case of Ubuntu hypervisor and CentOS virtual nodes wanted.
 
-    ./kolla-ansible-aio nodes-bootstrap -e kolla_vm_os_distro=centos
+    ./kolla-ansible-aio nodes-bootstrap -e vm_os_distro=centos
 
 Any of the default role variables can be easily overridden with variables from **group_vars/all.yml**
 

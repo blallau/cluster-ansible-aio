@@ -75,6 +75,6 @@
 
 - name: Add current user to Docker group
   user:
-    name: "{{ kolla_os_default_user }}"
+    name: "{{ os_default_user }}"
     groups: docker
     append: yes

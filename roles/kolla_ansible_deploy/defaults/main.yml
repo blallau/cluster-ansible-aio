@@ -16,10 +16,10 @@ password_overrides:
 ###############################
 globals_override:
   # api_interface: ""
-  network_interface: "{{ kolla_node_internal_intf }}"
-  neutron_external_interface: "{{ kolla_node_external_intf }}"
+  network_interface: "{{ node_internal_intf }}"
+  neutron_external_interface: "{{ node_external_intf }}"
   kolla_install_type: "{{ kolla_install_type }}"
-  kolla_base_distro: "{{ kolla_vm_os_distro }}"
+  kolla_base_distro: "{{ vm_os_distro }}"
   docker_registry: "{{ docker_registry_ip }}:{{ docker_registry_port }}"
   docker_namespace: "{{ kolla_image_namespace }}"
   kolla_internal_vip_address: 10.150.150.11

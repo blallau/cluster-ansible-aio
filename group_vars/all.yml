@@ -4,13 +4,13 @@
 ##############################
 
 # virtual nodes params
-kolla_vm_os_distro: "{{ ansible_distribution | lower }}"
-kolla_os_default_user: "{{ kolla_vm_os_distro }}"
+vm_os_distro: "{{ ansible_distribution | lower }}"
+os_default_user: "{{ vm_os_distro }}"
 
 # Network params
 host_ip: 10.100.100.1
-kolla_node_internal_intf: ens4
-kolla_node_external_intf: ens5
+node_internal_intf: ens4
+node_external_intf: ens5
 
 # Path to Kolla configuration directory.
 kolla_config_path: "{{ lookup('env', 'KOLLA_CONFIG_PATH') | default('/etc/kolla', true) }}"

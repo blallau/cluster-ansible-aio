@@ -2,7 +2,7 @@
   <name>{{ item.name }}</name>
   <metadata>
     <kolla:instance xmlns:kolla="https://github.com/blallau/kolla-ansible-aio">
-      <kolla:inventory group="{{ item.role }}" distro="{{ kolla_vm_os_distro }}"/>
+      <kolla:inventory group="{{ item.role }}" distro="{{ vm_os_distro }}"/>
     </kolla:instance>
   </metadata>
   <memory unit='KiB'>{{ item.ram * 1024 }}</memory>

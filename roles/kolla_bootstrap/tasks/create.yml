@@ -5,7 +5,7 @@
   lineinfile:
     path: /etc/hosts
     insertafter: EOF
-    line: "{{ hostvars[item]['ansible_' + kolla_node_internal_intf]['ipv4']['address'] }}  {{ hostvars[item]['inventory_hostname'] }}"
+    line: "{{ hostvars[item]['ansible_' + node_internal_intf]['ipv4']['address'] }}  {{ hostvars[item]['inventory_hostname'] }}"
   with_items: "{{ groups['kolla-nodes'] }}"
 
 - name: Disable SELinux

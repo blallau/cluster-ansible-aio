@@ -18,14 +18,14 @@
   virt:
     command: destroy
     name: "{{ item.name }}"
-  with_items: "{{ kolla_nodes }}"
+  with_items: "{{ cluster_nodes }}"
   ignore_errors: yes
 
 - name: Undefine VMs
   virt:
     command: undefine
     name: "{{ item.name }}"
-  with_items: "{{ kolla_nodes }}"
+  with_items: "{{ cluster_nodes }}"
   ignore_errors: yes
 
 - name: Remove OS images from libvirt directory
@@ -33,14 +33,14 @@
   file:
     path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
     state: absent
-  with_items: "{{ kolla_nodes }}"
+  with_items: "{{ cluster_nodes }}"
 
 - name: Remove config drive files
   become: True
   file:
     path: "{{ tmp_dir }}/{{ item.name }}/config.iso"
     state: absent
-  with_items: "{{ kolla_nodes }}"
+  with_items: "{{ cluster_nodes }}"
 
 - name: List virtual bridges
   virt_net:
@@ -66,11 +66,11 @@
   file:
     path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
     state: absent
-  with_items: "{{ kolla_nodes }}"
+  with_items: "{{ cluster_nodes }}"
   when: destroy_images | bool
   ignore_errors: yes
 
-- name: Clean Kolla nodes from ssh_config
+- name: Clean nodes from ssh_config
   become: True
   blockinfile:
     block: "{{ lookup('template', 'ssh_config.j2') }}"
@@ -84,6 +84,6 @@
     line: "{{ item.1.address }}  {{ item.0.name }}"
     state: absent
   with_subelements:
-    - "{{ kolla_nodes }}"
+    - "{{ cluster_nodes }}"
     - interfaces
   when: item.1.address is defined and item.1.role == "mgmt"
