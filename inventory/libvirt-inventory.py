@@ -122,7 +122,7 @@ class LibvirtInventory(object):
             tag_elem = root.find('./metadata/kolla:instance/kolla:inventory', kolla_ns)
             group = tag_elem.get('group')
             distro = tag_elem.get('distro')
-            _push(inventory, 'kolla-nodes', domain_name)
+            _push(inventory, 'nodes', domain_name)
             interfaces = root.findall("./devices/interface[@type='bridge']")
             if interfaces is not None:
                 # interface prov(DHCP)
@@ -138,7 +138,7 @@ class LibvirtInventory(object):
                         hostvars['ansible_host'] = ip_address
                         hostvars['libvirt_ip_address'] = ip_address
             inventory['_meta']['hostvars'][domain_name] = hostvars
-        _push(inventory, 'kolla-ansible', 'controller-1')
+        _push(inventory, 'controller', 'controller-1')
         return inventory
 
 def _push(my_dict, key, element):

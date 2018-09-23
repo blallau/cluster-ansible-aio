@@ -1,4 +1,29 @@
 ---
+- name: Add Docker CentOS repo
+  yum_repository:
+    name: docker-ce
+    description: Docker CE repo
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    gpgcheck: yes
+    gpgkey: https://download.docker.com/linux/centos/gpg
+  when: ansible_distribution|lower == "centos"
+
+- name: Add Docker Ubuntu repo
+  apt_repository:
+    repo: "deb https://download.docker.com/linux/ubuntu xenial edge"
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Add Docker Ubuntu repo signing keys
+  apt_key:
+    url: "https://download.docker.com/linux/ubuntu/gpg"
+    state: present
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Install Docker-ce package
+  package:
+    name: "docker-ce"
+    state: latest
+
 - name: Create drop-in unit directory for docker.service
   file:
     path: /etc/systemd/system/docker.service.d
@@ -17,16 +42,16 @@
     create: yes
     line: |
       [Service]
-      MountFlags=shared
       EnvironmentFile=/etc/sysconfig/docker
       ExecStart=
-      ExecStart=/usr/bin/dockerd $INSECURE_REGISTRY
+      ExecStart=/usr/bin/dockerd -H fd:// $INSECURE_REGISTRY
   when: ansible_distribution|lower == "centos"
 
 - name: Enable Ubuntu insecure registry
   lineinfile:
     path: /etc/default/docker
     create: yes
+    state: present
     line: "DOCKER_OPTS='--insecure-registry {{ docker_registry_ip }}:{{ docker_registry_port }}'"
   when: ansible_distribution|lower == "ubuntu"
 
@@ -36,21 +61,10 @@
     create: yes
     block: |
       [Service]
-      MountFlags=shared
       EnvironmentFile=-/etc/default/docker
       ExecStart=
       ExecStart=/usr/bin/dockerd -H fd:// $DOCKER_OPTS
   when: ansible_distribution|lower == "ubuntu"
-
-- name: Create Docker directory config
-  file:
-    path: "/etc/docker/"
-    state: directory
-
-- name: Ensure the Docker daemon.json file exists
-  template:
-    src: daemon.json.j2
-    dest: /etc/docker/daemon.json
 
 - name: Restart Docker service
   systemd:
@@ -59,8 +73,8 @@
     state: restarted
     enabled: yes
 
-- name: Add '{{ ansible_user }}' user to Docker group
+- name: Add current user to Docker group
   user:
-    name: "{{ ansible_user }}"
+    name: "{{ os_default_user }}"
     groups: docker
     append: yes

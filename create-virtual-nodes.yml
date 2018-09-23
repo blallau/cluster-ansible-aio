@@ -1,0 +1,13 @@
+---
+- name: Create VMs
+  hosts: hypervisors
+  roles:
+    - create_virtual_nodes
+
+- name: Wait for Python 2 to be installed
+  hosts: created_nodes
+  gather_facts: false
+  become: True
+  tasks:
+    - raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      when: method == "create" and ansible_distribution|lower == "ubuntu"

@@ -51,12 +51,16 @@ Options:
     --verbose, -v                      Increase verbosity of ansible-playbook
 
 Commands:
-    nodes-bootstrap           Bootstrap hypervisor and create virtual nodes
-    kolla-bootstrap           Bootstrap all virtual nodes
+    create-virtual-nodes      Bootstrap hypervisor and create virtual nodes
+    nodes-bootstrap           Bootstrap all virtual nodes
+
     kolla-build               Build Kolla images
     kolla-ansible-deploy      Deploy Openstack on nodes using Kolla-ansible
     kolla-ansible-cleanup     Cleanup all deployed Kolla containers and volumes
-    nodes-cleanup             Cleanup hypervisor and remove virtual nodes
+
+    ovirt-deploy              Deploy OVirt
+
+    remove-virtual-nodes      Cleanup hypervisor and remove virtual nodes
 EOF
 }
 
@@ -70,12 +74,13 @@ cat <<EOF
 --extra -e
 --limit
 --verbose -v
+create-virtual-nodes
 nodes-bootstrap
-kolla-bootstrap
 kolla-build
 kolla-ansible-deploy
 kolla-ansible-cleanup
-nodes-cleanup
+ovirt-deploy
+remove-virtual-nodes
 EOF
 }
 
@@ -144,15 +149,15 @@ esac
 done
 
 case "$1" in
-(nodes-bootstrap)
+(create-virtual-nodes)
         ACTION="Bootstrap hypervisor and create virtual nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e method=create"
-        PLAYBOOK="${BASEDIR}/nodes-bootstrap.yml"
+        PLAYBOOK="${BASEDIR}/create-virtual-nodes.yml"
         ;;
-(nodes-cleanup)
+(remove-virtual-nodes)
         ACTION="Cleanup hypervisor and remove virtual nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e method=destroy"
-        PLAYBOOK="${BASEDIR}/nodes-bootstrap.yml"
+        PLAYBOOK="${BASEDIR}/create-virtual-nodes.yml"
         if [[ "${DANGER_CONFIRM}" != "--yes-i-really-really-mean-it" ]]; then
             cat << EOF
 WARNING:
@@ -165,15 +170,20 @@ EOF
         fi
 
         ;;
-(kolla-bootstrap)
+(nodes-bootstrap)
         ACTION="Bootstrap all virtual nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e method=create"
-        PLAYBOOK="${BASEDIR}/kolla-bootstrap.yml"
+        PLAYBOOK="${BASEDIR}/nodes-bootstrap.yml"
         ;;
 (kolla-build)
         ACTION="Build Kolla images"
         EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/kolla-build.yml"
+        ;;
+(ovirt-deploy)
+        ACTION="Deploy Ovirt"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
+        PLAYBOOK="${BASEDIR}/ovirt-deploy.yml"
         ;;
 (kolla-ansible-deploy)
         ACTION="Deploy Openstack using kolla-ansible"

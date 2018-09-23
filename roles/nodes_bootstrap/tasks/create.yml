@@ -1,132 +1,118 @@
 ---
 - import_tasks: enable_nested_virt.yml
-  become: True
 
-- name: Install CentOS packages
-  become: True
-  yum:
-    name: "{{ item }}"
-  with_items: "{{ yum_dependencies }}"
+- name: Populate /etc/hosts file
+  lineinfile:
+    path: /etc/hosts
+    insertafter: EOF
+    line: "{{ hostvars[item]['ansible_' + node_internal_intf]['ipv4']['address'] }}  {{ hostvars[item]['inventory_hostname'] }}"
+  with_items: "{{ groups['nodes'] }}"
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
   when: ansible_distribution|lower == "centos"
 
-- name: Install Ubuntu packages
-  become: True
-  apt:
-    name: "{{ item }}"
-  with_items: "{{ apt_dependencies }}"
+- name: Add Centos repo
+  yum_repository:
+    name: epel
+    description: EPEL YUM repo
+    baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+    gpgcheck: no
+  when: ansible_distribution|lower == "centos"
+
+- name: Add Docker CentOS repo
+  yum_repository:
+    name: docker-ce
+    description: Docker CE repo
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    gpgcheck: yes
+    gpgkey: https://download.docker.com/linux/centos/gpg
+  when: ansible_distribution|lower == "centos"
+
+- name: Add Docker Ubuntu repo signing keys
+  apt_key:
+    url: "https://download.docker.com/linux/ubuntu/gpg"
+    state: present
   when: ansible_distribution|lower == "ubuntu"
 
-- import_tasks: enable_docker.yml
-  when: docker_enabled | bool
-  become: True
+- name: Wait for automatic Ubuntu system updates
+  shell: while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do sleep 1; done;
+  when: ansible_distribution|lower == "ubuntu"
 
-- name: Create a local Docker registry
-  docker_container:
-    name: "{{ docker_registry_name }}"
-    image: "{{ docker_registry_image }}"
-    restart_policy: always
-    published_ports:
-      - "5000:5000"
-    volumes:
-      - "registry:/var/lib/registry"
+- name: Add Docker Ubuntu repo
+  apt_repository:
+    repo: "deb https://download.docker.com/linux/ubuntu xenial edge"
+    state: present
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Add Ubuntu standard xenial repo
+  apt_repository:
+    repo: "deb http://archive.ubuntu.com/ubuntu/ xenial main restricted"
+    state: present
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Add Ubuntu standard xenial-security repo
+  apt_repository:
+    repo: "deb http://security.ubuntu.com/ubuntu xenial-security main restricted"
+    state: present
+    update_cache: "yes"
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Wait for automatic Ubuntu system updates
+  shell: while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do sleep 1; done;
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Install CentOS packages
+  yum:
+    name: "{{ item }}"
+    update_cache: yes
+  with_items: "{{ yum_packages }}"
+  when: ansible_distribution|lower == "centos"
 
 - import_tasks: enable_apt_proxy.yml
   when: apt_cache_enabled | bool
   tags: apt_cache
 
+- name: Wait for automatic Ubuntu system updates
+  shell: while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 1; done;
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Install Ubuntu packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: "yes"
+  with_items: "{{ apt_packages }}"
+  when: ansible_distribution|lower == "ubuntu"
+
 - import_tasks: enable_pip_proxy.yml
   when: pip_cache_enabled | bool
-  tags: pip_cache
 
-- name: Install/Update pip packages
-  become: True
+- name: Install/Update PIP packages
   pip:
     name: "{{ item }}"
     state: latest
-  with_items: "{{ pip_dependencies }}"
+  with_items: "{{ pip_packages }}"
 
-- name: Starting Libvirt service
-  become: True
-  service:
-    name: "{{ 'libvirt-bin' if ansible_distribution|lower == 'ubuntu' else 'libvirtd' }}"
-    state: started
+- import_tasks: enable_docker.yml
+
+- name: Start NTP
+  systemd:
+    name: "{{ 'ntp' if ansible_distribution|lower == 'ubuntu' else 'ntpd' }}"
     enabled: yes
+    state: started
 
-- import_tasks: setup_libvirt_networks.yml
-  become: True
+- name: Create '{{ config_owner_group }}' group
+  group:
+    name: "{{ config_owner_group }}"
+  tags: user
 
-- import_tasks: retrieve_os_image.yml
+- name: Create '{{ config_owner_user }}' user
+  user:
+    name: "{{ config_owner_user }}"
+    group: "{{ config_owner_group }}"
+  tags: user
 
-- name: Instantiate meta-data file
-  template:
-    src: "meta-data.j2"
-    dest: "{{ tmp_dir }}/{{ item.name }}/meta-data"
-  with_items: "{{ cluster_nodes }}"
-
-- name: Instantiate user-data file
-  template:
-    src: "user-data.j2"
-    dest: "{{ tmp_dir}}/{{ item.name }}/user-data"
-  with_items: "{{ cluster_nodes }}"
-
-- name: Create config drive
-  command: "genisoimage -input-charset utf-8 \
-           -o {{ tmp_dir }}/{{ item.name }}/config.iso \
-           -V cidata -r -J {{ tmp_dir }}/{{ item.name }}/meta-data \
-           {{ tmp_dir }}/{{ item.name }}/user-data"
-  with_items: "{{ cluster_nodes }}"
-
-- name: Define a VM
-  virt:
-    name: "{{ item.name }}"
-    command: define
-    xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
-  with_items: "{{ cluster_nodes }}"
-
-- name: Start a VM
-  virt:
-    name: "{{ item.name }}"
-    state: running
-  with_items: "{{ cluster_nodes }}"
-
-- name: Wait for VMs to boot
-  wait_for:
-    host: "{{ item.1.address }}"
-    port: 22
-    delay: 10
-    timeout: 250
-  with_subelements:
-    - "{{ cluster_nodes }}"
-    - interfaces
-  when: item.1.address is defined and item.1.role == "mgmt"
-
-- name: Insert node into ssh_config
-  become: True
-  blockinfile:
-    block: "{{ lookup('template', 'ssh_config.j2') }}"
-    dest: "/etc/ssh/ssh_config"
-
-- name: Add new node to created_nodes Ansible group
-  add_host:
-    name: "{{ item.1.address }}"
-    ansible_distribution: "{{ vm_os_distro }}"
-    ansible_user: "{{ vm_os_distro }}"
-    groups: created_nodes
-  with_subelements:
-    - "{{ cluster_nodes }}"
-    - interfaces
-  when: ansible_distribution|lower == "ubuntu" and item.1.address is defined and item.1.role == "mgmt"
-
-- name: Populate /etc/hosts file
-  become: True
-  lineinfile:
-    path: /etc/hosts
-    insertafter: EOF
-    line: "{{ item.1.address }}  {{ item.0.name }}"
-  with_subelements:
-    - "{{ cluster_nodes }}"
-    - interfaces
-  when: item.1.address is defined and item.1.role == "mgmt"
-
-# - import_tasks: disable_pip_proxy.yml
-#   when: pip_cache_enabled | bool
+- import_tasks: configure_ssh.yml
+  tags: ssh

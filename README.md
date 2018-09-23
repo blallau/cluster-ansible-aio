@@ -76,13 +76,13 @@ virtual nodes.
 
 By default, virtual nodes OS will be same as hypervisor OS.
 
-    ./kolla-ansible-aio nodes-bootstrap
+    ./kolla-ansible-aio create-virtual-nodes
 
 Virtual nodes OS can be override using **vm_os_distro** variable.
 
 Example: in case of Ubuntu hypervisor and CentOS virtual nodes wanted.
 
-    ./kolla-ansible-aio nodes-bootstrap -e vm_os_distro=centos
+    ./kolla-ansible-aio create-virtual-nodes -e vm_os_distro=centos
 
 Any of the default role variables can be easily overridden with variables from **group_vars/all.yml**
 
@@ -91,7 +91,7 @@ configure SSH...).
 
 Command:
 
-    ./kolla-ansible-aio kolla-bootstrap
+    ./kolla-ansible-aio nodes-bootstrap
 
 4. Build Kolla Docker images.
 
@@ -114,4 +114,4 @@ Cleanup Kolla Docker containers and Docker volumes.
 
 Cleanup hypervisor and remove virtual nodes.
 
-    ./kolla-ansible-aio nodes-cleanup --yes-i-really-really-mean-it
+    ./kolla-ansible-aio remove-virtual-nodes --yes-i-really-really-mean-it

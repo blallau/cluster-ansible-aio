@@ -1,0 +1,89 @@
+---
+- name: Destroy local docker registry
+  docker_container:
+    name: "{{ docker_registry_name }}"
+    image: registry:2
+    state: absent
+  ignore_errors: True
+  when: destroy_docker_registry | bool
+
+- import_tasks: disable_pip_proxy.yml
+  when: pip_cache_enabled | bool and destroy_pip_cache | bool
+
+- import_tasks: disable_apt_proxy.yml
+  when: apt_cache_enabled | bool and destroy_apt_cache | bool
+  tags: apt_cache
+
+- name: Destroy VMs
+  virt:
+    command: destroy
+    name: "{{ item.name }}"
+  with_items: "{{ cluster_nodes }}"
+  ignore_errors: yes
+
+- name: Undefine VMs
+  virt:
+    command: undefine
+    name: "{{ item.name }}"
+  with_items: "{{ cluster_nodes }}"
+  ignore_errors: yes
+
+- name: Remove OS images from libvirt directory
+  become: True
+  file:
+    path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
+    state: absent
+  with_items: "{{ cluster_nodes }}"
+
+- name: Remove config drive files
+  become: True
+  file:
+    path: "{{ tmp_dir }}/{{ item.name }}/config.iso"
+    state: absent
+  with_items: "{{ cluster_nodes }}"
+
+- name: List virtual bridges
+  virt_net:
+    command: list_nets
+  register: bridge_exists
+
+- name: Destroy virtual bridges
+  virt_net:
+    command: destroy
+    name: "{{ item.name }}"
+  with_items: "{{ host_interfaces }}"
+  when: item.name in bridge_exists.list_nets
+  ignore_errors: True
+
+- name: Undefine virtual bridges
+  virt_net:
+    command: undefine
+    name: "{{ item.name }}"
+  with_items: "{{ host_interfaces }}"
+  when: item.name in bridge_exists.list_nets
+
+- name: Delete qcow2 images
+  file:
+    path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
+    state: absent
+  with_items: "{{ cluster_nodes }}"
+  when: destroy_images | bool
+  ignore_errors: yes
+
+- name: Clean nodes from ssh_config
+  become: True
+  blockinfile:
+    block: "{{ lookup('template', 'ssh_config.j2') }}"
+    dest: "/etc/ssh/ssh_config"
+    state: absent
+
+- name: Clean /etc/hosts file
+  become: True
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ item.1.address }}  {{ item.0.name }}"
+    state: absent
+  with_subelements:
+    - "{{ cluster_nodes }}"
+    - interfaces
+  when: item.1.address is defined and item.1.role == "mgmt"

@@ -1,0 +1,46 @@
+---
+- name: Build PIP cache proxy image and push it
+  docker_image:
+    name: "{{ docker_pip_cache_image }}"
+    path: roles/nodes_bootstrap/tasks/proxy/pip
+    dockerfile: Dockerfile
+    push: yes
+
+- name: Create a PIP cache proxy
+  docker_container:
+    name: "{{ docker_pip_cache_name }}"
+    image: "{{ docker_pip_cache_image }}"
+    restart_policy: always
+    published_ports:
+      - "{{ pip_cache_proxy_port }}:3141"
+    volumes:
+      - "devpi:/var/lib/devpi"
+
+# - name: Create directory for PIP config
+#   file:
+#     path: "{{ home_dir }}/.pip"
+#     state: directory
+
+# - name: Set PIP config to use Devpi proxy
+#   blockinfile:
+#     path: "{{ home_dir }}/.pip/pip.conf"
+#     create: yes
+#     block: |
+#       [global]
+#       index-url = http://{{ pip_cache_proxy_ip }}:{{ pip_cache_proxy_port }}/root/pypi/+simple/
+#       trusted-host = {{ pip_cache_proxy_ip }}
+
+# - name: Set setuptools config to use Devpi proxy
+#   blockinfile:
+#     path: "{{ home_dir }}/.pydistutils.cfg"
+#     create: yes
+#     block: |
+#       [easy_install]
+#       index_url = http://{{ pip_cache_proxy_ip }}:{{ pip_cache_proxy_port }}/root/pypi/+simple/
+#       trusted-host = {{ pip_cache_proxy_ip }}
+
+- name: Wait for PIP cache proxy ready
+  wait_for:
+    port: '{{ pip_cache_proxy_port }}'
+    delay: 10
+    timeout: 250

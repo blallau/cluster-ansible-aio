@@ -20,7 +20,7 @@
     key: "{{ ssh_key['content'] | b64decode }}"
   delegate_to: "{{ hostvars[item]['ansible_host'] }}"
   remote_user: "{{ hostvars[item]['ansible_user'] }}"
-  with_items: "{{ groups['kolla-nodes'] }}"
+  with_items: "{{ groups['nodes'] }}"
 
 - name: Disable SSH host key checking in /etc/ssh/ssh_config
   blockinfile:

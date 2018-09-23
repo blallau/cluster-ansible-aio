@@ -1,5 +1,5 @@
 ---
 - name: Deploy Openstack using kolla-ansible
-  hosts: kolla-ansible
+  hosts: controller
   roles:
     - kolla_ansible_deploy
