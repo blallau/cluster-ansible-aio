@@ -54,6 +54,7 @@ Commands:
     create-virtual-nodes      Bootstrap hypervisor and create virtual nodes
     nodes-bootstrap           Bootstrap all virtual nodes
 
+    kolla-bootstrap           Bootstrap Kolla nodes
     kolla-build               Build Kolla images
     kolla-ansible-deploy      Deploy Openstack on nodes using Kolla-ansible
     kolla-ansible-cleanup     Cleanup all deployed Kolla containers and volumes
@@ -76,10 +77,14 @@ cat <<EOF
 --verbose -v
 create-virtual-nodes
 nodes-bootstrap
+
+kolla-bootstrap
 kolla-build
 kolla-ansible-deploy
 kolla-ansible-cleanup
+
 ovirt-deploy
+
 remove-virtual-nodes
 EOF
 }
@@ -174,6 +179,11 @@ EOF
         ACTION="Bootstrap all virtual nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/nodes-bootstrap.yml"
+        ;;
+(kolla-bootstrap)
+        ACTION="Bootstrap Kolla nodes"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
+        PLAYBOOK="${BASEDIR}/kolla-bootstrap.yml"
         ;;
 (kolla-build)
         ACTION="Build Kolla images"

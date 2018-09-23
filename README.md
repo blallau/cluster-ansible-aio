@@ -93,13 +93,19 @@ Command:
 
     ./kolla-ansible-aio nodes-bootstrap
 
-4. Build Kolla Docker images.
+4. Bootstrap Kolla nodes.
+
+Command:
+
+    ./kolla-ansible-aio kolla-bootstrap
+
+5. Build Kolla Docker images.
 
 Command:
 
     ./kolla-ansible-aio kolla-build [-e install_type=binary] [-e kolla_build_profile=default]
 
-5. Deploy multi-node Openstack using Kolla-ansible.
+6. Deploy multi-node Openstack using Kolla-ansible.
 
 Command:
 

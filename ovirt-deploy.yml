@@ -1,0 +1,45 @@
+---
+- name: Deploy Ovirt
+  hosts: controller
+  pre_tasks:
+    - name: Install oVirt repo
+      become: yes
+      yum:
+        name: https://resources.ovirt.org/pub/yum-repo/ovirt-release42.rpm
+        update_cache: yes
+        state: present
+      when: ansible_distribution|lower == "centos"
+    - name: Install ovirt-engine
+      become: yes
+      yum:
+        name: ovirt-engine
+        update_cache: yes
+        state: present
+      when: ansible_distribution|lower == "centos"
+  tasks:
+    - include_role:
+        name: oVirt.engine-setup
+      become: yes
+      vars:
+        ovirt_engine_setup_admin_password: admin
+        ovirt_engine_setup_product_type: 'ovirt'
+        ovirt_engine_setup_version: "4.2"
+        ovirt_engine_setup_provider_ovn_configure: false
+        ovirt_engine_setup_hostname: "localhost"
+        ovirt_engine_setup_organization: "example.com"
+        ovirt_engine_setup_dwh_db_host: "localhost"
+        ovirt_engine_setup_configure_iso_domain: true
+        ovirt_engine_setup_firewall_manager: null
+        ovirt_repositories_ovirt_release_rpm: "http://plain.resources.ovirt.org/pub/yum-repo/ovirt-release42.rpm"
+      when: ansible_distribution|lower == "centos"
+
+- name: Deploy Ovirt nodes
+  hosts: nodes
+  tasks:
+    - name: Install oVirt repo
+      become: yes
+      yum:
+        name: https://resources.ovirt.org/pub/yum-repo/ovirt-release42.rpm
+        update_cache: yes
+        state: present
+      when: ansible_distribution|lower == "centos"
