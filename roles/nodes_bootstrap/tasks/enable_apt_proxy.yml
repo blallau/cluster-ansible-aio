@@ -17,4 +17,43 @@
     path: "/etc/yum.conf"
     create: yes
     line: "proxy=http://{{ apt_cache_proxy_ip }}:{{ apt_cache_proxy_port }}"
-  when: ansible_distribution|lower == "centos"
+  when: ansible_distribution|lower == "centos" and apt_cache_enabled | bool
+
+- name: Enable baseurl in repositories
+  replace: >
+    dest={{ item }}
+    regexp='^\#(baseurl)'
+    replace='\1'
+  when: ansible_distribution|lower == "centos" and apt_cache_enabled | bool
+  with_items:
+   - /etc/yum.repos.d/CentOS-Base.repo
+   - /etc/yum.repos.d/CentOS-Debuginfo.repo
+   - /etc/yum.repos.d/CentOS-Media.repo
+   - /etc/yum.repos.d/CentOS-Vault.repo
+   - /etc/yum.repos.d/CentOS-CR.repo
+   - /etc/yum.repos.d/CentOS-fasttrack.repo
+   - /etc/yum.repos.d/CentOS-Sources.repo
+   - /etc/yum.repos.d/epel.repo
+
+- name: Disable mirrorlist in repositories (mirror mode)
+  replace: >
+    dest={{ item }}
+    regexp='(^mirrorlist)'
+    replace='#\1'
+  when: ansible_distribution|lower == "centos" and apt_cache_enabled | bool
+  with_items:
+   - /etc/yum.repos.d/CentOS-Base.repo
+   - /etc/yum.repos.d/CentOS-Debuginfo.repo
+   - /etc/yum.repos.d/CentOS-Media.repo
+   - /etc/yum.repos.d/CentOS-Vault.repo
+   - /etc/yum.repos.d/CentOS-CR.repo
+   - /etc/yum.repos.d/CentOS-fasttrack.repo
+   - /etc/yum.repos.d/CentOS-Sources.repo
+   - /etc/yum.repos.d/epel.repo
+
+- name: Disable fastestmirror plugin
+  lineinfile:
+    path: /etc/yum/pluginconf.d/fastestmirror.conf
+    regexp: '^enabled=1'
+    line: 'enabled=0'
+  when: ansible_distribution|lower == "centos" and apt_cache_enabled | bool
