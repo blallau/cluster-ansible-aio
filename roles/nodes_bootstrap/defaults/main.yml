@@ -11,6 +11,7 @@ yum_packages:
   - openssl-devel
   - redhat-rpm-config
   - yum-utils
+  - qemu-guest-agent
 
 apt_packages:
   - apt-transport-https
@@ -22,3 +23,4 @@ apt_packages:
   - ntp
   - openssl
   - software-properties-common
+  - qemu-guest-agent
