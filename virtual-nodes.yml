@@ -2,7 +2,7 @@
 - name: Create VMs
   hosts: hypervisors
   roles:
-    - create_virtual_nodes
+    - virtual_nodes
 
 - name: Wait for Python 2 to be installed
   hosts: created_nodes

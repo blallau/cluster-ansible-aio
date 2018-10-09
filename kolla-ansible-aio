@@ -54,12 +54,16 @@ Commands:
     create-virtual-nodes      Bootstrap hypervisor and create virtual nodes
     nodes-bootstrap           Bootstrap all virtual nodes
 
+    ### KOLLA ###
     kolla-bootstrap           Bootstrap Kolla nodes
     kolla-build               Build Kolla images
     kolla-ansible-deploy      Deploy Openstack on nodes using Kolla-ansible
     kolla-ansible-cleanup     Cleanup all deployed Kolla containers and volumes
 
-    ovirt-deploy              Deploy OVirt
+    ### OVIRT ###
+    nfs-server                Deploy a NFS server
+    ovirt-deploy              Deploy oVirt
+    ovirt-populate            Populate oVirt resources
 
     remove-virtual-nodes      Cleanup hypervisor and remove virtual nodes
 EOF
@@ -83,7 +87,9 @@ kolla-build
 kolla-ansible-deploy
 kolla-ansible-cleanup
 
+nfs-server
 ovirt-deploy
+ovirt-populate
 
 remove-virtual-nodes
 EOF
@@ -157,12 +163,12 @@ case "$1" in
 (create-virtual-nodes)
         ACTION="Bootstrap hypervisor and create virtual nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e method=create"
-        PLAYBOOK="${BASEDIR}/create-virtual-nodes.yml"
+        PLAYBOOK="${BASEDIR}/virtual-nodes.yml"
         ;;
 (remove-virtual-nodes)
         ACTION="Cleanup hypervisor and remove virtual nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e method=destroy"
-        PLAYBOOK="${BASEDIR}/create-virtual-nodes.yml"
+        PLAYBOOK="${BASEDIR}/virtual-nodes.yml"
         if [[ "${DANGER_CONFIRM}" != "--yes-i-really-really-mean-it" ]]; then
             cat << EOF
 WARNING:
@@ -190,10 +196,17 @@ EOF
         EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/kolla-build.yml"
         ;;
+(nfs-server)
+        ACTION="Deploy NFS server"
+        PLAYBOOK="${BASEDIR}/nfs-server.yml"
+        ;;
 (ovirt-deploy)
         ACTION="Deploy Ovirt"
-        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/ovirt-deploy.yml"
+        ;;
+(ovirt-populate)
+        ACTION="Populate Ovirt resources"
+        PLAYBOOK="${BASEDIR}/ovirt-populate.yml"
         ;;
 (kolla-ansible-deploy)
         ACTION="Deploy Openstack using kolla-ansible"
