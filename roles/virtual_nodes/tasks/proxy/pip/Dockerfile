@@ -1,8 +1,7 @@
 FROM python:2
 MAINTAINER Bertrand Lallau <bertrand.lallau@gmail.com>
 
-RUN pip install devpi-server
-RUN pip install devpi-web
+RUN pip install devpi-server && pip install devpi-web
 
 VOLUME /var/lib/devpi
 

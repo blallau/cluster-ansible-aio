@@ -1,7 +1,9 @@
 FROM ubuntu
 MAINTAINER Bertrand Lallau <bertrand.lallau@gmail.com>
 
-RUN apt-get update && apt-get install -y apt-cacher-ng
+RUN apt-get update && apt-get install -y apt-cacher-ng && \
+    apt-get clean && \
+    rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin
 
 VOLUME ["/var/cache/apt-cacher-ng"]
 
