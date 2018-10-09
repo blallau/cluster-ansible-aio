@@ -1,5 +1,5 @@
 ---
-- name: Deploy oVirt nodes
+- name: Prepare oVirt nodes
   hosts: nodes
   become: True
   tasks:
@@ -15,7 +15,7 @@
         dest={{ item }}
         regexp='^\#(baseurl)'
         replace='\1'
-      when: ansible_distribution == "CentOS"
+      when: ansible_distribution|lower == "centos" and apt_cache_enabled | bool
       with_items:
         - /etc/yum.repos.d/ovirt-4.2.repo
         - /etc/yum.repos.d/ovirt-4.2-dependencies.repo
@@ -25,18 +25,68 @@
         dest={{ item }}
         regexp='(^mirrorlist)'
         replace='#\1'
-      when: ansible_distribution == "CentOS"
+      when: ansible_distribution|lower == "centos" and apt_cache_enabled | bool
       with_items:
         - /etc/yum.repos.d/ovirt-4.2.repo
         - /etc/yum.repos.d/ovirt-4.2-dependencies.repo
 
-    #Fix firewalld starting issue during ovirt-host-deploy Ansible
-    - name: Restart SystemD services
+    - name: Install firewalld on worker nodes
+      yum:
+        name: "firewalld"
+        update_cache: yes
+      with_inventory_hostnames: all:!controller-1
+      retries: 5
+      delay: 5
+
+    #Fix firewalld starting issue during engine-setup
+    # ovirt-host-deploy Ansible
+    - name: Restart firewalld services
       systemd:
         state: restarted
-        name: "{{ item }}"
+        name: "firewalld"
+      with_inventory_hostnames: all:!controller-1
+
+    # Fix bug on "connect interface by http(s)"
+    # Fix bug on "add Host"
+    # 5634 - 6166 : guest console access ports
+    # 49152 - 49216 : VM migration port range
+    # 54321 (vdsm)
+    # 16514 (libvirt)
+    #
+    - name: Accept somes ports
+      firewalld:
+        port: "{{ item }}/tcp"
+        immediate: True
+        permanent: True
+        state: enabled
+        zone: public
       with_items:
-        - dbus
+        - 80
+        - 111
+        - 443
+        - 2049
+        - 5900-6923
+        - 16514
+        - 54321
+
+    # Fix bug on "add host"
+    # - name: Flush 'filter' iptables
+    #   iptables:
+    #     table: filter
+    #     flush: True
+    #   tags: flush
+
+    - name: Ensure group 'kvm' exists
+      group:
+        name: kvm
+        gid: 36
+        state: present
+
+    - name: Create the user 'vdsm' in the group 'kvm'
+      user:
+        name: "vdsm"
+        uid: 36
+        group: kvm
 
 - name: Deploy oVirt Engine
   hosts: controller
@@ -45,26 +95,30 @@
     - include_role:
         name: oVirt.engine-setup
       vars:
-        ovirt_engine_setup_admin_password: admin
+        ovirt_engine_setup_admin_password: "admin"
         ovirt_engine_setup_product_type: 'ovirt'
         ovirt_engine_setup_version: "4.2"
         ovirt_engine_setup_provider_ovn_configure: false
-        ovirt_engine_setup_hostname: "localhost"
+        ovirt_engine_setup_hostname: "controller-1"
         ovirt_engine_setup_organization: "example.com"
-        ovirt_engine_setup_dwh_db_host: "localhost"
+        ovirt_engine_setup_dwh_db_host: "controller-1"
         ovirt_engine_setup_configure_iso_domain: true
-        #don't configure DWH
-        ovirt_engine_setup_dwh_db_configure: null
         #set firewalld (iptables get ERROR: "is not available")
-        ovirt_engine_setup_firewall_manager: "firewalld"
-        ovirt_repositories_ovirt_release_rpm: "http://plain.resources.ovirt.org/pub/yum-repo/ovirt-release42.rpm"
+        ovirt_engine_setup_firewall_manager: null
       when: ansible_distribution|lower == "centos"
 
-- name: Add Host to oVirt Engine
+- name: Prepare Host to oVirt Engine
   hosts: controller
   tasks:
+    # to connect on node using "Host console"
+    - name: Change root user password
+      become: True
+      user:
+        name: root
+        password: "$6$rounds=656000$GlDrOXhwDbwgtd/W$tEVY3/NEhEeH6oHzfK0kWOHWuJdmIOMVBCxDBB4uW12/1hTEcfghAbZe6HTCNodh7.79puqFykDz572g4JV0b1"
+
     - name: Generate SSH keys
-      become: true
+      become: True
       shell: ssh-keygen -y -f /etc/pki/ovirt-engine/keys/engine_id_rsa > /tmp/engine_id_rsa.pub
       args:
         creates: "/tmp/engine_id_rsa.pub"
@@ -75,7 +129,7 @@
       register: ovirt_ssh_pub
 
     - name: Authorize oVirt engine SSH key on other nodes
-      become: true
+      become: True
       authorized_key:
         user: root
         state: present
@@ -84,74 +138,3 @@
       remote_user: "{{ hostvars[item]['ansible_user'] }}"
       when: hostvars[item]['ansible_host'] is defined
       with_inventory_hostnames: all:!controller-1
-
-    - name: Register a fact for the ovirt pub key
-      set_fact:
-        ovirt_pubkey: "{{ ovirt_ssh_pub.content }}"
-
-    ###########################
-    # API
-    ###########################
-    - name: Login to oVirt (Obtain SSO token)
-      ovirt_auth:
-        url: "https://controller-1/ovirt-engine/api"
-        username: "admin@internal"
-        password: "admin"
-        insecure: "true"
-
-    # ###########################
-    # # Data center
-    # ###########################
-    # # Create datacenter
-    # - name: Create datacenter
-    #   ovirt_datacenter:
-    #     auth: "{{ ovirt_auth }}"
-    #     name: Artemis
-    #     local: True
-    #     compatibility_version: 4.2
-    #     quota_mode: enabled
-
-    # ###########################
-    # # Clusters
-    # ###########################
-    # # Create cluster
-    # - name: Create cluster
-    #   ovirt_cluster:
-    #     auth: "{{ ovirt_auth }}"
-    #     data_center: Artemis
-    #     name: ArtemisCluster
-    #     switch_type: ovs
-    #     virt: True
-    #     threads_as_cores: True
-    #     description: mycluster
-    #     compatibility_version: 4.2
-
-    # ###########################
-    # # Network
-    # ###########################
-    # - name: Create network
-    #   ovirt_networks:
-    #     data_center: Artemis
-    #     name: artemisnet
-    #     # vlan_tag: 1
-    #     vm_network: true
-
-    ###########################
-    # Add host
-    ###########################
-    - name: Ensure host is joined
-      ovirt_hosts:
-        auth: "{{ ovirt_auth }}"
-        public_key: yes
-        cluster: Default
-        name: "{{ hostvars[item]['ansible_host'] }}"
-        address: "{{ hostvars[item]['ansible_host'] }}"
-        override_iptables: true
-        timeout: 1800
-      when: hostvars[item]['ansible_host'] is defined
-      with_inventory_hostnames: all:!controller-1
-
-    - name: Revoke SSO token
-      ovirt_auth:
-        state: absent
-        ovirt_auth: "{{ ovirt_auth }}"
