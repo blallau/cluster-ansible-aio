@@ -1,7 +1,4 @@
 ---
-- import_tasks: enable_nested_virt.yml
-  become: True
-
 - name: Install CentOS packages
   become: True
   yum:
