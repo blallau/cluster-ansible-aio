@@ -1,25 +1,49 @@
 ---
-- name: Deploy Ovirt
-  hosts: controller
-  pre_tasks:
+- name: Deploy oVirt nodes
+  hosts: nodes
+  become: True
+  tasks:
     - name: Install oVirt repo
-      become: yes
       yum:
         name: https://resources.ovirt.org/pub/yum-repo/ovirt-release42.rpm
         update_cache: yes
         state: present
       when: ansible_distribution|lower == "centos"
-    - name: Install ovirt-engine
-      become: yes
-      yum:
-        name: ovirt-engine
-        update_cache: yes
-        state: present
-      when: ansible_distribution|lower == "centos"
+
+    - name: Enable baseurl in repositories
+      replace: >
+        dest={{ item }}
+        regexp='^\#(baseurl)'
+        replace='\1'
+      when: ansible_distribution == "CentOS"
+      with_items:
+        - /etc/yum.repos.d/ovirt-4.2.repo
+        - /etc/yum.repos.d/ovirt-4.2-dependencies.repo
+
+    - name: Disable mirrorlist in repositories (mirror mode)
+      replace: >
+        dest={{ item }}
+        regexp='(^mirrorlist)'
+        replace='#\1'
+      when: ansible_distribution == "CentOS"
+      with_items:
+        - /etc/yum.repos.d/ovirt-4.2.repo
+        - /etc/yum.repos.d/ovirt-4.2-dependencies.repo
+
+    #Fix firewalld starting issue during ovirt-host-deploy Ansible
+    - name: Restart SystemD services
+      systemd:
+        state: restarted
+        name: "{{ item }}"
+      with_items:
+        - dbus
+
+- name: Deploy oVirt Engine
+  hosts: controller
+  become: True
   tasks:
     - include_role:
         name: oVirt.engine-setup
-      become: yes
       vars:
         ovirt_engine_setup_admin_password: admin
         ovirt_engine_setup_product_type: 'ovirt'
@@ -29,17 +53,105 @@
         ovirt_engine_setup_organization: "example.com"
         ovirt_engine_setup_dwh_db_host: "localhost"
         ovirt_engine_setup_configure_iso_domain: true
-        ovirt_engine_setup_firewall_manager: null
+        #don't configure DWH
+        ovirt_engine_setup_dwh_db_configure: null
+        #set firewalld (iptables get ERROR: "is not available")
+        ovirt_engine_setup_firewall_manager: "firewalld"
         ovirt_repositories_ovirt_release_rpm: "http://plain.resources.ovirt.org/pub/yum-repo/ovirt-release42.rpm"
       when: ansible_distribution|lower == "centos"
 
-- name: Deploy Ovirt nodes
-  hosts: nodes
+- name: Add Host to oVirt Engine
+  hosts: controller
   tasks:
-    - name: Install oVirt repo
-      become: yes
-      yum:
-        name: https://resources.ovirt.org/pub/yum-repo/ovirt-release42.rpm
-        update_cache: yes
+    - name: Generate SSH keys
+      become: true
+      shell: ssh-keygen -y -f /etc/pki/ovirt-engine/keys/engine_id_rsa > /tmp/engine_id_rsa.pub
+      args:
+        creates: "/tmp/engine_id_rsa.pub"
+
+    - name: Get oVirt engine public key content and store as var
+      slurp:
+        src: "/tmp/engine_id_rsa.pub"
+      register: ovirt_ssh_pub
+
+    - name: Authorize oVirt engine SSH key on other nodes
+      become: true
+      authorized_key:
+        user: root
         state: present
-      when: ansible_distribution|lower == "centos"
+        key: "{{ ovirt_ssh_pub['content'] | b64decode }}"
+      delegate_to: "{{ hostvars[item]['ansible_host'] }}"
+      remote_user: "{{ hostvars[item]['ansible_user'] }}"
+      when: hostvars[item]['ansible_host'] is defined
+      with_inventory_hostnames: all:!controller-1
+
+    - name: Register a fact for the ovirt pub key
+      set_fact:
+        ovirt_pubkey: "{{ ovirt_ssh_pub.content }}"
+
+    ###########################
+    # API
+    ###########################
+    - name: Login to oVirt (Obtain SSO token)
+      ovirt_auth:
+        url: "https://controller-1/ovirt-engine/api"
+        username: "admin@internal"
+        password: "admin"
+        insecure: "true"
+
+    # ###########################
+    # # Data center
+    # ###########################
+    # # Create datacenter
+    # - name: Create datacenter
+    #   ovirt_datacenter:
+    #     auth: "{{ ovirt_auth }}"
+    #     name: Artemis
+    #     local: True
+    #     compatibility_version: 4.2
+    #     quota_mode: enabled
+
+    # ###########################
+    # # Clusters
+    # ###########################
+    # # Create cluster
+    # - name: Create cluster
+    #   ovirt_cluster:
+    #     auth: "{{ ovirt_auth }}"
+    #     data_center: Artemis
+    #     name: ArtemisCluster
+    #     switch_type: ovs
+    #     virt: True
+    #     threads_as_cores: True
+    #     description: mycluster
+    #     compatibility_version: 4.2
+
+    # ###########################
+    # # Network
+    # ###########################
+    # - name: Create network
+    #   ovirt_networks:
+    #     data_center: Artemis
+    #     name: artemisnet
+    #     # vlan_tag: 1
+    #     vm_network: true
+
+    ###########################
+    # Add host
+    ###########################
+    - name: Ensure host is joined
+      ovirt_hosts:
+        auth: "{{ ovirt_auth }}"
+        public_key: yes
+        cluster: Default
+        name: "{{ hostvars[item]['ansible_host'] }}"
+        address: "{{ hostvars[item]['ansible_host'] }}"
+        override_iptables: true
+        timeout: 1800
+      when: hostvars[item]['ansible_host'] is defined
+      with_inventory_hostnames: all:!controller-1
+
+    - name: Revoke SSO token
+      ovirt_auth:
+        state: absent
+        ovirt_auth: "{{ ovirt_auth }}"
