@@ -24,9 +24,6 @@ globals_override:
   docker_namespace: "{{ kolla_image_namespace }}"
   kolla_internal_vip_address: 10.150.150.11
 
-  config_owner_user: "kolla"
-  config_owner_group: "kolla"
-
   enable_barbican: "no"
   enable_cinder: "no"
   enable_designate: "no"
