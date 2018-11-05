@@ -29,4 +29,4 @@
       Host *
       StrictHostKeyChecking no
       UserKnownHostsFile=/dev/null
-    dest: "/etc/ssh/ssh_config"
+    path: "/etc/ssh/ssh_config"

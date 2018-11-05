@@ -74,7 +74,7 @@
   become: True
   blockinfile:
     block: "{{ lookup('template', 'ssh_config.j2') }}"
-    dest: "/etc/ssh/ssh_config"
+    path: "/etc/ssh/ssh_config"
     state: absent
 
 - name: Clean /etc/hosts file
