@@ -11,7 +11,15 @@ yum_packages:
   - openssl-devel
   - redhat-rpm-config
   - yum-utils
+  # RHVM
   - qemu-guest-agent
+  # Openshift needed
+  - NetworkManager
+  # Openshift metrics
+  - httpd-tools
+  # Openshift logging
+  - java-1.8.0-openjdk-headless
+  - patch
 
 apt_packages:
   - apt-transport-https
