@@ -27,14 +27,6 @@
     volumes:
       - "registry:/var/lib/registry"
 
-- import_tasks: enable_apt_proxy.yml
-  when: apt_cache_enabled | bool
-  tags: apt_cache
-
-- import_tasks: enable_pip_proxy.yml
-  when: pip_cache_enabled | bool
-  tags: pip_cache
-
 - name: Install/Update pip packages
   become: True
   pip:
@@ -52,6 +44,18 @@
 - import_tasks: setup_libvirt_networks.yml
   become: True
 
+- import_tasks: enable_dns_server.yml
+  when: dns_server_enabled | bool
+  tags: dns_server
+
+- import_tasks: enable_apt_proxy.yml
+  when: apt_cache_enabled | bool
+  tags: apt_cache
+
+- import_tasks: enable_pip_proxy.yml
+  when: pip_cache_enabled | bool
+  tags: pip_cache
+
 - import_tasks: retrieve_os_image.yml
 
 - name: Instantiate meta-data file
@@ -64,6 +68,12 @@
   template:
     src: "user-data.j2"
     dest: "{{ tmp_dir}}/{{ item.name }}/user-data"
+  with_items: "{{ cluster_nodes }}"
+
+- name: Remove config drive files
+  file:
+    path: "{{ tmp_dir }}/{{ item.name }}/config.iso"
+    state: absent
   with_items: "{{ cluster_nodes }}"
 
 - name: Create config drive
