@@ -1,9 +1,9 @@
 <domain type='kvm'>
   <name>{{ item.name }}</name>
   <metadata>
-    <kolla:instance xmlns:kolla="https://github.com/blallau/kolla-ansible-aio">
-      <kolla:inventory group="{{ item.role }}" distro="{{ vm_os_distro }}"/>
-    </kolla:instance>
+    <aio:instance xmlns:aio="https://github.com/blallau/ansible-aio">
+      <aio:inventory group="{{ item.role }}" distro="{{ vm_os_distro }}"/>
+    </aio:instance>
   </metadata>
   <memory unit='KiB'>{{ item.ram * 1024 }}</memory>
   <vcpu placement='static'>{{ item.vcpu }}</vcpu>
@@ -18,7 +18,9 @@
     <acpi/>
     <apic/>
   </features>
-  <cpu mode='host-model'/>
+  <cpu mode='host-model' match='exact'>
+    <feature policy='require' name='vmx'/>
+  </cpu>
   <clock offset='utc'>
     <timer name='rtc' tickpolicy='catchup'/>
     <timer name='pit' tickpolicy='delay'/>
