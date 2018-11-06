@@ -1,17 +1,20 @@
-{% set cidr = host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='cidr') | join %}
-{% set ip = cidr | ipaddr('1') | ipaddr('address') %}
-{% set netmask = cidr | ipaddr('netmask') %}
-{% set dhcp_range_start = cidr | ipaddr('128') | ipaddr('address') %}
-{% set dhcp_range_end = cidr | ipaddr('254') | ipaddr('address') %}
+{% set ip = item.cidr | ipaddr('1') | ipaddr('address') %}
+{% set netmask = item.cidr | ipaddr('netmask') %}
+{% set dhcp_range_start = item.cidr | ipaddr('100') | ipaddr('address') %}
+{% set dhcp_range_end = item.cidr | ipaddr('254') | ipaddr('address') %}
 
 <network>
   <name>{{ item.name }}</name>
   <forward mode='nat'/>
   <bridge name='{{ item.bridge }}' stp='on' delay='0'/>
   <mac address='52:54:00:e3:3c:3f'/>
+  <dns enable='no'/>
   <ip address='{{ ip }}' netmask='{{ netmask }}'>
     <dhcp>
       <range start='{{ dhcp_range_start }}' end='{{ dhcp_range_end }}'/>
+      {% for node in cluster_nodes %}
+      <host mac='{{ node.interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='mac') | join }}' ip='{{ node.interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='address') | join }}'/>
+      {% endfor %}
     </dhcp>
   </ip>
 </network>

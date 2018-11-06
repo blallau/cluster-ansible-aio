@@ -87,6 +87,8 @@ cluster_nodes:
       - name: "{{ host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='vnic') | join }}"
         role: prov
         mode: dhcp
+        address: "10.100.100.100"
+        mac: "52:54:00:33:44:50"
       - name: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='vnic') | join }}"
         role: mgmt
         mode: static
@@ -106,6 +108,8 @@ cluster_nodes:
       - name: "{{ host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='vnic') | join }}"
         role: prov
         mode: dhcp
+        address: "10.100.100.101"
+        mac: "52:54:00:33:44:51"
       - name: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='vnic') | join }}"
         role: mgmt
         mode: static
@@ -125,6 +129,8 @@ cluster_nodes:
       - name: "{{ host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='vnic') | join }}"
         role: prov
         mode: dhcp
+        address: "10.100.100.102"
+        mac: "52:54:00:33:44:52"
       - name: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='vnic') | join }}"
         role: mgmt
         mode: static

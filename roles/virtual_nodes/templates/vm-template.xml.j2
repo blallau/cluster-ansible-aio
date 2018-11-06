@@ -58,6 +58,11 @@
     <interface type='bridge'>
       <source bridge='{{ host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='bridge') | join }}'/>
       <target dev='vnet0'/>
+      {% for intf in item.interfaces %}
+        {% if intf.role == "prov" and intf.mac is defined %}
+      <mac address='{{ intf.mac }}'/>
+        {% endif %}
+      {% endfor %}
       <model type='rtl8139'/>
       <alias name='net0'/>
       <address type='pci' domain='0x0000' bus='0x00' slot='0x03' function='0x0'/>
