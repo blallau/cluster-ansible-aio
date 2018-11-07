@@ -14,6 +14,11 @@
   when: apt_cache_enabled | bool and destroy_apt_cache | bool
   tags: apt_cache
 
+- import_tasks: disable_dns_server.yml
+  when: dns_server_enabled | bool
+  tags: dns_server
+
+# TODO destroy snapshot if present
 - name: Destroy VMs
   virt:
     command: destroy
@@ -32,13 +37,6 @@
   become: True
   file:
     path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
-    state: absent
-  with_items: "{{ cluster_nodes }}"
-
-- name: Remove config drive files
-  become: True
-  file:
-    path: "{{ tmp_dir }}/{{ item.name }}/config.iso"
     state: absent
   with_items: "{{ cluster_nodes }}"
 
@@ -81,9 +79,25 @@
   become: True
   lineinfile:
     path: /etc/hosts
-    line: "{{ item.1.address }}  {{ item.0.name }}"
+    line: "{{ item.1.address }} {{ item.0.name }}.{{ dns_domain }} {{ item.0.name }}"
     state: absent
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.1.address is defined and item.1.role == "mgmt"
+  when: item.1.address is defined and item.1.role == "prov"
+
+- name: "Clean {{ ansible_env.HOME }}/.ssh/known_hosts"
+  known_hosts:
+    path: "{{ ansible_env.HOME }}/.ssh/known_hosts"
+    name: "{{ item.name }}.{{ dns_domain }}"
+    state: absent
+  with_items: "{{ cluster_nodes }}"
+
+# - name: Clean NetworkManager dnsmasq config file
+#   become: True
+#   lineinfile:
+#     path: "/etc/NetworkManager/dnsmasq.d/libvirt_dnsmasq.conf"
+#     state: absent
+#     line: "server=/{{ item.domain }}/{{ item.cidr | join | ipaddr('1') | ipaddr('address') }}"
+#   when: item.domain is defined
+#   with_items: "{{ host_interfaces }}"

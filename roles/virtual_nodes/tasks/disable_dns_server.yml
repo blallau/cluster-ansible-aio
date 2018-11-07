@@ -1,0 +1,7 @@
+---
+- name: Destroy DNS server
+  docker_container:
+    name: "{{ docker_dns_server_name }}"
+    image: "{{ docker_dns_server_image }}"
+    state: absent
+  ignore_errors: True

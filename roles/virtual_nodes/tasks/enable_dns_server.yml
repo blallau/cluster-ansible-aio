@@ -1,0 +1,41 @@
+---
+- name: Build DNS server image and push it
+  docker_image:
+    name: "{{ docker_dns_server_image }}"
+    path: roles/virtual_nodes/tasks/server/dns
+    dockerfile: Dockerfile
+    push: yes
+
+- name: 'Ensure the {{ myvirt_config_path }} directory exist'
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+  with_items:
+    - "{{ myvirt_config_path }}"
+
+- name: 'Generate dnsmasq.conf in {{ myvirt_config_path }}'
+  blockinfile:
+    create: true
+    block: "{{ lookup('template', 'dnsmasq.conf.j2') }}"
+    dest: "{{ myvirt_config_path }}/dnsmasq.conf"
+
+- name: Create a DNS server
+  docker_container:
+    name: "{{ docker_dns_server_name }}"
+    image: "{{ docker_dns_server_image }}"
+    restart_policy: always
+    published_ports:
+      - "{{ dns_server_proxy_ip }}:{{ dns_server_port }}:53/udp"
+      - "{{ dns_server_proxy_ip }}:{{ dns_server_webproc_port }}:8080"
+    volumes:
+      - "{{ myvirt_config_path }}/dnsmasq.conf:/etc/dnsmasq.conf"
+      - "/etc/resolv.conf:/etc/resolv.conf"
+      - "/etc/hosts:/etc/hosts"
+
+- name: Wait for DNS server ready
+  wait_for:
+    host: "{{ dns_server_proxy_ip }}"
+    port: "{{ dns_server_webproc_port }}"
+    delay: 10
+    timeout: 250
