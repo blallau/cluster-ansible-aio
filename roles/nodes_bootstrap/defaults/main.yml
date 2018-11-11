@@ -29,6 +29,10 @@ apt_packages:
   - libffi-dev
   - libssl-dev
   - ntp
+  # Openshift needed
+  - network-manager
   - openssl
   - software-properties-common
   - qemu-guest-agent
+
+network_manager_enabled: "no"
