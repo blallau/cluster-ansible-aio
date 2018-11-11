@@ -1,0 +1,65 @@
+---
+- name: Add Docker CentOS repo
+  yum_repository:
+    name: docker-ce
+    description: Docker CE repo
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    gpgcheck: yes
+    gpgkey: https://download.docker.com/linux/centos/gpg
+  when: ansible_distribution|lower == "centos"
+
+- name: Add Docker Ubuntu repo signing keys
+  apt_key:
+    url: "https://download.docker.com/linux/ubuntu/gpg"
+    state: present
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Wait for automatic Ubuntu system updates
+  shell: while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do sleep 1; done;
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Add Docker Ubuntu repo
+  apt_repository:
+    repo: "deb https://download.docker.com/linux/ubuntu xenial edge"
+    state: present
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Wait for automatic Ubuntu system updates
+  shell: while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do sleep 1; done;
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Install CentOS packages
+  yum:
+    name: "{{ item }}"
+    update_cache: yes
+  with_items: "{{ yum_packages }}"
+  when: ansible_distribution|lower == "centos"
+
+- import_tasks: enable_apt_proxy.yml
+  when: apt_cache_enabled | bool
+  tags: apt_cache
+
+- name: Wait for automatic Ubuntu system updates
+  shell: while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 1; done;
+  when: ansible_distribution|lower == "ubuntu"
+
+- name: Install Ubuntu packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: "yes"
+  with_items: "{{ apt_packages }}"
+  when: ansible_distribution|lower == "ubuntu"
+
+- import_tasks: enable_docker.yml
+
+- name: Create '{{ config_owner_group }}' group
+  group:
+    name: "{{ config_owner_group }}"
+  tags: user
+
+- name: Create '{{ config_owner_user }}' user
+  user:
+    name: "{{ config_owner_user }}"
+    group: "{{ config_owner_group }}"
+  tags: user

@@ -51,11 +51,14 @@ Options:
     --verbose, -v                      Increase verbosity of ansible-playbook
 
 Commands:
+    ### GENERAL ###
     create-virtual-nodes      Bootstrap hypervisor and create virtual nodes
     nodes-bootstrap           Bootstrap all virtual nodes
+    [docker-bootstrap]        Bootstrap Docker on nodes
+
+    remove-virtual-nodes      Cleanup hypervisor and remove virtual nodes
 
     ### KOLLA ###
-    kolla-bootstrap           Bootstrap Kolla nodes
     kolla-build               Build Kolla images
     kolla-ansible-deploy      Deploy Openstack on nodes using Kolla-ansible
     kolla-ansible-cleanup     Cleanup all deployed Kolla containers and volumes
@@ -65,7 +68,6 @@ Commands:
     ovirt-deploy              Deploy oVirt
     ovirt-populate            Populate oVirt resources
 
-    remove-virtual-nodes      Cleanup hypervisor and remove virtual nodes
 EOF
 }
 
@@ -81,8 +83,8 @@ cat <<EOF
 --verbose -v
 create-virtual-nodes
 nodes-bootstrap
+docker-bootstrap
 
-kolla-bootstrap
 kolla-build
 kolla-ansible-deploy
 kolla-ansible-cleanup
@@ -108,7 +110,7 @@ PLAYBOOK=""
 VERBOSITY=
 EXTRA_OPTS=${EXTRA_OPTS}
 DANGER_CONFIRM=
-echo "$1"
+
 while [ "$#" -gt 0 ]; do
     case "$1" in
     (--inventory|-i)
@@ -186,10 +188,10 @@ EOF
         EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/nodes-bootstrap.yml"
         ;;
-(kolla-bootstrap)
-        ACTION="Bootstrap Kolla nodes"
+(docker-bootstrap)
+        ACTION="Bootstrap Docker on nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e method=create"
-        PLAYBOOK="${BASEDIR}/kolla-bootstrap.yml"
+        PLAYBOOK="${BASEDIR}/docker-bootstrap.yml"
         ;;
 (kolla-build)
         ACTION="Build Kolla images"

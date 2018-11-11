@@ -1,0 +1,23 @@
+---
+- name: Create directory for PIP config
+  file:
+    path: "/root/.pip"
+    state: directory
+
+- name: Set PIP config to use Devpi proxy
+  blockinfile:
+    path: "/root/.pip/pip.conf"
+    create: yes
+    block: |
+      [global]
+      index-url = http://{{ pip_cache_proxy_ip }}:{{ pip_cache_proxy_port }}/root/pypi/+simple/
+      trusted-host = {{ pip_cache_proxy_ip }}
+
+- name: Set setuptools config to use Devpi proxy
+  blockinfile:
+    path: "/root/.pydistutils.cfg"
+    create: yes
+    block: |
+      [easy_install]
+      index_url = http://{{ pip_cache_proxy_ip }}:{{ pip_cache_proxy_port }}/root/pypi/+simple/
+      trusted-host = {{ pip_cache_proxy_ip }}
