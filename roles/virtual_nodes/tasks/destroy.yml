@@ -15,7 +15,7 @@
   tags: apt_cache
 
 - import_tasks: disable_dns_server.yml
-  when: dns_server_enabled | bool
+  when: dns_server_enabled | bool and destroy_dns_server | bool
   tags: dns_server
 
 # TODO destroy snapshot if present
