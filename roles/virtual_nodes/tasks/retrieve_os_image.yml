@@ -44,11 +44,6 @@
     dest: "{{ tmp_dir }}"
   when: vm_os_distro == "ubuntu" and not ubuntu_downloaded.stat.exists
 
-- name: Increase the image size
-  command: "qemu-img resize {{ tmp_dir }}/{{ kolla_vm_os_image }} +10G"
-  when: not item.stat.exists
-  with_items: "{{ copied.results }}"
-
 - name: Create VM-specific directories
   file:
     path: "{{ tmp_dir }}/{{ item.name }}"
@@ -61,5 +56,11 @@
     src: "{{ tmp_dir }}/{{ kolla_vm_os_image }}"
     dest: "{{ libvirt_dir }}/{{ item.item.name }}.qcow2"
     remote_src: True
+  when: not item.stat.exists
+  with_items: "{{ copied.results }}"
+
+- name: Increase the image size
+  become: True
+  command: "qemu-img resize {{ libvirt_dir }}/{{ item.item.name }}.qcow2 +10G"
   when: not item.stat.exists
   with_items: "{{ copied.results }}"
