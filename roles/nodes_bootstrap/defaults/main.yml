@@ -36,3 +36,4 @@ apt_packages:
   - qemu-guest-agent
 
 network_manager_enabled: "no"
+nested_virt_enabled: "false"

@@ -1,17 +1,31 @@
 ---
 - import_tasks: enable_nested_virt.yml
+  when: nested_virt_enabled | bool
 
-- name: Populate /etc/hosts file
-  lineinfile:
-    path: /etc/hosts
-    insertafter: EOF
-    line: "{{ hostvars[item]['ansible_' + node_internal_intf]['ipv4']['address'] }}  {{ hostvars[item]['inventory_hostname'] }}"
-  with_items: "{{ groups['nodes'] }}"
+# - name: Populate /etc/hosts file
+#   lineinfile:
+#     path: /etc/hosts
+#     insertafter: EOF
+#     line: "{{ hostvars[item]['ansible_' + node_internal_intf]['ipv4']['address'] }}  {{ hostvars[item]['inventory_hostname'] }}"
+#   with_items: "{{ groups['nodes'] }}"
 
-- name: Disable SELinux
-  selinux:
-    state: disabled
-  when: ansible_distribution|lower == "centos"
+# - name: Add search domain to /etc/resolv.conf file
+#   lineinfile:
+#     path: /etc/resolv.conf
+#     insertafter: EOF
+#     line: "search {{ dns_domain }}"
+
+#- name: Set hostname
+#  hostname:
+#    name: "{{ inventory_hostname }}"
+
+# Disabled for Kolla
+# Enabled for OpenShift
+
+# - name: Disable SELinux
+#   selinux:
+#     state: disabled
+#   when: ansible_distribution|lower == "centos"
 
 - name: Add Centos repo
   yum_repository:
@@ -61,11 +75,18 @@
   with_items: "{{ apt_packages }}"
   when: ansible_distribution|lower == "ubuntu"
 
-- name: Start NTP
+- name: Start NTP service
   systemd:
     name: "{{ 'ntp' if ansible_distribution|lower == 'ubuntu' else 'ntpd' }}"
     enabled: yes
     state: started
+
+- name: Start NetworkManager service
+  systemd:
+    name: "NetworkManager"
+    enabled: yes
+    state: started
+  when: network_manager_enabled | bool
 
 - import_tasks: configure_ssh.yml
   tags: ssh
