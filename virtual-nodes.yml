@@ -4,10 +4,43 @@
   roles:
     - virtual_nodes
 
+# Python not present on Ubuntu and used by Ansible
 - name: Wait for Python 2 to be installed
   hosts: created_nodes
   gather_facts: false
   become: True
   tasks:
+    - raw: echo "nameserver {{ host_ip }}" > /etc/resolv.conf
     - raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
       when: method == "create" and ansible_distribution|lower == "ubuntu"
+
+- name: Populate /etc/resolv.conf file
+  hosts: created_nodes
+  gather_facts: false
+  become: True
+  tasks:
+    - lineinfile:
+        path: "/etc/resolv.conf"
+        regexp: '^nameserver'
+        line: 'nameserver {{ host_ip }}'
+      when: method == "create"
+    - lineinfile:
+        path: "/etc/resolv.conf"
+        regexp: '^search'
+        #Fix using {{ dns_domain }} from virtual-nodes playbook
+        line: 'search mydomain.org'
+      when: method == "create"
+
+    # - lineinfile:
+    #     path: /etc/hosts
+    #     insertafter: EOF
+    #     line: "{{ hostvars[item]['ansible_' + node_internal_intf]['ipv4']['address'] }}  {{ hostvars[item]['inventory_hostname'] }}"
+    #     with_items: "{{ groups['nodes'] }}"
+
+# - name: Set hostname
+#   hosts: created_nodes
+#   gather_facts: false
+#   become: True
+#   tasks:
+#     - command: "hostnamectl set-hostname {{ hostvars[inventory_hostname].instance_name }}"
+#       when: method == "create"
