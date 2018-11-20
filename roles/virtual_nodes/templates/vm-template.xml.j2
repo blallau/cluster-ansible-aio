@@ -12,7 +12,6 @@
   </resource>
   <os>
     <type arch='x86_64'>hvm</type>
-    <boot dev='hd'/>
   </os>
   <features>
     <acpi/>
@@ -21,7 +20,7 @@
   <cpu mode='host-passthrough' match='exact'>
     <feature policy='require' name='vmx'/>
   </cpu>
-  <clock offset='utc'>
+  <clock offset='variable' adjustment='0' basis='utc'>
     <timer name='rtc' tickpolicy='catchup'/>
     <timer name='pit' tickpolicy='delay'/>
     <timer name='hpet' present='no'/>
@@ -40,12 +39,14 @@
       <source file='{{ libvirt_dir }}/{{ item.name }}.qcow2'/>
       <backingStore/>
       <target dev='vda' bus='virtio'/>
+      <boot order='1'/>
     </disk>
     <disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
       <source file='{{ tmp_dir }}/{{ item.name }}/config.iso'/>
       <backingStore/>
       <target dev='hda' bus='ide'/>
+      <boot order='2'/>
       <readonly/>
       <alias name='ide0-0-1'/>
       <address type='drive' controller='0' bus='0' target='0' unit='1'/>
@@ -95,7 +96,12 @@
     </input>
     <memballoon model='virtio'>
       <alias name='balloon0'/>
-      <address type='pci' domain='0x0000' bus='0x00' slot='0x08' function='0x0'/>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x07' function='0x0'/>
     </memballoon>
+    <rng model='virtio'>
+      <alias name='rng0'/>
+      <backend model='random'>/dev/urandom</backend>
+      <address type='pci' domain='0x0000' bus='0x00' slot='0x08' function='0x0'/>
+    </rng>
   </devices>
 </domain>
