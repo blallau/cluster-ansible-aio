@@ -11,7 +11,6 @@ of hosts, groups the hosts are in, and even variables to assign to each host.
 To use this, copy this file over /etc/ansible/hosts and chmod +x the file.
 This, more or less, allows you to keep one central database containing
 info about all of your managed instances.
-
 '''
 
 import argparse
@@ -117,9 +116,9 @@ class LibvirtInventory(object):
             hostvars['libvirt_status'] = 'running'
 
             root = ET.fromstring(domain.XMLDesc())
-            kolla_ns = {'kolla': 'https://github.com/blallau/kolla-ansible-aio'}
+            aio_ns = {'aio': 'https://github.com/blallau/ansible-aio'}
 
-            tag_elem = root.find('./metadata/kolla:instance/kolla:inventory', kolla_ns)
+            tag_elem = root.find('./metadata/aio:instance/aio:inventory', aio_ns)
             group = tag_elem.get('group')
             distro = tag_elem.get('distro')
             _push(inventory, 'nodes', domain_name)
