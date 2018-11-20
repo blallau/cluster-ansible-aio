@@ -36,17 +36,16 @@
   <devices>
     <emulator>{% if ansible_distribution|lower == 'centos' %}/usr/libexec/qemu-kvm{% else %}/usr/bin/kvm{% endif %}</emulator>
     <disk type='file' device='disk'>
-      <driver name='qemu' type='qcow2'/>
+      <driver name='qemu' type='qcow2' cache='none' io='native'/>
       <source file='{{ libvirt_dir }}/{{ item.name }}.qcow2'/>
-      <target dev='hda' bus='ide'/>
-      <alias name='ide0-0-0'/>
-      <address type='drive' controller='0' bus='0' target='0' unit='0'/>
+      <backingStore/>
+      <target dev='vda' bus='virtio'/>
     </disk>
     <disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
       <source file='{{ tmp_dir }}/{{ item.name }}/config.iso'/>
       <backingStore/>
-      <target dev='hdb' bus='ide'/>
+      <target dev='hda' bus='ide'/>
       <readonly/>
       <alias name='ide0-0-1'/>
       <address type='drive' controller='0' bus='0' target='0' unit='1'/>
