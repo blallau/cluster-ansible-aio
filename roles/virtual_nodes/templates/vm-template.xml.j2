@@ -5,7 +5,7 @@
       <aio:inventory group="{{ item.role }}" distro="{{ vm_os_distro }}"/>
     </aio:instance>
   </metadata>
-  <memory unit='KiB'>{{ item.ram * 1024 }}</memory>
+  <memory unit='GiB'>{{ item.ram }}</memory>
   <vcpu placement='static'>{{ item.vcpu }}</vcpu>
   <resource>
     <partition>/machine</partition>

@@ -80,7 +80,7 @@ os_default_user: "{{ vm_os_distro }}"
 ######################
 cluster_nodes:
   - name: "{{ node_prefix }}controller-1"
-    ram: 4096
+    ram: 4
     vcpu: 1
     role: controller-deploy
     interfaces:
@@ -101,7 +101,7 @@ cluster_nodes:
         address: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('100') | ipaddr('address') }}"
         netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('netmask') }}"
   - name: "{{ node_prefix }}node-1"
-    ram: 4096
+    ram: 4
     vcpu: 1
     role: compute
     interfaces:
@@ -122,7 +122,7 @@ cluster_nodes:
         address: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('101') | ipaddr('address') }}"
         netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('netmask') }}"
   - name: "{{ node_prefix }}node-2"
-    ram: 4096
+    ram: 4
     vcpu: 1
     role: compute
     interfaces:
