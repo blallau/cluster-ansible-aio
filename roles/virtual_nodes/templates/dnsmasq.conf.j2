@@ -28,14 +28,14 @@ server=8.8.8.8
 
 # Add local-only domains here, queries in these domains are answered
 # from /etc/hosts or DHCP only.
-local=/mydomain.org/
+local=/{{ dns_domain }}/
 
 #explicitly define host-ip mappings
 # Add domains which you want to force to an IP address here.
 # The example below send any host in doubleclick.net to a local
 # webserver.
 
-address=/apps.mydomain.org/10.100.100.101
+address=/apps.{{ dns_domain }}/10.100.100.101
 
 # If you want dnsmasq to listen for DHCP and DNS requests only on
 # specified interfaces (and the loopback) give the name of the
@@ -84,7 +84,7 @@ expand-hosts
 # 2) Sets the "domain" DHCP option thereby potentially setting the
 #    domain of all systems configured by DHCP
 # 3) Provides the domain part for "expand-hosts"
-domain=mydomain.org
+domain={{ dns_domain }}
 
 # For debugging purposes, log each DNS query as it passes through
 # dnsmasq.
