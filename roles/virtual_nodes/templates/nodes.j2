@@ -1,0 +1,43 @@
+{% set mac_prefix = "52:54:00:33" %}
+---
+- name: "{{ node_prefix }}controller"
+  ram: {{ master_ram }}
+  vcpu: {{ master_cpu }}
+  role: controller
+  interfaces:
+{% for intf in host_interfaces %}
+    - name: "{{ intf.vnic }}"
+      bridge: "{{ intf.bridge }}"
+      role: "{{ intf.role }}"
+      mode: "{{ intf.mode }}"
+      cidr: "{{ intf.cidr }}"
+{% set ip = 100 + loop.index %}
+      address: "{{ intf.cidr | ipaddr(ip) | ipaddr('address') }}"
+{% if intf.mode == 'dhcp' %}
+      mac: "{{ mac_prefix }}:00:0{{ loop.index }}"
+{% elif intf.mode == 'static' %}
+      netmask: "{{ intf.cidr | ipaddr('netmask') }}"
+{% endif %}
+{% endfor %}
+{% for node_nb in range(worker_nb) %}
+- name: "{{ node_prefix }}node-{{ node_nb }}"
+  ram: {{ worker_ram }}
+  vcpu: {{ worker_cpu }}
+  role: compute
+  interfaces:
+{% set outer_loop = loop %}
+{% for intf in host_interfaces %}
+    - name: "{{ intf.vnic }}"
+      bridge: "{{ intf.bridge }}"
+      role: "{{ intf.role }}"
+      mode: "{{ intf.mode }}"
+      cidr: "{{ intf.cidr }}"
+{% set ip = 100 + outer_loop.index * 10 + loop.index %}
+      address: "{{ intf.cidr | ipaddr(ip) | ipaddr('address') }}"
+{% if intf.mode == 'dhcp' %}
+      mac: "{{ mac_prefix }}:1{{ outer_loop.index }}:0{{ loop.index }}"
+{% elif intf.mode == 'static' %}
+      netmask: "{{ intf.cidr | ipaddr('netmask') }}"
+{% endif %}
+{% endfor %}
+{% endfor %}

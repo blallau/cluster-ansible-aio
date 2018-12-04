@@ -41,6 +41,15 @@
     state: started
     enabled: yes
 
+- name: Load cluster_nodes variables
+  set_fact:
+    cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
+  tags: test
+
+- name: display cluster_nodes
+  debug:
+    msg: "{{ cluster_nodes | from_yaml }}"
+
 - import_tasks: setup_libvirt_networks.yml
   become: True
 
@@ -105,7 +114,7 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.1.address is defined and item.1.role == "mgmt"
+  when: item.1.address is defined and item.1.mode == "dhcp"
 
 - name: Insert node into ssh_config
   become: True
@@ -123,7 +132,7 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.1.address is defined and item.1.role == "mgmt"
+  when: item.1.address is defined and item.1.mode == "dhcp"
 
 - name: Populate /etc/hosts file
   become: True
@@ -134,7 +143,7 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.1.address is defined and item.1.role == "prov"
+  when: item.1.address is defined and item.1.mode == "dhcp"
 
 #virsh net-dumpxml mgmt-br
 #<network>

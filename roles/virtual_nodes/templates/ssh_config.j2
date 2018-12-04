@@ -1,7 +1,7 @@
 #jinja2: trim_blocks: False
 {% for node in cluster_nodes %}
 Host {{ node.name }}
-     Hostname {{ node.interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='address') | join }}
+     Hostname {{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | map(attribute='address') | join }}
      UserKnownHostsFile /dev/null
      StrictHostKeyChecking no
      User {{ os_default_user }}

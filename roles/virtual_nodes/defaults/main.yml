@@ -22,23 +22,34 @@ home_dir: "{{ ansible_user_dir }}"
 tmp_dir: "{{ home_dir}}/tmp"
 libvirt_dir: "/var/lib/libvirt/images"
 dns_domain: "mydomain.org"
+
+master_ram: 2
+master_cpu: 1
+
+worker_nb: 0
+worker_ram: 2
+worker_cpu: 1
+
 host_interfaces:
   - name: prov-br
     role: prov
+    forward: nat
+    mode: dhcp
     cidr: 10.100.100.0/24
     bridge: prov-br
     vnic: ens3
   - name: mgmt-br
     role: mgmt
+    mode: static
     domain: "{{ dns_domain }}"
     cidr: 10.150.150.0/24
     bridge: mgmt-br
     vnic: ens4
-  - name: ext-br
-    role: ext
-    cidr: 10.200.200.0/24
-    bridge: ext-br
-    vnic: ens5
+  # - name: ext-br
+  #   role: ext
+  #   cidr: 10.200.200.0/24
+  #   bridge: ext-br
+  #   vnic: ens5
 
 yum_dependencies:
   - libvirt
@@ -74,71 +85,3 @@ centos_os_image: "{{ centos_os_image_xz.split('.')[:-1] | join('.') }}"
 
 kolla_vm_os_image: "{{ centos_os_image if vm_os_distro == 'centos' else ubuntu_os_image }}"
 os_default_user: "{{ vm_os_distro }}"
-
-######################
-# VMs variables
-######################
-cluster_nodes:
-  - name: "{{ node_prefix }}controller-1"
-    ram: 4
-    vcpu: 1
-    role: controller-deploy
-    interfaces:
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='vnic') | join }}"
-        role: prov
-        mode: dhcp
-        address: "10.100.100.100"
-        mac: "52:54:00:33:44:50"
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='vnic') | join }}"
-        role: mgmt
-        mode: static
-        address: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('100') | ipaddr('address') }}"
-        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('netmask') }}"
-        gateway: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('1') | ipaddr('address') }}"
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='vnic') | join }}"
-        role: ext
-        mode: static
-        address: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('100') | ipaddr('address') }}"
-        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('netmask') }}"
-  - name: "{{ node_prefix }}node-1"
-    ram: 4
-    vcpu: 1
-    role: compute
-    interfaces:
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='vnic') | join }}"
-        role: prov
-        mode: dhcp
-        address: "10.100.100.101"
-        mac: "52:54:00:33:44:51"
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='vnic') | join }}"
-        role: mgmt
-        mode: static
-        address: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('101') | ipaddr('address') }}"
-        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('netmask') }}"
-        gateway: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('1') | ipaddr('address') }}"
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='vnic') | join }}"
-        role: ext
-        mode: static
-        address: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('101') | ipaddr('address') }}"
-        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('netmask') }}"
-  - name: "{{ node_prefix }}node-2"
-    ram: 4
-    vcpu: 1
-    role: compute
-    interfaces:
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'prov') | map(attribute='vnic') | join }}"
-        role: prov
-        mode: dhcp
-        address: "10.100.100.102"
-        mac: "52:54:00:33:44:52"
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='vnic') | join }}"
-        role: mgmt
-        mode: static
-        address: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('102') | ipaddr('address') }}"
-        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('netmask') }}"
-        gateway: "{{ host_interfaces | selectattr('role', 'equalto', 'mgmt') | map(attribute='cidr') | join | ipaddr('1') | ipaddr('address') }}"
-      - name: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='vnic') | join }}"
-        role: ext
-        mode: static
-        address: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('102') | ipaddr('address') }}"
-        netmask: "{{ host_interfaces | selectattr('role', 'equalto', 'ext') | map(attribute='cidr') | join | ipaddr('netmask') }}"

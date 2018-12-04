@@ -8,6 +8,8 @@ network-interfaces: |
   iface {{ intf.name }} inet {{ intf.mode }}
 {% if intf.mode == 'static' %}
   address {{ intf.address }}
+{% endif %}
+{% if intf.netmask is defined %}
   netmask {{ intf.netmask }}
 {% endif %}
 {# To investiguate: not working #}

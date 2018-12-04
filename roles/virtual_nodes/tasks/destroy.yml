@@ -18,6 +18,10 @@
   when: dns_server_enabled | bool and destroy_dns_server | bool
   tags: dns_server
 
+- name: Load cluster_nodes variables
+  set_fact:
+    cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
+
 # TODO destroy snapshot if present
 - name: Destroy VMs
   virt:
@@ -84,7 +88,7 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.1.address is defined and item.1.role == "prov"
+  when: item.1.address is defined and item.1.mode == "dhcp"
 
 - name: "Clean {{ ansible_env.HOME }}/.ssh/known_hosts"
   known_hosts:
