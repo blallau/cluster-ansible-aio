@@ -4,6 +4,8 @@
   <name>{{ item.name }}</name>
 {% if item.forward is defined and item.forward == 'nat' %}
   <forward mode='nat'/>
+{% elif item.forward is defined and item.forward == 'bridge' %}
+  <forward mode='bridge'/>
 {% endif %}
   <bridge name='{{ item.bridge }}' stp='on' delay='0'/>
   <dns enable='no'/>

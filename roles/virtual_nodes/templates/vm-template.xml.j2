@@ -59,7 +59,11 @@
       {% if intf.mac is defined %}
       <mac address='{{ intf.mac }}'/>
       {% endif %}
+      {% if intf.mode == 'dhcp' %}
       <model type='rtl8139'/>
+      {% elif intf.mode == 'static' %}
+      <model type='rtl8139'/>
+      {% endif %}
       <alias name='net{{ loop.index }}'/>
     </interface>
     {% endfor %}
