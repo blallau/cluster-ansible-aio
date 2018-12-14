@@ -1,7 +1,8 @@
+
 #!/bin/bash
 
 NODE_PREFIX=""
-SERVICES="${NODE_PREFIX}controller-1 ${NODE_PREFIX}node-1 ${NODE_PREFIX}node-2"
+SERVICES="${NODE_PREFIX}master ${NODE_PREFIX}node-1 ${NODE_PREFIX}node-2"
 SNAPSHOT_NAME=""
 TIMEOUT=300
 
