@@ -3,23 +3,16 @@ Cluster-ansible-aio
 
 Multi-node deployment of cluster system (Kolla, oVirt, RKE, OpenShift) using Libvirt and Ansible.
 
-![kolla-ansible-aio](https://user-images.githubusercontent.com/9655027/31175714-6e453b1e-a910-11e7-8a60-f7c6d2114b1a.png)
+![cluster-ansible-aio](https://user-images.githubusercontent.com/9655027/31175714-6e453b1e-a910-11e7-8a60-f7c6d2114b1a.png)
 
-Kolla-ansible-aio is an open source tool for automating deployment of
-Openstack Kolla-ansible in multi-node scenario, on a single machine.
-
-Kolla-ansible-aio is composed of Ansible playbooks, and makes heavy use
-of Libvirt, OpenStack Kolla and Kolla-ansible project.
-
-Kolla-ansible-aio aims to test, use and develop on Kolla and
-Kolla-ansible projects.
+Cluster-ansible-aio is an open source tool for automating deployment of cluster apps (oVirt, RKE, Kolla, GlusterFS, OpenShift,...), on a single machine.
 
 -   Source: <https://github.com/blallau/kolla-ansible-aio>
 
 Features
 --------
 
--   Multi-node (1 master and Nx nodes)
+-   Multi-node (1 master and N nodes)
 -   Multi OS (CentOS and Ubuntu compliancy)
 -   Heavily automated using Ansible
 -   Quick deployment: using PIP cache proxy (Devpi) and APT cache proxy (apt-cacher-ng)
