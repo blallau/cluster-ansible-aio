@@ -34,7 +34,7 @@
       yum:
         name: "firewalld"
         update_cache: yes
-      with_inventory_hostnames: all:!controller-1
+      with_inventory_hostnames: all:!master-1
       retries: 5
       delay: 5
 
@@ -44,7 +44,7 @@
       systemd:
         state: restarted
         name: "firewalld"
-      with_inventory_hostnames: all:!controller-1
+      with_inventory_hostnames: all:!master-1
 
     # Fix bug on "connect interface by http(s)"
     # Fix bug on "add Host"
@@ -89,7 +89,7 @@
         group: kvm
 
 - name: Deploy oVirt Engine
-  hosts: controller
+  hosts: master
   become: True
   tasks:
     - include_role:
@@ -99,16 +99,16 @@
         ovirt_engine_setup_product_type: 'ovirt'
         ovirt_engine_setup_version: "4.2"
         ovirt_engine_setup_provider_ovn_configure: false
-        ovirt_engine_setup_hostname: "controller-1"
+        ovirt_engine_setup_hostname: "master-1"
         ovirt_engine_setup_organization: "example.com"
-        ovirt_engine_setup_dwh_db_host: "controller-1"
+        ovirt_engine_setup_dwh_db_host: "master-1"
         ovirt_engine_setup_configure_iso_domain: true
         #set firewalld (iptables get ERROR: "is not available")
         ovirt_engine_setup_firewall_manager: null
       when: ansible_distribution|lower == "centos"
 
 - name: Prepare Host to oVirt Engine
-  hosts: controller
+  hosts: master
   tasks:
     # to connect on node using "Host console"
     - name: Change root user password
@@ -137,4 +137,4 @@
       delegate_to: "{{ hostvars[item]['ansible_host'] }}"
       remote_user: "{{ hostvars[item]['ansible_user'] }}"
       when: hostvars[item]['ansible_host'] is defined
-      with_inventory_hostnames: all:!controller-1
+      with_inventory_hostnames: all:!master-1

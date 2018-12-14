@@ -137,7 +137,7 @@ class LibvirtInventory(object):
                         hostvars['ansible_host'] = ip_address
                         hostvars['libvirt_ip_address'] = ip_address
             inventory['_meta']['hostvars'][domain_name] = hostvars
-        _push(inventory, 'controller', 'controller-1')
+        _push(inventory, 'master', 'master-1')
         return inventory
 
 def _push(my_dict, key, element):
