@@ -23,11 +23,11 @@ tmp_dir: "{{ home_dir}}/tmp"
 libvirt_dir: "/var/lib/libvirt/images"
 dns_domain: "mydomain.org"
 
-master_ram: 2
+master_ram: 4
 master_cpu: 1
 
-worker_nb: 1
-worker_ram: 2
+worker_nb: 2
+worker_ram: 4
 worker_cpu: 1
 
 host_interfaces:
@@ -47,7 +47,6 @@ host_interfaces:
   #   role: ext
   #   cidr: 10.200.200.0/24
   #   bridge: ext-br
-  #   vnic: ens5
 
 yum_dependencies:
   - libvirt
