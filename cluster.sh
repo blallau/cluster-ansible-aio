@@ -2,15 +2,22 @@
 #!/bin/bash
 
 NODE_PREFIX=""
-SERVICES="${NODE_PREFIX}master ${NODE_PREFIX}node-1 ${NODE_PREFIX}node-2"
+SERVICES="${NODE_PREFIX}master-* ${NODE_PREFIX}node-*"
 SNAPSHOT_NAME=""
 TIMEOUT=300
 
 function start {
     docker start docker-dnsmasq
-    for service in $SERVICES; do
-        virsh start $service
-    done
+    # for service in $SERVICES; do
+    #     virsh start $service
+    # done
+	list_inactive_domains | while read DOMAIN; do
+        for service in $SERVICES; do
+            if [[ "$DOMAIN" =~ $service ]]; then
+		        virsh start $DOMAIN
+            fi
+        done
+	done
 }
 
 function destroy {
@@ -23,6 +30,10 @@ function undefine {
     for service in $SERVICES; do
         virsh undefine $service
     done
+}
+
+function list_inactive_domains() {
+    virsh list --inactive | grep "shut off" | awk '{ print $2}'
 }
 
 function list_running_domains() {

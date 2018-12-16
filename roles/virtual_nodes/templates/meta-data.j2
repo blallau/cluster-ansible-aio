@@ -12,6 +12,8 @@ network-interfaces: |
 {% if intf.netmask is defined %}
   netmask {{ intf.netmask }}
 {% endif %}
+  dns-nameservers {{ host_ip }}
+  dns-search {{ dns_domain }}
 {# To investiguate: not working #}
 {# {% if intf.dnsnameservers is defined %} #}
 {#   dns-nameservers {{ intf.dnsnameservers }} #}

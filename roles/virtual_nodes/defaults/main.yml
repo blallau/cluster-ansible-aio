@@ -23,6 +23,7 @@ tmp_dir: "{{ home_dir}}/tmp"
 libvirt_dir: "/var/lib/libvirt/images"
 dns_domain: "mydomain.org"
 
+master_nb: 1
 master_ram: 4
 master_cpu: 1
 

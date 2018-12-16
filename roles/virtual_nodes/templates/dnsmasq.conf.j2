@@ -41,12 +41,14 @@ address=/apps.{{ dns_domain }}/10.100.100.101
 # specified interfaces (and the loopback) give the name of the
 # interface (eg eth0) here.
 # Repeat the line for more than one interface.
-#interface=prov-br
+# {% for intf in host_interfaces if intf.mode == 'dhcp' %}
+# interface={{ intf.name }}
+# {% endfor %}
 # Or you can specify which interface _not_ to listen on
 #except-interface=
 # Or which to listen on by address (remember to include 127.0.0.1 if
 # you use this.)
-#listen-address=10.100.100.1
+# listen-address={{ host_ip }}
 # If you want dnsmasq to provide only DNS service on an interface,
 # configure it as shown above, and then use the following line to
 # disable DHCP on it.
