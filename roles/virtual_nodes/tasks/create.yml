@@ -153,15 +153,6 @@
     - interfaces
   when: item.1.address is defined and item.1.mode == "dhcp"
 
-#virsh net-dumpxml mgmt-br
-#<network>
-#  <name>mgmt-br</name>
-#  <domain name='mydomain.org' localOnly='yes'/>
-#  <ip address='10.150.150.1' netmask='255.255.255.0'>
-#  ...
-#  </ip>
-#</network>
-
 # cat /etc/NetworkManager/NetworkManager.conf
 # [main]
 # plugins=ifupdown,keyfile,ofono
@@ -192,20 +183,6 @@
 #     - "{{ cluster_nodes }}"
 #     - interfaces
 #   when: item.1.address is defined and item.1.role == "mgmt"
-
-# - name: Destroy mgmt virtual bridges
-#   virt_net:
-#     command: destroy
-#     name: "{{ item.name }}"
-#   with_items: "{{ host_interfaces }}"
-#   when: item.role == "mgmt"
-
-# - name: Start mgmt virtual bridges
-#   virt_net:
-#     command: start
-#     name: "{{ item.name }}"
-#   with_items: "{{ host_interfaces }}"
-#   when: item.role == "mgmt"
 
 # - import_tasks: disable_pip_proxy.yml
 #   when: pip_cache_enabled | bool
