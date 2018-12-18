@@ -1,0 +1,7 @@
+---
+- name: Destroy local docker registry
+  docker_container:
+    name: "{{ docker_registry_name }}"
+    image: registry:2
+    state: absent
+  ignore_errors: True

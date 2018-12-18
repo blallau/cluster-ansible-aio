@@ -1,10 +1,5 @@
 ---
-- name: Destroy local docker registry
-  docker_container:
-    name: "{{ docker_registry_name }}"
-    image: registry:2
-    state: absent
-  ignore_errors: True
+- import_tasks: docker/disable_registry.yml
   when: destroy_docker_registry | bool
 
 - import_tasks: docker/disable_pip_proxy.yml

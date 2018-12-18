@@ -17,15 +17,7 @@
   when: docker_enabled | bool
   become: True
 
-- name: Create a local Docker registry
-  docker_container:
-    name: "{{ docker_registry_name }}"
-    image: "{{ docker_registry_image }}"
-    restart_policy: always
-    published_ports:
-      - "5000:5000"
-    volumes:
-      - "registry:/var/lib/registry"
+- import_tasks: docker/enable_registry.yml
 
 - name: Install/Update pip packages
   become: True
@@ -55,10 +47,6 @@
 - import_tasks: libvirt/setup_libvirt_storages.yml
   become: True
   when: storage_volume_enabled | bool
-
-- import_tasks: docker/enable_dns_server.yml
-  when: dns_server_enabled | bool
-  tags: dns_server
 
 - import_tasks: docker/enable_apt_proxy.yml
   when: apt_cache_enabled | bool
@@ -152,6 +140,10 @@
     - "{{ cluster_nodes }}"
     - interfaces
   when: item.1.address is defined and item.1.mode == "dhcp"
+
+- import_tasks: docker/enable_dns_server.yml
+  when: dns_server_enabled | bool
+  tags: dns_server
 
 # cat /etc/NetworkManager/NetworkManager.conf
 # [main]
