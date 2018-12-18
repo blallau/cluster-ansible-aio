@@ -44,14 +44,17 @@
 - name: Load cluster_nodes variables
   set_fact:
     cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
-  tags: test
 
-- name: display cluster_nodes
+- name: Display cluster_nodes
   debug:
     msg: "{{ cluster_nodes | from_yaml }}"
 
 - import_tasks: setup_libvirt_networks.yml
   become: True
+
+- import_tasks: setup_libvirt_storages.yml
+  become: True
+  when: storage_volume_enabled | bool
 
 - import_tasks: enable_dns_server.yml
   when: dns_server_enabled | bool
@@ -90,6 +93,11 @@
            -o {{ tmp_dir }}/{{ item.name }}/config.iso \
            -V cidata -r -J {{ tmp_dir }}/{{ item.name }}/meta-data \
            {{ tmp_dir }}/{{ item.name }}/user-data"
+  with_items: "{{ cluster_nodes }}"
+
+- name: Display VM template
+  debug:
+    msg: "{{ lookup('template', 'vm-template.xml.j2') }}"
   with_items: "{{ cluster_nodes }}"
 
 - name: Define a VM

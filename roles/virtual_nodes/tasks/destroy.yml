@@ -64,6 +64,15 @@
   with_items: "{{ host_interfaces }}"
   when: item.name in bridge_exists.list_nets
 
+- name: Destroy volume
+  virt_volume:
+    name: "{{ item.1.name }}"
+    pool: "{{ virt_volume_group }}"
+    state: absent
+  with_subelements:
+    - "{{ cluster_nodes }}"
+    - disks
+
 - name: Delete qcow2 images
   file:
     path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"

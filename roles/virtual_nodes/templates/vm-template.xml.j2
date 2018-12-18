@@ -41,6 +41,13 @@
       <target dev='vda' bus='virtio'/>
       <boot order='1'/>
     </disk>
+    {% for disk in item.disks %}
+    <disk type='block' device='disk'>
+      <driver name='qemu' type='raw' cache='none' io='native'/>
+      <source dev='/dev/{{ virt_volume_group }}/{{ disk.name }}'/>
+      <target dev='{{ disk.device }}' bus='virtio'/>
+    </disk>
+    {% endfor %}
     <disk type='file' device='cdrom'>
       <driver name='qemu' type='raw'/>
       <source file='{{ tmp_dir }}/{{ item.name }}/config.iso'/>

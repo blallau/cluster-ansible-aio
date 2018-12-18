@@ -46,10 +46,24 @@ host_interfaces:
   #   mode: static
   #   cidr: 10.200.200.0/24
   #   bridge: br0
-
   # - name: ext-br
   #   cidr: 10.200.200.0/24
   #   bridge: ext-br
+
+storage_volume_enabled: True
+
+virt_volume_group: "virtvg"
+
+host_volumes:
+  - name: volume1
+    size: 2
+    format: raw
+  - name: volume2
+    size: 2
+    format: raw
+  - name: volume3
+    size: 2
+    format: raw
 
 yum_dependencies:
   - libvirt

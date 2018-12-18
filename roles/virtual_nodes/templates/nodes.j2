@@ -1,4 +1,9 @@
 {% set mac_prefix = "52:54:00:33" %}
+{% set lettres = ['a', 'b', 'c', 'd', 'e', 'f'] %}
+{% macro disk_device(index) -%}
+  {% set device = lettres[index | int] -%}
+  {{ device }}
+{%- endmacro %}
 ---
 {% for master in range(master_nb) %}
 - name: "{{ node_prefix }}master{{ master }}"
@@ -16,7 +21,6 @@
     - name: "ens{{ intf_nb }}"
 {% endif %}
       bridge: "{{ intf.bridge }}"
-      role: "{{ intf.role }}"
       mode: "{{ intf.mode }}"
       cidr: "{{ intf.cidr }}"
 {% set ip = 200 + outer_master_loop.index * 10 + loop.index %}
@@ -27,6 +31,16 @@
       netmask: "{{ intf.cidr | ipaddr('netmask') }}"
 {% endif %}
 {% endfor %}
+{% if storage_volume_enabled %}
+  disks:
+{% for volume in host_volumes %}
+{% set device = disk_device(loop.index) %}
+    - name: "vol-{{ node_prefix }}master{{ master }}-{{ loop.index }}"
+      device: "vd{{ device }}"
+      size: {{ volume.size }}
+      format: {{ volume.format }}
+{% endfor %}
+{% endif %}
 {% endfor %}
 {% for worker in range(worker_nb) %}
 - name: "{{ node_prefix }}node{{ worker }}"
@@ -44,7 +58,6 @@
     - name: "ens{{ intf_nb }}"
 {% endif %}
       bridge: "{{ intf.bridge }}"
-      role: "{{ intf.role }}"
       mode: "{{ intf.mode }}"
       cidr: "{{ intf.cidr }}"
 {% set ip = 100 + outer_worker_loop.index * 10 + loop.index %}
@@ -55,4 +68,14 @@
       netmask: "{{ intf.cidr | ipaddr('netmask') }}"
 {% endif %}
 {% endfor %}
+{% if storage_volume_enabled %}
+  disks:
+{% for volume in host_volumes %}
+{% set device = disk_device(loop.index) %}
+    - name: "vol-{{ node_prefix }}node{{ worker }}-{{ loop.index }}"
+      device: "vd{{ device }}"
+      size: {{ volume.size }}
+      format: {{ volume.format }}
+{% endfor %}
+{% endif %}
 {% endfor %}

@@ -3,14 +3,12 @@
   virt_net:
     command: list_nets
   register: net_exists
-  tags: test
 
-- name: display cluster_nodes
+- name: Display cluster_nodes
   debug:
     msg: "{{ lookup('template','network.xml.j2') }}"
   when: item.name not in net_exists.list_nets
   with_items: "{{ host_interfaces }}"
-  tags: test
 
 - name: Define virtual networks
   virt_net:
@@ -19,7 +17,6 @@
     xml: '{{ lookup("template", "network.xml.j2") }}'
   when: item.name not in net_exists.list_nets
   with_items: "{{ host_interfaces }}"
-  tags: test
 
 - name: Autostart virtual networks
   virt_net:
