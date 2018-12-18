@@ -53,7 +53,7 @@
 - name: Copy OS images to libvirt directory
   become: True
   copy:
-    src: "{{ tmp_dir }}/{{ kolla_vm_os_image }}"
+    src: "{{ tmp_dir }}/{{ vm_os_image }}"
     dest: "{{ libvirt_dir }}/{{ item.item.name }}.qcow2"
     remote_src: True
   when: not item.stat.exists
