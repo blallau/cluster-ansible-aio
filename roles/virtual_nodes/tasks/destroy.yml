@@ -7,14 +7,14 @@
   ignore_errors: True
   when: destroy_docker_registry | bool
 
-- import_tasks: disable_pip_proxy.yml
+- import_tasks: docker/disable_pip_proxy.yml
   when: pip_cache_enabled | bool and destroy_pip_cache | bool
 
-- import_tasks: disable_apt_proxy.yml
+- import_tasks: docker/disable_apt_proxy.yml
   when: apt_cache_enabled | bool and destroy_apt_cache | bool
   tags: apt_cache
 
-- import_tasks: disable_dns_server.yml
+- import_tasks: docker/disable_dns_server.yml
   when: dns_server_enabled | bool and destroy_dns_server | bool
   tags: dns_server
 
@@ -44,35 +44,6 @@
     state: absent
   with_items: "{{ cluster_nodes }}"
 
-- name: List virtual bridges
-  virt_net:
-    command: list_nets
-  register: bridge_exists
-
-- name: Destroy virtual bridges
-  virt_net:
-    command: destroy
-    name: "{{ item.name }}"
-  with_items: "{{ host_interfaces }}"
-  when: item.name in bridge_exists.list_nets
-  ignore_errors: True
-
-- name: Undefine virtual bridges
-  virt_net:
-    command: undefine
-    name: "{{ item.name }}"
-  with_items: "{{ host_interfaces }}"
-  when: item.name in bridge_exists.list_nets
-
-- name: Destroy volume
-  virt_volume:
-    name: "{{ item.1.name }}"
-    pool: "{{ virt_volume_group }}"
-    state: absent
-  with_subelements:
-    - "{{ cluster_nodes }}"
-    - disks
-
 - name: Delete qcow2 images
   file:
     path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
@@ -80,6 +51,13 @@
   with_items: "{{ cluster_nodes }}"
   when: destroy_images | bool
   ignore_errors: yes
+
+- import_tasks: libvirt/destroy_libvirt_networks.yml
+  become: True
+
+- import_tasks: libvirt/destroy_libvirt_storages.yml
+  become: True
+  when: storage_volume_enabled | bool
 
 - name: Clean nodes from ssh_config
   become: True

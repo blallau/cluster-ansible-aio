@@ -2,7 +2,7 @@
 - name: Build DNS server image and push it
   docker_image:
     name: "{{ docker_dns_server_image }}"
-    path: roles/virtual_nodes/tasks/server/dns
+    path: roles/virtual_nodes/tasks/docker/server/dns
     dockerfile: Dockerfile
     push: yes
 

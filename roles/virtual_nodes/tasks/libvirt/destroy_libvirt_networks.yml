@@ -1,0 +1,20 @@
+---
+- name: List virtual bridges
+  virt_net:
+    command: list_nets
+  register: bridge_exists
+
+- name: Destroy virtual bridges
+  virt_net:
+    command: destroy
+    name: "{{ item.name }}"
+  with_items: "{{ host_interfaces }}"
+  when: item.name in bridge_exists.list_nets
+  ignore_errors: True
+
+- name: Undefine virtual bridges
+  virt_net:
+    command: undefine
+    name: "{{ item.name }}"
+  with_items: "{{ host_interfaces }}"
+  when: item.name in bridge_exists.list_nets

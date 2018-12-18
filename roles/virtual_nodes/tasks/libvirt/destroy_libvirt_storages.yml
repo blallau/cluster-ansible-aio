@@ -1,0 +1,9 @@
+---
+- name: Destroy volume
+  virt_volume:
+    name: "{{ item.1.name }}"
+    pool: "{{ virt_volume_group }}"
+    state: absent
+  with_subelements:
+    - "{{ cluster_nodes }}"
+    - disks

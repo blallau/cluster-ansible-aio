@@ -1,6 +1,6 @@
 {% set mac_prefix = "52:54:00:33" %}
 {% set lettres = ['a', 'b', 'c', 'd', 'e', 'f'] %}
-{% macro disk_device(index) %}
+{% macro disk_device(index) -%}
   {% set device = lettres[index | int] -%}
   {{ device }}
 {%- endmacro %}

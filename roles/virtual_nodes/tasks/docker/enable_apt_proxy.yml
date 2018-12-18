@@ -2,7 +2,7 @@
 - name: Build APT cache proxy image and push it
   docker_image:
     name: "{{ docker_apt_cache_image }}"
-    path: roles/virtual_nodes/tasks/proxy/apt
+    path: roles/virtual_nodes/tasks/docker/proxy/apt
     dockerfile: Dockerfile
     push: yes
 
