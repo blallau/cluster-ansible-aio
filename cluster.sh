@@ -41,7 +41,7 @@ function list_running_domains() {
 }
 
 function gracefully_shutdown {
-	echo "Try to cleanly shut down all running KVM domains..."
+	echo -e "Try to cleanly shut down all running KVM domains...\n"
 
 	# Try to shutdown each domain, one by one.
 	list_running_domains | while read DOMAIN; do

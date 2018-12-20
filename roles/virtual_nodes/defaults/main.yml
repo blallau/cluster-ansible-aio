@@ -3,7 +3,6 @@
 # Host OS variables
 ####################
 node_prefix: ""
-dns_domain: "mydomain.org"
 
 master_nb: 1
 master_ram: 4
@@ -31,6 +30,8 @@ host_interfaces:
   # - name: ext-br
   #   cidr: 10.200.200.0/24
   #   bridge: ext-br
+
+dns_domain: "mydomain.org"
 
 storage_volume_enabled: True
 

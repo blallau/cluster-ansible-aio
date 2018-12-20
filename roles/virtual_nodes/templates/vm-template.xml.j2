@@ -67,6 +67,7 @@
       <mac address='{{ intf.mac }}'/>
       {% endif %}
       <model type='virtio'/>
+      <driver name='vhost' queues='1'/>
       <alias name='net{{ loop.index }}'/>
     </interface>
     {% endfor %}
