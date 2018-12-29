@@ -4,7 +4,7 @@
     name: docker-ce
     description: Docker CE repo
     baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
-    gpgcheck: yes
+    gpgcheck: True
     gpgkey: https://download.docker.com/linux/centos/gpg
   when: ansible_distribution|lower == "centos"
 
@@ -31,7 +31,7 @@
 - name: Install CentOS packages
   yum:
     name: "{{ item }}"
-    update_cache: yes
+    update_cache: True
   with_items: "{{ yum_packages }}"
   when: ansible_distribution|lower == "centos"
 
@@ -47,7 +47,7 @@
   apt:
     name: "{{ item }}"
     state: latest
-    update_cache: "yes"
+    update_cache: True
   with_items: "{{ apt_packages }}"
   when: ansible_distribution|lower == "ubuntu"
 

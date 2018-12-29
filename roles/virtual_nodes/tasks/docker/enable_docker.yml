@@ -4,7 +4,7 @@
     name: docker-ce
     description: Docker CE repo
     baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
-    gpgcheck: yes
+    gpgcheck: True
     gpgkey: https://download.docker.com/linux/centos/gpg
   when: ansible_distribution|lower == "centos"
 
@@ -32,14 +32,14 @@
 - name: Enable CentOS insecure registry
   lineinfile:
     path: /etc/sysconfig/docker
-    create: yes
+    create: True
     line: "INSECURE_REGISTRY='--insecure-registry {{ docker_registry_ip }}:{{ docker_registry_port }}'"
   when: ansible_distribution|lower == "centos"
 
 - name: Create the CentOS drop-in unit file
   lineinfile:
     path: /etc/systemd/system/docker.service.d/docker.conf
-    create: yes
+    create: True
     line: |
       [Service]
       EnvironmentFile=/etc/sysconfig/docker
@@ -50,7 +50,7 @@
 - name: Enable Ubuntu insecure registry
   lineinfile:
     path: /etc/default/docker
-    create: yes
+    create: True
     state: present
     line: "DOCKER_OPTS='--insecure-registry {{ docker_registry_ip }}:{{ docker_registry_port }}'"
   when: ansible_distribution|lower == "ubuntu"
@@ -58,7 +58,7 @@
 - name: Create the Ubuntu drop-in unit file
   lineinfile:
     path: /etc/systemd/system/docker.service.d/docker.conf
-    create: yes
+    create: True
     line: |
       [Service]
       EnvironmentFile=-/etc/default/docker
@@ -69,12 +69,12 @@
 - name: Restart Docker service
   systemd:
     name: docker
-    daemon_reload: yes
+    daemon_reload: True
     state: restarted
-    enabled: yes
+    enabled: True
 
 - name: Add current user to Docker group
   user:
     name: "{{ os_default_user }}"
     groups: docker
-    append: yes
+    append: True

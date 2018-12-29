@@ -20,7 +20,7 @@
 
 - name: Autostart virtual networks
   virt_net:
-    autostart: yes
+    autostart: True
     name: "{{ item.name }}"
   when: item.name not in net_exists.list_nets
   with_items: "{{ host_interfaces }}"
@@ -28,7 +28,7 @@
 - name: Start virtual networks
   virt_net:
     state: active
-    autostart: yes
+    autostart: True
     name: "{{ item.name }}"
   when: item.name not in net_exists.list_nets
   with_items: "{{ host_interfaces }}"
@@ -36,7 +36,7 @@
 # - name: Setup NetworkManager dnsmasq config file
 #   lineinfile:
 #     path: "/etc/NetworkManager/dnsmasq.d/libvirt_dnsmasq.conf"
-#     create: yes
+#     create: True
 #     line: "server=/{{ item.domain }}/{{ item.cidr | join | ipaddr('1') | ipaddr('address') }}"
 #   when: item.domain is defined
 #   with_items: "{{ host_interfaces }}"

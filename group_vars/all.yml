@@ -44,32 +44,32 @@ kolla_build_profile: "myprofile"
 ############################
 # Docker registry defaults #
 ############################
-docker_enabled: "yes"
+docker_enabled: "True"
 docker_registry_ip: "{{ host_ip }}"
 docker_registry_port: 5000
-destroy_docker_registry: "no"
+destroy_docker_registry: "False"
 
 ############################
 # Devpi PIP proxy defaults #
 ############################
-pip_cache_enabled: "no"
-destroy_pip_cache: "no"
+pip_cache_enabled: "False"
+destroy_pip_cache: "False"
 pip_cache_proxy_ip: "{{ host_ip }}"
 pip_cache_proxy_port: 3141
 
 ############################
 # APT cache proxy defaults #
 ############################
-apt_cache_enabled: "yes"
-destroy_apt_cache: "no"
+apt_cache_enabled: "True"
+destroy_apt_cache: "False"
 apt_cache_proxy_ip: "{{ host_ip }}"
 apt_cache_proxy_port: 3142
 
 ############################
 #   DNS server defaults    #
 ############################
-dns_server_enabled: "yes"
-destroy_dns_server: "no"
+dns_server_enabled: "True"
+destroy_dns_server: "False"
 dns_server_proxy_ip: "{{ host_ip }}"
 dns_server_port: 53
 dns_server_webproc_port: 5380

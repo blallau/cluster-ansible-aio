@@ -90,7 +90,7 @@
 - name: Create ansible.cfg file
   blockinfile:
     path: "{{ kolla_node_home_dir }}/ansible.cfg"
-    create: yes
+    create: True
     block: |
       [defaults]
       remote_user = {{ ansible_user }}

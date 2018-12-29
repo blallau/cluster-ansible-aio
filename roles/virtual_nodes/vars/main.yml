@@ -49,7 +49,7 @@ pip_dependencies:
 ##################################
 # Ubuntu/CentOS OS image variables
 ##################################
-destroy_images: "no"
+destroy_images: False
 
 ubuntu_os_image_url: https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img
 ubuntu_os_image: "{{ ubuntu_os_image_url.split('/')[-1] }}"

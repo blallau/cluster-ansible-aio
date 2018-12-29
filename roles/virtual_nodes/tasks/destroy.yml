@@ -23,14 +23,14 @@
     command: destroy
     name: "{{ item.name }}"
   with_items: "{{ cluster_nodes }}"
-  ignore_errors: yes
+  ignore_errors: True
 
 - name: Undefine VMs
   virt:
     command: undefine
     name: "{{ item.name }}"
   with_items: "{{ cluster_nodes }}"
-  ignore_errors: yes
+  ignore_errors: True
 
 - name: Remove OS images from libvirt directory
   become: True
@@ -45,7 +45,7 @@
     state: absent
   with_items: "{{ cluster_nodes }}"
   when: destroy_images | bool
-  ignore_errors: yes
+  ignore_errors: True
 
 - import_tasks: libvirt/destroy_libvirt_networks.yml
   become: True

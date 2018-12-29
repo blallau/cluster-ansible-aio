@@ -6,7 +6,7 @@
     - name: Install oVirt repo
       yum:
         name: https://resources.ovirt.org/pub/yum-repo/ovirt-release42.rpm
-        update_cache: yes
+        update_cache: True
         state: present
       when: ansible_distribution|lower == "centos"
 
@@ -33,7 +33,7 @@
     - name: Install firewalld on worker nodes
       yum:
         name: "firewalld"
-        update_cache: yes
+        update_cache: True
       with_inventory_hostnames: all:!master
       retries: 5
       delay: 5

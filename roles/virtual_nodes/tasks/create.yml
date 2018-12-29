@@ -31,7 +31,7 @@
   service:
     name: "{{ 'libvirt-bin' if ansible_distribution|lower == 'ubuntu' else 'libvirtd' }}"
     state: started
-    enabled: yes
+    enabled: True
 
 - name: Load cluster_nodes variables
   set_fact:

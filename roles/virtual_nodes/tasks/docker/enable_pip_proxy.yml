@@ -4,7 +4,7 @@
     name: "{{ docker_pip_cache_image }}"
     path: roles/virtual_nodes/tasks/docker/proxy/pip
     dockerfile: Dockerfile
-    push: yes
+    push: True
 
 - name: Create a PIP cache proxy
   docker_container:
@@ -24,7 +24,7 @@
 # - name: Set PIP config to use Devpi proxy
 #   blockinfile:
 #     path: "{{ home_dir }}/.pip/pip.conf"
-#     create: yes
+#     create: True
 #     block: |
 #       [global]
 #       index-url = http://{{ pip_cache_proxy_ip }}:{{ pip_cache_proxy_port }}/root/pypi/+simple/
@@ -33,7 +33,7 @@
 # - name: Set setuptools config to use Devpi proxy
 #   blockinfile:
 #     path: "{{ home_dir }}/.pydistutils.cfg"
-#     create: yes
+#     create: True
 #     block: |
 #       [easy_install]
 #       index_url = http://{{ pip_cache_proxy_ip }}:{{ pip_cache_proxy_port }}/root/pypi/+simple/
