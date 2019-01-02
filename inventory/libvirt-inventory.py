@@ -119,24 +119,25 @@ class LibvirtInventory(object):
             aio_ns = {'aio': 'https://github.com/blallau/ansible-aio'}
 
             tag_elem = root.find('./metadata/aio:instance/aio:inventory', aio_ns)
-            group = tag_elem.get('group')
-            distro = tag_elem.get('distro')
-            _push(inventory, 'nodes', domain_name)
-            interfaces = root.findall("./devices/interface[@type='bridge']")
-            if interfaces is not None:
-                # interface prov(DHCP)
-                interface_prov = interfaces[0]
-                source_elem = interface_prov.find('source')
-                mac_elem = interface_prov.find('mac')
-                if source_elem is not None and mac_elem is not None:
-                    dhcp_leases = conn.networkLookupByName(source_elem.get('bridge')) \
-                                      .DHCPLeases(mac_elem.get('address'))
-                    if len(dhcp_leases) > 0:
-                        ip_address = dhcp_leases[0]['ipaddr']
-                        hostvars['ansible_user'] = distro
-                        hostvars['ansible_host'] = ip_address
-                        hostvars['libvirt_ip_address'] = ip_address
-            inventory['_meta']['hostvars'][domain_name] = hostvars
+            if tag_elem is not None:
+                group = tag_elem.get('group')
+                distro = tag_elem.get('distro')
+                _push(inventory, 'nodes', domain_name)
+                interfaces = root.findall("./devices/interface[@type='bridge']")
+                if interfaces is not None:
+                    # interface prov(DHCP)
+                    interface_prov = interfaces[0]
+                    source_elem = interface_prov.find('source')
+                    mac_elem = interface_prov.find('mac')
+                    if source_elem is not None and mac_elem is not None:
+                        dhcp_leases = conn.networkLookupByName(source_elem.get('bridge')) \
+                                          .DHCPLeases(mac_elem.get('address'))
+                        if len(dhcp_leases) > 0:
+                            ip_address = dhcp_leases[0]['ipaddr']
+                            hostvars['ansible_user'] = distro
+                            hostvars['ansible_host'] = ip_address
+                            hostvars['libvirt_ip_address'] = ip_address
+                inventory['_meta']['hostvars'][domain_name] = hostvars
         return inventory
 
 def _push(my_dict, key, element):
