@@ -34,3 +34,10 @@ Command:
 Command:
 
     ./cluster-ansible-aio ovirt-populate
+
+Clean-up
+--------
+
+Clean-up hypervisor and remove virtual nodes.
+
+    ./cluster-ansible-aio remove-virtual-nodes --yes-i-really-really-mean-it

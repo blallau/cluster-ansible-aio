@@ -12,6 +12,8 @@ worker_nb: 2
 worker_ram: 4
 worker_cpu: 1
 
+# Networking info
+#################
 host_interfaces:
   - name: prov-br
     forward: nat
@@ -33,8 +35,9 @@ host_interfaces:
 
 dns_domain: "mydomain.org"
 
+# Storage info
+##############
 storage_volume_enabled: True
-
 virt_volume_group: "virtvg"
 
 host_volumes:

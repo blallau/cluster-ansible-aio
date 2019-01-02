@@ -48,3 +48,14 @@ Command:
 Command:
 
     ./cluster-ansible-aio kolla-ansible-deploy
+
+Clean-up
+--------
+
+Clean-up Kolla Docker containers and Docker volumes.
+
+    ./cluster-ansible-aio kolla-ansible-cleanup
+
+Clean-up hypervisor and remove virtual nodes.
+
+    ./cluster-ansible-aio remove-virtual-nodes --yes-i-really-really-mean-it

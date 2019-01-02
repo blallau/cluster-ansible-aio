@@ -90,3 +90,10 @@ Command:
     helm repo add es-operator https://raw.githubusercontent.com/upmc-enterprises/elasticsearch-operator/master/charts/
     helm install --name elasticsearch-operator es-operator/elasticsearch-operator --set rbac.enabled=True --namespace logging
     helm install --name elasticsearch es-operator/elasticsearch --set kibana.enabled=True --set cerebro.enabled=True --set zones="{eu-west-1a,eu-west-1b}" --namespace logging
+
+Clean-up
+--------
+
+Clean-up hypervisor and remove virtual nodes.
+
+    ./cluster-ansible-aio remove-virtual-nodes --yes-i-really-really-mean-it

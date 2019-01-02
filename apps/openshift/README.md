@@ -23,3 +23,10 @@ Command:
 
     ansible-playbook -i ../OPENSHIFT/openshift-ansible/inventory/hosts prepare.yml
     ansible-playbook -i ../OPENSHIFT/openshift-ansible/inventory/deploy_cluster.yml
+
+Clean-up
+--------
+
+Clean-up hypervisor and remove virtual nodes.
+
+    ./cluster-ansible-aio remove-virtual-nodes --yes-i-really-really-mean-it
