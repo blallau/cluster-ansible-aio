@@ -92,7 +92,7 @@
   hosts: master
   become: True
   tasks:
-    - include_role:
+    - import_role:
         name: oVirt.engine-setup
       vars:
         ovirt_engine_setup_admin_password: "admin"
