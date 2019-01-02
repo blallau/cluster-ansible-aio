@@ -10,7 +10,7 @@
   docker_container:
     name: "{{ docker_apt_cache_name }}"
     image: "{{ docker_apt_cache_image }}"
-    restart_policy: always
+    restart_policy: unless-stopped
     published_ports:
     - "{{ apt_cache_proxy_ip }}:{{ apt_cache_proxy_port }}:3142"
     volumes:

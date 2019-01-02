@@ -10,7 +10,7 @@
   docker_container:
     name: "{{ docker_pip_cache_name }}"
     image: "{{ docker_pip_cache_image }}"
-    restart_policy: always
+    restart_policy: unless-stopped
     published_ports:
       - "{{ pip_cache_proxy_ip }}:{{ pip_cache_proxy_port }}:3141"
     volumes:

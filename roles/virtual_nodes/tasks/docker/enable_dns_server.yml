@@ -24,7 +24,7 @@
   docker_container:
     name: "{{ docker_dns_server_name }}"
     image: "{{ docker_dns_server_image }}"
-    restart_policy: always
+    restart_policy: unless-stopped
     published_ports:
       - "{{ dns_server_proxy_ip }}:{{ dns_server_port }}:53/udp"
       - "{{ dns_server_proxy_ip }}:{{ dns_server_webproc_port }}:8080"

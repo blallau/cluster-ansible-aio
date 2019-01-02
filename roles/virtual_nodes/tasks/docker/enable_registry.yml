@@ -3,7 +3,7 @@
   docker_container:
     name: "{{ docker_registry_name }}"
     image: "{{ docker_registry_image }}"
-    restart_policy: always
+    restart_policy: unless-stopped
     published_ports:
       - "5000:5000"
     volumes:
