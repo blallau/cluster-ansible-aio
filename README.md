@@ -5,14 +5,14 @@ Multi-node deployment of cluster apps (Kolla, oVirt, RKE, OpenShift, GlusterFS) 
 
 ![cluster-ansible-aio](https://user-images.githubusercontent.com/9655027/31175714-6e453b1e-a910-11e7-8a60-f7c6d2114b1a.png)
 
-Cluster-ansible-aio is an open source tool for automating deployment of cluster apps (oVirt, RKE, Kolla, GlusterFS, OpenShift,...), on a single machine.
+Cluster-ansible-aio is an open source tool for automating deployment of cluster apps (oVirt, RKE, Kolla, GlusterFS, OpenShift,...), on a single physical machine.
 
 -   Source: <https://github.com/blallau/cluster-ansible-aio>
 
 Features
 --------
 
--   Multi-nodes (1 master and N nodes)
+-   Multi-nodes (N master and N worker)
 -   Multi OS (CentOS and Ubuntu compliancy)
 -   Multi Networks (DHCP, static)
 -   Multi block storage (LVM disks)
@@ -91,4 +91,4 @@ Clean-up
 
 1. Clean-up hypervisor and remove virtual nodes.
 
-    ./kolla-ansible-aio remove-virtual-nodes --yes-i-really-really-mean-it
+    ./cluster-ansible-aio remove-virtual-nodes --yes-i-really-really-mean-it

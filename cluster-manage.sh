@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 NODE_PREFIX=""
@@ -8,9 +7,6 @@ TIMEOUT=300
 
 function start {
     docker start docker-dnsmasq
-    # for service in $SERVICES; do
-    #     virsh start $service
-    # done
 	list_inactive_domains | while read DOMAIN; do
         for service in $SERVICES; do
             if [[ "$DOMAIN" =~ $service ]]; then
