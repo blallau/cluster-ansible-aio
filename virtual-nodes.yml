@@ -21,12 +21,12 @@
   tasks:
     - lineinfile:
         path: "/etc/resolv.conf"
-        regexp: '^nameserver'
+        regexp: '^nameserver .*'
         line: 'nameserver {{ host_ip }}'
       when: method == "create"
     - lineinfile:
         path: "/etc/resolv.conf"
-        regexp: '^search'
+        regexp: '^search .*'
         #Fix using {{ dns_domain }} from virtual-nodes playbook
         line: 'search mydomain.org'
       when: method == "create"

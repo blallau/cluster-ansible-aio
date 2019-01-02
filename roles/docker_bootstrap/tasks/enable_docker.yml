@@ -8,6 +8,7 @@
   lineinfile:
     path: /etc/sysconfig/docker
     create: True
+    regexp: "^INSECURE_REGISTRY=.*"
     line: "INSECURE_REGISTRY='--insecure-registry {{ docker_registry_ip }}:{{ docker_registry_port }}'"
   when: ansible_distribution|lower == "centos"
 
@@ -27,6 +28,7 @@
   lineinfile:
     path: /etc/default/docker
     create: True
+    regexp: "^DOCKER_OPTS=.*"
     line: "DOCKER_OPTS='--insecure-registry {{ docker_registry_ip }}:{{ docker_registry_port }}'"
   when: ansible_distribution|lower == "ubuntu"
 

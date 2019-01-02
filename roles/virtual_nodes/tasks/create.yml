@@ -135,6 +135,7 @@
   lineinfile:
     path: /etc/hosts
     insertafter: EOF
+    regexp: "^{{ item.1.address }} {{ item.0.name }}.{{ dns_domain }} {{ item.0.name }}"
     line: "{{ item.1.address }} {{ item.0.name }}.{{ dns_domain }} {{ item.0.name }}"
   with_subelements:
     - "{{ cluster_nodes }}"
