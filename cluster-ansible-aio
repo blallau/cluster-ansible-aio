@@ -6,11 +6,11 @@ function find_base_dir {
     local real_path=$(python -c "import os;print(os.path.realpath('$0'))")
     local dir_name="$(dirname "$real_path")"
     if [[ ${dir_name} == "/usr/bin" ]]; then
-        BASEDIR=/usr/share/kolla-ansible-aio
+        BASEDIR="/usr/share/cluster-ansible-aio"
     elif [[ ${dir_name} == "/usr/local/bin" ]]; then
-        BASEDIR=/usr/local/share/kolla-ansible-aio
+        BASEDIR="/usr/local/share/cluster-ansible-aio"
     elif [[ -n ${VIRTUAL_ENV} ]] && [[ ${dir_name} == "${VIRTUAL_ENV}/bin" ]]; then
-        BASEDIR="${VIRTUAL_ENV}/share/kolla-ansible-aio"
+        BASEDIR="${VIRTUAL_ENV}/share/cluster-ansible-aio"
     else
         BASEDIR="${dir_name}"
     fi

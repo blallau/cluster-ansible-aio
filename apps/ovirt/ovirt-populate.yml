@@ -1,0 +1,147 @@
+---
+- name: Add Host to oVirt Engine
+  hosts: controller
+  vars:
+#    datacenter: "mydatacenter"
+    datacenter: "Default"
+#    cluster: "mycluster"
+    cluster: "Default"
+    network: "mynetwork"
+    network_intf: "ens4"
+    nfs_server: "10.100.100.1"
+  tasks:
+    ###########################
+    # API
+    ###########################
+    - name: Login to oVirt (Obtain SSO token)
+      ovirt_auth:
+        url: "https://controller-1/ovirt-engine/api"
+        username: "admin@internal"
+        password: "admin"
+        insecure: "true"
+
+    ###########################
+    # Data center
+    ###########################
+    # Create datacenter
+    # - name: Ensure Datacenter "{{ datacenter }}" is existing
+    #   ovirt_datacenter:
+    #     auth: "{{ ovirt_auth }}"
+    #     name: "{{ datacenter }}"
+    #     comment: "Our primary DC"
+    #     compatibility_version: 4.2
+    #     quota_mode: enabled
+    #     local: False
+
+    ###########################
+    # Clusters
+    ###########################
+    # - name: Ensure Cluster "{{ cluster }}" is existing
+    #   ovirt_cluster:
+    #     auth: "{{ ovirt_auth }}"
+    #     name: "{{ cluster }}"
+    #     data_center: "{{ datacenter }}"
+    #     description: "Default Cluster 1"
+    #     cpu_type: "Intel Haswell-noTSX Family"
+    #     switch_type: ovs
+    #     compatibility_version: 4.2
+    #     gluster: False
+    #     ballooning: True
+    #     ha_reservation: False
+    #     memory_policy: server
+    #     virt: True
+    #     threads_as_cores: True
+
+    ###########################
+    # Network
+    ###########################
+    # - name: Ensure "{{ network }}" is existing
+    #   ovirt_networks:
+    #     auth: "{{ ovirt_auth }}"
+    #     name: "{{ network }}"
+    #     data_center: "{{ datacenter }}"
+    #     # vlan_tag: 1
+    #     vm_network: True
+    #     clusters:
+    #       - name: "{{ cluster }}"
+    #         assigned: True
+    #         required: False
+    #         display: True
+    #         migration: True
+    #         gluster: False
+
+    ###########################
+    # Add host
+    ###########################
+    - name: Ensure hosts are joined
+      ovirt_hosts:
+        auth: "{{ ovirt_auth }}"
+        public_key: True
+        cluster: "{{ cluster }}"
+        name: "{{ hostvars[item]['libvirt_name'] }}"
+        address: "{{ hostvars[item]['ansible_host'] }}"
+        # Don't change to False !!!
+        override_iptables: True
+        timeout: 600
+      when: hostvars[item]['ansible_host'] is defined
+      with_inventory_hostnames: all:!controller-1
+
+    ###########################
+    # Assign network to host
+    ###########################
+    # - name: Assign Networks to host
+    #   ovirt_host_networks:
+    #     auth: "{{ ovirt_auth }}"
+    #     state: present
+    #     name: "{{ hostvars[item]['libvirt_name'] }}"
+    #     interface: "{{ network_intf }}"
+    #     save: True
+    #     networks:
+    #       - name: "{{ network }}"
+    #   when: hostvars[item]['ansible_host'] is defined
+    #   with_inventory_hostnames: all:!controller-1
+
+    ###########################
+    # Storage
+    ###########################
+    - name: Create VM NFS storage domain
+      ovirt_storage_domains:
+        auth: "{{ ovirt_auth }}"
+        name: "vms"
+        host: "{{ hostvars[item]['libvirt_name'] }}"
+        domain_function: "data"
+        data_center: "{{ datacenter }}"
+        timeout: 240
+        nfs:
+          address: "{{ nfs_server }}"
+          path: "/opt/ovirt/vms"
+          version: "auto"
+      when: hostvars[item]['ansible_host'] is defined
+      with_inventory_hostnames: all:!controller-1
+
+    - name: Create ISO NFS storage domain
+      ovirt_storage_domains:
+        auth: "{{ ovirt_auth }}"
+        name: "iso"
+        host: "{{ hostvars[item]['libvirt_name'] }}"
+        domain_function: "iso"
+        data_center: "{{ datacenter }}"
+        timeout: 240
+        nfs:
+          address: "{{ nfs_server }}"
+          path: "/opt/ovirt/iso"
+          version: "auto"
+      when: hostvars[item]['ansible_host'] is defined
+      with_inventory_hostnames: all:!controller-1
+
+      # ovirt_disk
+      # ovirt_templates
+      # ovirt_vms
+
+    ###########################
+    # Logout
+    ###########################
+    - name: Revoke SSO token
+      ovirt_auth:
+        state: absent
+        ovirt_auth: "{{ ovirt_auth }}"
