@@ -6,7 +6,7 @@
     dockerfile: Dockerfile
     push: True
 
-- name: 'Ensure the {{ myvirt_config_path }} directory exist'
+- name: "Ensure the {{ myvirt_config_path }} directory exist"
   file:
     path: "{{ item }}"
     state: directory
@@ -14,7 +14,7 @@
   with_items:
     - "{{ myvirt_config_path }}"
 
-- name: 'Generate dnsmasq.conf in {{ myvirt_config_path }}'
+- name: "Generate dnsmasq.conf in {{ myvirt_config_path }}"
   blockinfile:
     create: True
     block: "{{ lookup('template', 'dnsmasq.conf.j2') }}"

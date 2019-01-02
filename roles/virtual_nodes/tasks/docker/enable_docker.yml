@@ -75,7 +75,7 @@
     state: restarted
     enabled: True
 
-- name: Add current user to Docker group
+- name: "Add {{ os_default_user }} user to Docker group"
   user:
     name: "{{ os_default_user }}"
     groups: docker
