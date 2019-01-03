@@ -4,6 +4,8 @@
 ####################
 node_prefix: ""
 
+# Cluster sizing info
+#####################
 master_nb: 1
 master_ram: 4
 master_cpu: 1
