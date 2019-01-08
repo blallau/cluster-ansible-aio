@@ -14,8 +14,8 @@
   when: ansible_distribution|lower == "ubuntu"
 
 - import_tasks: docker/enable_docker.yml
-  when: docker_enabled | bool
   become: True
+  when: docker_enabled | bool
 
 - import_tasks: docker/enable_registry.yml
 
@@ -44,7 +44,7 @@
 - import_tasks: libvirt/setup_libvirt_networks.yml
   become: True
 
-- import_tasks: libvirt/setup_libvirt_storages.yml
+- include_tasks: libvirt/setup_libvirt_storages.yml
   become: True
   when: storage_volume_enabled | bool
 

@@ -50,7 +50,7 @@
 - import_tasks: libvirt/destroy_libvirt_networks.yml
   become: True
 
-- import_tasks: libvirt/destroy_libvirt_storages.yml
+- include_tasks: libvirt/destroy_libvirt_storages.yml
   become: True
   when: storage_volume_enabled | bool
 
