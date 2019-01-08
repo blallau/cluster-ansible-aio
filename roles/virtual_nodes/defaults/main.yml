@@ -39,7 +39,9 @@ dns_domain: "mydomain.org"
 
 # Storage info
 ##############
-storage_volume_enabled: True
+root_disk_size: "20"
+
+storage_volume_enabled: False
 virt_volume_group: "virtvg"
 
 host_volumes:
