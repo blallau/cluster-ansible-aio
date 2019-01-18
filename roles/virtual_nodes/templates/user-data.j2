@@ -1,7 +1,12 @@
 #cloud-config
+disable_root: false
 ssh_pwauth: True
 chpasswd:
   list: |
      root:root
      {{ os_default_user }}:{{ os_default_user }}
   expire: False
+bootcmd:
+  - if grep -Gq "^\s*UseDNS" /etc/ssh/sshd_config; then sed -re "s/^\s*(UseDNS)\s+(yes|no)/\1 no/" -i.$(date -u +%Y%m%d%H%M%S) /etc/ssh/sshd_config; else echo "UseDNS no" >> /etc/ssh/sshd_config; fi
+runcmd:
+  - systemctl restart sshd &
