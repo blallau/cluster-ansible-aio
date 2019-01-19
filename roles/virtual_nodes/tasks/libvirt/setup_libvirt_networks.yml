@@ -4,34 +4,32 @@
     command: list_nets
   register: net_exists
 
-- name: Display cluster_nodes
+- name: Display networks
   debug:
     msg: "{{ lookup('template','network.xml.j2') }}"
   when: item.name not in net_exists.list_nets
   with_items: "{{ host_interfaces }}"
 
-- name: Define virtual networks
-  virt_net:
-    command: define
-    name: "{{ item.name }}"
-    xml: '{{ lookup("template", "network.xml.j2") }}'
+- name: Steps to setup network using Libvirt
+  block:
+  - name: Define virtual networks
+    virt_net:
+      command: define
+      name: "{{ item.name }}"
+      xml: '{{ lookup("template", "network.xml.j2") }}'
+    with_items: "{{ host_interfaces }}"
+  - name: Autostart virtual networks
+    virt_net:
+      autostart: True
+      name: "{{ item.name }}"
+    with_items: "{{ host_interfaces }}"
+  - name: Start virtual networks
+    virt_net:
+      state: active
+      autostart: True
+      name: "{{ item.name }}"
+    with_items: "{{ host_interfaces }}"
   when: item.name not in net_exists.list_nets
-  with_items: "{{ host_interfaces }}"
-
-- name: Autostart virtual networks
-  virt_net:
-    autostart: True
-    name: "{{ item.name }}"
-  when: item.name not in net_exists.list_nets
-  with_items: "{{ host_interfaces }}"
-
-- name: Start virtual networks
-  virt_net:
-    state: active
-    autostart: True
-    name: "{{ item.name }}"
-  when: item.name not in net_exists.list_nets
-  with_items: "{{ host_interfaces }}"
 
 # - name: Setup NetworkManager dnsmasq config file
 #   lineinfile:
