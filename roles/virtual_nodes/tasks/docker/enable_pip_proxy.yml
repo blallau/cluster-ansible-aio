@@ -16,29 +16,6 @@
     volumes:
       - "devpi:/var/lib/devpi"
 
-# - name: Create directory for PIP config
-#   file:
-#     path: "{{ home_dir }}/.pip"
-#     state: directory
-
-# - name: Set PIP config to use Devpi proxy
-#   blockinfile:
-#     path: "{{ home_dir }}/.pip/pip.conf"
-#     create: True
-#     block: |
-#       [global]
-#       index-url = http://{{ pip_cache_proxy_ip }}:{{ pip_cache_proxy_port }}/root/pypi/+simple/
-#       trusted-host = {{ pip_cache_proxy_ip }}
-
-# - name: Set setuptools config to use Devpi proxy
-#   blockinfile:
-#     path: "{{ home_dir }}/.pydistutils.cfg"
-#     create: True
-#     block: |
-#       [easy_install]
-#       index_url = http://{{ pip_cache_proxy_ip }}:{{ pip_cache_proxy_port }}/root/pypi/+simple/
-#       trusted-host = {{ pip_cache_proxy_ip }}
-
 - name: Wait for PIP cache proxy ready
   wait_for:
     host: "{{ pip_cache_proxy_ip }}"

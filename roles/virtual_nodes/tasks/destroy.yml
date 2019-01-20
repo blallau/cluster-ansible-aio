@@ -75,12 +75,3 @@
     name: "{{ item.name }}.{{ dns_domain }}"
     state: absent
   with_items: "{{ cluster_nodes }}"
-
-# - name: Clean NetworkManager dnsmasq config file
-#   become: True
-#   lineinfile:
-#     path: "/etc/NetworkManager/dnsmasq.d/libvirt_dnsmasq.conf"
-#     state: absent
-#     line: "server=/{{ item.domain }}/{{ item.cidr | join | ipaddr('1') | ipaddr('address') }}"
-#   when: item.domain is defined
-#   with_items: "{{ host_interfaces }}"
