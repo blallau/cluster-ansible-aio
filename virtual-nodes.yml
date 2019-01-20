@@ -34,17 +34,3 @@
         #Fix using {{ dns_domain }} from virtual-nodes playbook
         line: 'search mydomain.org'
       when: method == "create"
-
-    # - lineinfile:
-    #     path: /etc/hosts
-    #     insertafter: EOF
-    #     line: "{{ hostvars[item]['ansible_' + node_internal_intf]['ipv4']['address'] }}  {{ hostvars[item]['inventory_hostname'] }}"
-    #     with_items: "{{ groups['nodes'] }}"
-
-# - name: Set hostname
-#   hosts: created_nodes
-#   gather_facts: false
-#   become: True
-#   tasks:
-#     - command: "hostnamectl set-hostname {{ hostvars[inventory_hostname].instance_name }}"
-#       when: method == "create"
