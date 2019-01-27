@@ -14,7 +14,7 @@
 {% set outer_master_loop = loop %}
 {% for intf in host_interfaces %}
 {% if vm_os_distro == 'centos' %}
-{% set intf_nb = loop.index - 1 %}
+{% set intf_nb = loop.index0 %}
     - name: "eth{{ intf_nb }}"
 {% elif vm_os_distro == 'ubuntu' %}
 {% set intf_nb = loop.index + 1 %}
@@ -51,7 +51,7 @@
 {% set outer_worker_loop = loop %}
 {% for intf in host_interfaces %}
 {% if vm_os_distro == 'centos' %}
-{% set intf_nb = loop.index - 1 %}
+{% set intf_nb = loop.index0 %}
     - name: "eth{{ intf_nb }}"
 {% elif vm_os_distro == 'ubuntu' %}
 {% set intf_nb = loop.index + 1 %}
