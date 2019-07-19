@@ -55,7 +55,7 @@
   become: True
   blockinfile:
     block: "{{ lookup('template', 'ssh_config.j2') }}"
-    path: "/etc/ssh/ssh_config"
+    path: "{{ ansible_env.HOME }}/.ssh/config"
     state: absent
 
 - name: Clean /etc/hosts file
