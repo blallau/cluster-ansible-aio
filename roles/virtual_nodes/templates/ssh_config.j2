@@ -1,6 +1,6 @@
-#jinja2: trim_blocks: False
+#jinja2: trim_blocks: True
 {# {% set network_mode = 'static' %} #}
-{% for node in cluster_nodes %}
+{% for node in cluster_nodes -%}
 {# {% for intf in node.interfaces %} #}
 {# {% if intf.mode == 'dhcp' %} #}
 {# {% set network_mode = 'dhcp' %} #}
@@ -11,4 +11,4 @@ Host {{ node.name }}
   UserKnownHostsFile /dev/null
   StrictHostKeyChecking no
   User {{ os_default_user }}
-{% endfor %}
+{%- endfor %}
