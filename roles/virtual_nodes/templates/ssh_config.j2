@@ -1,8 +1,14 @@
 #jinja2: trim_blocks: False
+{# {% set network_mode = 'static' %} #}
 {% for node in cluster_nodes %}
+{# {% for intf in node.interfaces %} #}
+{# {% if intf.mode == 'dhcp' %} #}
+{# {% set network_mode = 'dhcp' %} #}
+{# {% endif %} #}
+{# {% endfor %} #}
 Host {{ node.name }}
-     Hostname {{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | map(attribute='address') | join }}
-     UserKnownHostsFile /dev/null
-     StrictHostKeyChecking no
-     User {{ os_default_user }}
+  Hostname {{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | map(attribute='address') | join }}
+  UserKnownHostsFile /dev/null
+  StrictHostKeyChecking no
+  User {{ os_default_user }}
 {% endfor %}
