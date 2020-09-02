@@ -20,36 +20,36 @@
 # TODO destroy snapshot if present
 - name: Steps to destroy VM using Libvirt
   block:
-  - name: Destroy VMs
-    virt:
-      command: destroy
-      name: "{{ item.name }}"
-    with_items: "{{ cluster_nodes }}"
-  - name: Undefine VMs
-    virt:
-      command: undefine
-      name: "{{ item.name }}"
-    with_items: "{{ cluster_nodes }}"
-  - name: Remove OS images from libvirt directory
-    become: True
-    file:
-      path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
-      state: absent
-    with_items: "{{ cluster_nodes }}"
-  - name: Delete qcow2 images
-    file:
-      path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
-      state: absent
-    with_items: "{{ cluster_nodes }}"
-    when: destroy_images | bool
+    - name: Destroy VMs
+      virt:
+        command: destroy
+        name: "{{ item.name }}"
+      with_items: "{{ cluster_nodes }}"
+    - name: Undefine VMs
+      virt:
+        command: undefine
+        name: "{{ item.name }}"
+      with_items: "{{ cluster_nodes }}"
+    - name: Remove OS images from libvirt directory
+      become: True
+      file:
+        path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
+        state: absent
+      with_items: "{{ cluster_nodes }}"
+    - name: Delete qcow2 images
+      file:
+        path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
+        state: absent
+      with_items: "{{ cluster_nodes }}"
+      when: destroy_images | bool
   ignore_errors: True
 
 - import_tasks: libvirt/destroy_libvirt_networks.yml
   become: True
 
-- include_tasks: libvirt/destroy_libvirt_storages.yml
-  become: True
-  when: storage_volume_enabled | bool
+# - include_tasks: libvirt/destroy_libvirt_storages.yml
+#   become: True
+#   when: storage_volume_enabled | bool
 
 - name: Clean nodes from ssh_config
   become: True
