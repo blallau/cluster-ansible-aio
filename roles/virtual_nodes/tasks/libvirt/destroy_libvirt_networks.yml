@@ -6,15 +6,15 @@
 
 - name: Steps to destroy network using Libvirt
   block:
-  - name: Destroy virtual bridges
-    virt_net:
-      command: destroy
-      name: "{{ item.name }}"
-    with_items: "{{ host_interfaces }}"
-  - name: Undefine virtual bridges
-    virt_net:
-      command: undefine
-      name: "{{ item.name }}"
-    with_items: "{{ host_interfaces }}"
+    - name: Destroy virtual bridges
+      virt_net:
+        command: destroy
+        name: "{{ item.name }}"
+      with_items: "{{ host_interfaces }}"
+    - name: Undefine virtual bridges
+      virt_net:
+        command: undefine
+        name: "{{ item.name }}"
+      with_items: "{{ host_interfaces }}"
   when: item.name in bridge_exists.list_nets
   ignore_errors: True

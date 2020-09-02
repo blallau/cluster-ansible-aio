@@ -57,42 +57,42 @@
 
 - name: Steps to instanciate VM using Libvirt
   block:
-  - name: Instantiate meta-data file
-    template:
-      src: "meta-data.j2"
-      dest: "{{ tmp_dir }}/{{ item.name }}/meta-data"
-    with_items: "{{ cluster_nodes }}"
-  - name: Instantiate user-data file
-    template:
-      src: "user-data.j2"
-      dest: "{{ tmp_dir}}/{{ item.name }}/user-data"
-    with_items: "{{ cluster_nodes }}"
-  - name: Remove config drive files
-    file:
-      path: "{{ tmp_dir }}/{{ item.name }}/config.iso"
-      state: absent
-    with_items: "{{ cluster_nodes }}"
-  - name: Create config drive
-    command: "genisoimage -input-charset utf-8 \
-             -o {{ tmp_dir }}/{{ item.name }}/config.iso \
-             -V cidata -r -J {{ tmp_dir }}/{{ item.name }}/meta-data \
-             {{ tmp_dir }}/{{ item.name }}/user-data"
-    with_items: "{{ cluster_nodes }}"
-  - name: Display VM template
-    debug:
-      msg: "{{ lookup('template', 'vm-template.xml.j2') }}"
-    with_items: "{{ cluster_nodes }}"
-  - name: Define a VM
-    virt:
-      name: "{{ item.name }}"
-      command: define
-      xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
-    with_items: "{{ cluster_nodes }}"
-  - name: Start a VM
-    virt:
-      name: "{{ item.name }}"
-      state: running
-    with_items: "{{ cluster_nodes }}"
+    - name: Instantiate meta-data file
+      template:
+        src: "meta-data.j2"
+        dest: "{{ tmp_dir }}/{{ item.name }}/meta-data"
+      with_items: "{{ cluster_nodes }}"
+    - name: Instantiate user-data file
+      template:
+        src: "user-data.j2"
+        dest: "{{ tmp_dir}}/{{ item.name }}/user-data"
+      with_items: "{{ cluster_nodes }}"
+    - name: Remove config drive files
+      file:
+        path: "{{ tmp_dir }}/{{ item.name }}/config.iso"
+        state: absent
+      with_items: "{{ cluster_nodes }}"
+    - name: Create config drive
+      command: "genisoimage -input-charset utf-8 \
+               -o {{ tmp_dir }}/{{ item.name }}/config.iso \
+               -V cidata -r -J {{ tmp_dir }}/{{ item.name }}/meta-data \
+               {{ tmp_dir }}/{{ item.name }}/user-data"
+      with_items: "{{ cluster_nodes }}"
+    - name: Display VM template
+      debug:
+        msg: "{{ lookup('template', 'vm-template.xml.j2') }}"
+      with_items: "{{ cluster_nodes }}"
+    - name: Define a VM
+      virt:
+        name: "{{ item.name }}"
+        command: define
+        xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
+      with_items: "{{ cluster_nodes }}"
+    - name: Start a VM
+      virt:
+        name: "{{ item.name }}"
+        state: running
+      with_items: "{{ cluster_nodes }}"
 
 - name: Wait for VMs to boot
   wait_for:
