@@ -2,34 +2,31 @@
 - name: Install CentOS packages
   become: True
   yum:
-    name: "{{ item }}"
-  with_items: "{{ yum_dependencies }}"
+    name: "{{ yum_dependencies }}"
   when: ansible_distribution|lower == "centos"
 
 - name: Install Ubuntu packages
   become: True
   apt:
-    name: "{{ item }}"
-  with_items: "{{ apt_dependencies }}"
+    pkg: "{{ apt_dependencies }}"
   when: ansible_distribution|lower == "ubuntu"
 
 - import_tasks: docker/enable_docker.yml
   become: True
   when: docker_enabled | bool
 
-- import_tasks: docker/enable_registry.yml
-
 - name: Install/Update pip packages
   become: True
   pip:
-    name: "{{ item }}"
+    name: "{{ pip_dependencies }}"
     state: latest
-  with_items: "{{ pip_dependencies }}"
+
+- import_tasks: docker/enable_registry.yml
 
 - name: Starting Libvirt service
   become: True
   service:
-    name: "{{ 'libvirt-bin' if ansible_distribution|lower == 'ubuntu' else 'libvirtd' }}"
+    name: "libvirtd"
     state: started
     enabled: True
 

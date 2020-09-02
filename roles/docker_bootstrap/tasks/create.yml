@@ -30,9 +30,8 @@
 
 - name: Install CentOS packages
   yum:
-    name: "{{ item }}"
+    name: "{{ yum_packages }}"
     update_cache: True
-  with_items: "{{ yum_packages }}"
   when: ansible_distribution|lower == "centos"
 
 - import_tasks: enable_apt_proxy.yml
@@ -45,10 +44,9 @@
 
 - name: Install Ubuntu packages
   apt:
-    name: "{{ item }}"
+    pkg: "{{ apt_packages }}"
     state: latest
     update_cache: True
-  with_items: "{{ apt_packages }}"
   when: ansible_distribution|lower == "ubuntu"
 
 - import_tasks: enable_docker.yml
