@@ -1,8 +1,8 @@
 {% set mac_prefix = "52:54:00:33" %}
 {% set lettres = ['a', 'b', 'c', 'd', 'e', 'f'] %}
 {% macro disk_device(index) -%}
-  {% set device = lettres[index | int] -%}
-  {{ device }}
+{% set device = lettres[index | int] -%}
+{{ device }}
 {%- endmacro %}
 ---
 {% for master in range(master_nb) %}
@@ -16,7 +16,7 @@
 {% if vm_os_distro == 'centos' %}
 {% set intf_nb = loop.index0 %}
     - name: "eth{{ intf_nb }}"
-{% elif vm_os_distro == 'ubuntu' %}
+{% elif vm_os_distro == 'ubuntu' or vm_os_distro == 'debian' %}
 {% set intf_nb = loop.index + 1 %}
     - name: "ens{{ intf_nb }}"
 {% endif %}
@@ -53,7 +53,7 @@
 {% if vm_os_distro == 'centos' %}
 {% set intf_nb = loop.index0 %}
     - name: "eth{{ intf_nb }}"
-{% elif vm_os_distro == 'ubuntu' %}
+{% elif vm_os_distro == 'ubuntu' or vm_os_distro == 'debian' %}
 {% set intf_nb = loop.index + 1 %}
     - name: "ens{{ intf_nb }}"
 {% endif %}

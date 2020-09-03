@@ -53,7 +53,7 @@
   when: pip_cache_enabled | bool
   tags: pip_cache
 
-- import_tasks: retrieve_os_image.yml
+- import_tasks: prepare_os_image.yml
 
 - name: Steps to instanciate VM using Libvirt
   block:
