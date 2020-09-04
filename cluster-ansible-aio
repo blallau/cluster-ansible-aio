@@ -108,7 +108,7 @@ find_base_dir
 INVENTORY="${BASEDIR}/inventory/"
 PLAYBOOK=""
 VERBOSITY=
-EXTRA_OPTS=${EXTRA_OPTS}
+EXTRA_OPTS="${EXTRA_OPTS} -K"
 DANGER_CONFIRM=
 
 while [ "$#" -gt 0 ]; do
