@@ -2,6 +2,7 @@ instance-id: {{ item.name }}
 local-hostname: {{ item.name }}
 public-keys:
   - "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+{% if vm_os_distro == 'centos' or vm_os_distro == 'ubuntu' %}
 network-interfaces: |
 {% for intf in item.interfaces %}
   auto {{ intf.name }}
@@ -14,6 +15,8 @@ network-interfaces: |
 {% endif %}
   dns-nameservers {{ host_ip }}
   dns-search {{ dns_domain }}
+{% endfor %}
+{% endif %}
 {# To investiguate: not working #}
 {# {% if intf.dnsnameservers is defined %} #}
 {#   dns-nameservers {{ intf.dnsnameservers }} #}
@@ -24,4 +27,3 @@ network-interfaces: |
 {# {% if intf.gateway is defined %} #}
 {#   gateway {{ intf.gateway }} #}
 {# {% endif %} #}
-{% endfor %}

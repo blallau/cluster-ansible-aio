@@ -55,7 +55,7 @@
 
 - import_tasks: prepare_os_image.yml
 
-- name: Steps to instanciate VM using Libvirt
+- name: Steps to instanciate Ubuntu or CentOS VM
   block:
     - name: Instantiate meta-data file
       template:
@@ -93,6 +93,52 @@
         name: "{{ item.name }}"
         state: running
       with_items: "{{ cluster_nodes }}"
+  when: vm_os_distro == "ubuntu" or vm_os_distro == "centos"
+
+- name: Steps to instanciate Debian VM
+  block:
+    - name: Instantiate meta-data file
+      template:
+        src: "meta-data.j2"
+        dest: "{{ tmp_dir }}/{{ item.name }}/meta-data"
+      with_items: "{{ cluster_nodes }}"
+    - name: Instantiate user-data file
+      template:
+        src: "user-data.j2"
+        dest: "{{ tmp_dir}}/{{ item.name }}/user-data"
+      with_items: "{{ cluster_nodes }}"
+    - name: Instantiate network-config file
+      template:
+        src: "network-config.j2"
+        dest: "{{ tmp_dir}}/{{ item.name }}/network-config"
+      with_items: "{{ cluster_nodes }}"
+    - name: Remove config drive files
+      file:
+        path: "{{ tmp_dir }}/{{ item.name }}/seed.img"
+        state: absent
+      with_items: "{{ cluster_nodes }}"
+    - name: Create config drive
+      command: "cloud-localds -v {{ tmp_dir }}/{{ item.name }}/seed.img \
+                --network-config {{ tmp_dir }}/{{ item.name }}/network-config \
+                  {{ tmp_dir }}/{{ item.name }}/user-data \
+                  {{ tmp_dir }}/{{ item.name }}/meta-data"
+      with_items: "{{ cluster_nodes }}"
+    - name: Display VM template
+      debug:
+        msg: "{{ lookup('template', 'vm-template.xml.j2') }}"
+      with_items: "{{ cluster_nodes }}"
+    - name: Define a VM
+      virt:
+        name: "{{ item.name }}"
+        command: define
+        xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
+      with_items: "{{ cluster_nodes }}"
+    - name: Start a VM
+      virt:
+        name: "{{ item.name }}"
+        state: running
+      with_items: "{{ cluster_nodes }}"
+  when: vm_os_distro == "debian"
 
 - name: Wait for VMs to boot
   wait_for:

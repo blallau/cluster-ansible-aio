@@ -35,7 +35,9 @@
 - name: Create the Ubuntu drop-in unit file
   blockinfile:
     path: /etc/systemd/system/docker.service.d/docker.conf
+    marker: "## {mark} added by ansible"
     create: True
+    state: present
     block: |
       [Service]
       MountFlags=shared

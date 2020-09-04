@@ -13,10 +13,10 @@
   interfaces:
 {% set outer_master_loop = loop %}
 {% for intf in host_interfaces %}
-{% if vm_os_distro == 'centos' %}
+{% if vm_os_distro == 'centos' or vm_os_distro == 'debian' %}
 {% set intf_nb = loop.index0 %}
     - name: "eth{{ intf_nb }}"
-{% elif vm_os_distro == 'ubuntu' or vm_os_distro == 'debian' %}
+{% elif vm_os_distro == 'ubuntu' %}
 {% set intf_nb = loop.index + 1 %}
     - name: "ens{{ intf_nb }}"
 {% endif %}
