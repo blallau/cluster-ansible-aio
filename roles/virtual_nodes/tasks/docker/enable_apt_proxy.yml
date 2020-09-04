@@ -2,8 +2,11 @@
 - name: Build APT cache proxy image and push it
   docker_image:
     name: "{{ docker_apt_cache_image }}"
-    path: roles/virtual_nodes/tasks/docker/proxy/apt
-    dockerfile: Dockerfile
+    source: build
+    build:
+      path: roles/virtual_nodes/tasks/docker/proxy/apt
+      dockerfile: Dockerfile
+      pull: False
     push: True
 
 - name: Create a APT cache proxy
@@ -12,7 +15,7 @@
     image: "{{ docker_apt_cache_image }}"
     restart_policy: unless-stopped
     published_ports:
-    - "{{ apt_cache_proxy_ip }}:{{ apt_cache_proxy_port }}:3142"
+      - "{{ apt_cache_proxy_ip }}:{{ apt_cache_proxy_port }}:3142"
     volumes:
       - "apt-cacher-ng:/var/cache/apt-cacher-ng"
 

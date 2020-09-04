@@ -2,8 +2,11 @@
 - name: Build DNS server image and push it
   docker_image:
     name: "{{ docker_dns_server_image }}"
-    path: roles/virtual_nodes/tasks/docker/server/dns
-    dockerfile: Dockerfile
+    source: build
+    build:
+      path: roles/virtual_nodes/tasks/docker/server/dns
+      dockerfile: Dockerfile
+      pull: False
     push: True
 
 - name: "Ensure the {{ myvirt_config_path }} directory exist"

@@ -61,15 +61,18 @@
   when: ansible_distribution|lower == "ubuntu"
 
 - name: Create the Ubuntu drop-in unit file
-  lineinfile:
+  blockinfile:
     path: /etc/systemd/system/docker.service.d/docker.conf
+    marker: "## {mark} added by ansible"
     create: True
-    line: |
+    state: present
+    block: |
       [Service]
       EnvironmentFile=-/etc/default/docker
       ExecStart=
       ExecStart=/usr/bin/dockerd $DOCKER_OPTS
   when: ansible_distribution|lower == "ubuntu"
+  register: unitfile
 
 - name: Restart Docker service
   systemd:
@@ -77,6 +80,7 @@
     daemon_reload: True
     state: restarted
     enabled: True
+  when: unitfile.changed
 
 - name: "Add {{ os_default_user }} user to Docker group"
   user:

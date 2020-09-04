@@ -2,8 +2,11 @@
 - name: Build PIP cache proxy image and push it
   docker_image:
     name: "{{ docker_pip_cache_image }}"
-    path: roles/virtual_nodes/tasks/docker/proxy/pip
-    dockerfile: Dockerfile
+    source: build
+    build:
+      path: roles/virtual_nodes/tasks/docker/proxy/pip
+      dockerfile: Dockerfile
+      pull: False
     push: True
 
 - name: Create a PIP cache proxy
