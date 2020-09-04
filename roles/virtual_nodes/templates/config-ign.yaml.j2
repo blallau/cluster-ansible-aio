@@ -5,7 +5,7 @@ passwd:
   users:
     - name: core
       ssh_authorized_keys:
-        - "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+        - {{ lookup('file', '~/.ssh/id_rsa.pub') }}
 systemd:
   units:
     - name: serial-getty@ttyS0.service
@@ -54,7 +54,7 @@ storage:
 
           [ipv4]
           method=manual
-          addresses={{ intf.address }}
+          addresses={{ intf.address }}/{{ intf.cidr.split("/")[1] }}
           dns={{ host_ip }}
           dns-search={{ dns_domain }}
 {% endfor %}
