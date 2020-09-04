@@ -6,6 +6,11 @@
       <aio:inventory group="{{ item.role }}" distro="{{ vm_os_distro }}"/>
     </aio:instance>
   </metadata>
+  {% if vm_os_distro == 'fcos' %}
+  <qemu:commandline>
+    <qemu:arg value='-fw_cfg name=opt/com.coreos/config,file={{ tmp_dir }}/{{ item.name }}/config.ign'/>
+  </qemu:commandline>
+  {% endif %}
   <memory unit='GiB'>{{ item.ram }}</memory>
   <vcpu placement='static'>{{ item.vcpu }}</vcpu>
   <resource>
