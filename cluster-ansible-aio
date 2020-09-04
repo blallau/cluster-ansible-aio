@@ -164,12 +164,12 @@ done
 case "$1" in
 (create-virtual-nodes)
         ACTION="Bootstrap hypervisor and create virtual nodes"
-        EXTRA_OPTS="$EXTRA_OPTS -e method=create -k"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/virtual-nodes.yml"
         ;;
 (remove-virtual-nodes)
         ACTION="Cleanup hypervisor and remove virtual nodes"
-        EXTRA_OPTS="$EXTRA_OPTS -e method=destroy -k"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=destroy"
         PLAYBOOK="${BASEDIR}/virtual-nodes.yml"
         if [[ "${DANGER_CONFIRM}" != "--yes-i-really-really-mean-it" ]]; then
             cat << EOF
@@ -185,17 +185,17 @@ EOF
         ;;
 (nodes-bootstrap)
         ACTION="Bootstrap all virtual nodes"
-        EXTRA_OPTS="$EXTRA_OPTS -e method=create -k"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/nodes-bootstrap.yml"
         ;;
 (docker-bootstrap)
         ACTION="Bootstrap Docker on nodes"
-        EXTRA_OPTS="$EXTRA_OPTS -e method=create -k"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/docker-bootstrap.yml"
         ;;
 (kolla-build)
         ACTION="Build Kolla images"
-        EXTRA_OPTS="$EXTRA_OPTS -e method=create -k"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/kolla-build.yml"
         ;;
 (nfs-server)
@@ -212,12 +212,12 @@ EOF
         ;;
 (kolla-ansible-deploy)
         ACTION="Deploy Openstack using kolla-ansible"
-        EXTRA_OPTS="$EXTRA_OPTS -e method=create -k"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/kolla-ansible-deploy.yml"
         ;;
 (kolla-ansible-cleanup)
         ACTION="Cleanup Kolla containers and volumes"
-        EXTRA_OPTS="$EXTRA_OPTS -e method=destroy -k"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=destroy"
         PLAYBOOK="${BASEDIR}/kolla-ansible-deploy.yml"
         ;;
 (bash-completion)
