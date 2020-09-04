@@ -1,11 +1,11 @@
 Cluster-ansible-aio
 ===================
 
-Multi-node deployment of cluster apps (Kolla, oVirt, RKE, OpenShift, GlusterFS) on a single host, using heavily Libvirt, Docker and Ansible.
+Multi-node deployment of cluster apps (Kolla, oVirt, Kubernetes, GlusterFS) on a single host, using heavily Libvirt, Docker and Ansible.
 
 ![cluster-ansible-aio](https://user-images.githubusercontent.com/9655027/31175714-6e453b1e-a910-11e7-8a60-f7c6d2114b1a.png)
 
-Cluster-ansible-aio is an open source tool for automating deployment of cluster apps (oVirt, RKE, Kolla, GlusterFS, OpenShift,...), on a single physical machine.
+Cluster-ansible-aio is an open source tool for automating deployment of cluster apps (oVirt, Kubernetes, GlusterFS), on a single physical machine.
 
 -   Source: <https://github.com/blallau/cluster-ansible-aio>
 
@@ -13,7 +13,8 @@ Features
 --------
 
 -   Multi-nodes (N master and N worker)
--   Multi OS (CentOS and Ubuntu compliancy)
+-   Multi OS (CentOS, Ubuntu)
+-   Multi guest OS (CentOS, Ubuntu, Debian)
 -   Multi Networks (DHCP, static)
 -   Multi block storage (LVM disks)
 -   Heavily automated using Ansible
@@ -72,6 +73,14 @@ virtual nodes.
 By default, virtual nodes OS will be same as hypervisor OS.
 
     ./cluster-ansible-aio create-virtual-nodes
+
+Virtual nodes OS can be override using **vm_os_distro** variable.
+
+Example: in case of Ubuntu hypervisor and Debian virtual nodes wanted.
+
+    ./cluster-ansible-aio create-virtual-nodes -e vm_os_distro=debian
+
+Any of the default role variables can be easily overridden with variables from **group_vars/all.yml**
 
 3. [Bootstrap all virtual nodes (install packages, configure Docker,
 configure SSH...).]
