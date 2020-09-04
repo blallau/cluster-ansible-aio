@@ -1,0 +1,19 @@
+---
+{# https://cloudinit.readthedocs.io/en/latest/topics/network-config-format-v1.html #}
+version: 1
+config:
+{% for intf in item.interfaces %}
+- type: physical
+  name: {{ intf.name }}
+  subnets:
+{% if intf.mode == 'dhcp' %}
+  - type: dhcp
+{% elif intf.mode == 'static' %}
+  - type: static
+    address: {{ intf.address }}
+    dns_nameservers:
+      - {{ host_ip }}
+    dns-search:
+      - {{ dns_domain }}
+{% endif %}
+{% endfor %}
