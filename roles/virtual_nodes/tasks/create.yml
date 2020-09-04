@@ -55,7 +55,23 @@
 
 - import_tasks: prepare_os_image.yml
 
-- name: Steps to instanciate Ubuntu or CentOS VM
+- name: "Copy cluster config in {{ tmp_dir }}"
+  blockinfile:
+    path: "{{ tmp_dir }}/{{ item.name }}/cluster_config"
+    create: True
+    block: |
+        {{ item | to_nice_json(indent=2) }}
+  with_items: "{{ cluster_nodes }}"
+
+- name: "Copy Libvirt XML domain in {{ tmp_dir }}"
+  blockinfile:
+    path: "{{ tmp_dir }}/{{ item.name }}/domain.xml"
+    create: True
+    block: |
+        {{ lookup('template', 'vm-template.xml.j2') }}
+  with_items: "{{ cluster_nodes }}"
+
+- name: Prepare Ubuntu or CentOS VMs config
   block:
     - name: Instantiate meta-data file
       template:
@@ -78,24 +94,9 @@
                -V cidata -r -J {{ tmp_dir }}/{{ item.name }}/meta-data \
                {{ tmp_dir }}/{{ item.name }}/user-data"
       with_items: "{{ cluster_nodes }}"
-    - name: Display VM template
-      debug:
-        msg: "{{ lookup('template', 'vm-template.xml.j2') }}"
-      with_items: "{{ cluster_nodes }}"
-    - name: Define a VM
-      virt:
-        name: "{{ item.name }}"
-        command: define
-        xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
-      with_items: "{{ cluster_nodes }}"
-    - name: Start a VM
-      virt:
-        name: "{{ item.name }}"
-        state: running
-      with_items: "{{ cluster_nodes }}"
   when: vm_os_distro == "ubuntu" or vm_os_distro == "centos"
 
-- name: Steps to instanciate Debian VM
+- name: Prepare Debian VMs config
   block:
     - name: Instantiate meta-data file
       template:
@@ -123,24 +124,42 @@
                   {{ tmp_dir }}/{{ item.name }}/user-data \
                   {{ tmp_dir }}/{{ item.name }}/meta-data"
       with_items: "{{ cluster_nodes }}"
-    - name: Display VM template
-      debug:
-        msg: "{{ lookup('template', 'vm-template.xml.j2') }}"
-      with_items: "{{ cluster_nodes }}"
-    - name: Define a VM
-      virt:
-        name: "{{ item.name }}"
-        command: define
-        xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
-      with_items: "{{ cluster_nodes }}"
-    - name: Start a VM
-      virt:
-        name: "{{ item.name }}"
-        state: running
-      with_items: "{{ cluster_nodes }}"
   when: vm_os_distro == "debian"
 
-- name: Wait for VMs to boot
+- name: Prepare FCOS VMs config
+  block:
+    - name: Instantiate Ignition config file
+      template:
+        src: "config-ign.yaml.j2"
+        dest: "{{ tmp_dir}}/{{ item.name }}/config-ign.yaml"
+      with_items: "{{ cluster_nodes }}"
+    - name: Remove Ignition config file
+      file:
+        path: "{{ tmp_dir }}/{{ item.name }}/config.ign"
+        state: absent
+      with_items: "{{ cluster_nodes }}"
+    - name: Convert Ignition file from YAML format
+      command: 'docker run --rm --interactive \
+        --security-opt label=disable        \
+        --volume {{ tmp_dir }}/{{ item.name }}:/work --workdir /work \
+        quay.io/coreos/fcct:release --pretty --strict config-ign.yaml --output config.ign'
+      with_items: "{{ cluster_nodes }}"
+  when: vm_os_distro == "fcos"
+
+- name: Define VMs
+  virt:
+    name: "{{ item.name }}"
+    command: define
+    xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
+  with_items: "{{ cluster_nodes }}"
+
+- name: Start a VMs
+  virt:
+    name: "{{ item.name }}"
+    state: running
+  with_items: "{{ cluster_nodes }}"
+
+- name: Wait for VMs to be ready
   wait_for:
     host: "{{ item.1.address }}"
     port: 22
@@ -151,13 +170,13 @@
     - interfaces
   when: item.1.address is defined and item.1.mode == "dhcp"
 
-- name: Insert node into ssh_config
+- name: Insert nodes into ssh_config
   become: True
   blockinfile:
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ ansible_env.HOME }}/.ssh/config"
 
-- name: Add new node to created_nodes Ansible group
+- name: Add new nodes to created_nodes Ansible group
   add_host:
     name: "{{ item.1.address }}"
     instance_name: "{{ item.0.name }}.{{ dns_domain }}"
