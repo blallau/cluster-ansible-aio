@@ -148,7 +148,6 @@
 
 - name: Define VMs
   virt:
-    name: "{{ item.name }}"
     command: define
     xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
   with_items: "{{ cluster_nodes }}"
