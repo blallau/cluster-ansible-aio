@@ -46,17 +46,10 @@ pip_dependencies:
   - lxml
   - pip
 
-##################################
-# Ubuntu/CentOS OS image variables
-##################################
 destroy_images: False
 
-ubuntu_os_image_url: https://cloud-images.ubuntu.com/releases/16.04/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img
-ubuntu_os_image: "{{ ubuntu_os_image_url.split('/')[-1] }}"
+#vm_os_image: "ubuntu-16.04-server-cloudimg-amd64-disk1.img"
+#vm_os_image: "CentOS-7-x86_64-GenericCloud.qcow2"
+vm_os_image: "debian-10-openstack-amd64.qcow2"
 
-centos_os_image_xz_url: https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2.xz
-centos_os_image_xz: "{{ centos_os_image_xz_url.split('/')[-1] }}"
-centos_os_image: "{{ centos_os_image_xz.split('.')[:-1] | join('.') }}"
-
-vm_os_image: "{{ centos_os_image if vm_os_distro == 'centos' else ubuntu_os_image }}"
 os_default_user: "{{ vm_os_distro }}"

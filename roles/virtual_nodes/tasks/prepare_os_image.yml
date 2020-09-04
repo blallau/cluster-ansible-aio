@@ -10,45 +10,15 @@
   with_items: "{{ cluster_nodes }}"
   register: copied
 
-- name: Check if CentOS file is already downloaded
-  stat:
-    path: "{{ tmp_dir }}/{{ centos_os_image_xz }}"
-  register: centos_downloaded
-  when: vm_os_distro == "centos"
-
-- name: Download CentOS Operating System image
-  get_url:
-    url: "{{ centos_os_image_xz_url }}"
-    dest: "{{ tmp_dir }}"
-  when: vm_os_distro == "centos" and not centos_downloaded.stat.exists
-
-- name: Check if CentOS file is already unpacked
-  stat:
-    path: "{{ tmp_dir }}/{{ centos_os_image }}"
-  register: centos_unpacked
-  when: vm_os_distro == "centos"
-
-- name: Uncompress CentOS OS image
-  command: "unxz -k {{ tmp_dir }}/{{ centos_os_image_xz }}"
-  when: vm_os_distro == "centos" and not centos_unpacked.stat.exists
-
-- name: Check if Ubuntu file is already downloaded
-  stat:
-    path: "{{ tmp_dir }}/{{ ubuntu_os_image }}"
-  register: ubuntu_downloaded
-  when: vm_os_distro == "ubuntu"
-
-- name: Download Ubuntu Operating System image
-  get_url:
-    url: "{{ ubuntu_os_image_url }}"
-    dest: "{{ tmp_dir }}"
-  when: vm_os_distro == "ubuntu" and not ubuntu_downloaded.stat.exists
-
 - name: Create VM-specific directories
   file:
     path: "{{ tmp_dir }}/{{ item.name }}"
     state: directory
   with_items: "{{ cluster_nodes }}"
+
+- name: "Check QCOW2 image {{ tmp_dir }}/{{ vm_os_image }} is present"
+  stat:
+    path: "{{ tmp_dir }}/{{ vm_os_image }}"
 
 - name: Copy OS images to libvirt directory
   become: True
