@@ -1,5 +1,5 @@
 #jinja2: lstrip_blocks: True
-<domain type='kvm'>
+<domain type='kvm'{% if vm_os_distro == 'fcos' %} xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'{% endif %}>
   <name>{{ item.name }}</name>
   <metadata>
     <aio:instance xmlns:aio="https://github.com/blallau/ansible-aio">
@@ -8,7 +8,8 @@
   </metadata>
   {% if vm_os_distro == 'fcos' %}
   <qemu:commandline>
-    <qemu:arg value='-fw_cfg name=opt/com.coreos/config,file={{ tmp_dir }}/{{ item.name }}/config.ign'/>
+    <qemu:arg value='-fw_cfg'/>
+    <qemu:arg value='name=opt/com.coreos/config,file={{ tmp_dir }}/{{ item.name }}/config.ign'/>
   </qemu:commandline>
   {% endif %}
   <memory unit='GiB'>{{ item.ram }}</memory>
@@ -82,7 +83,7 @@
       <source bridge='{{ intf.bridge }}'/>
       <target dev='vnet{{ loop.index }}'/>
       {% if intf.mac is defined %}
-      <mac address='{{ intf.mac }}'/>
+        <mac address='{{ intf.mac }}'/>
       {% endif %}
       <model type='virtio'/>
       <driver name='vhost' queues='1'/>
@@ -100,8 +101,11 @@
       <alias name='serial0'/>
     </console>
     <input type='keyboard' bus='ps2'>
-      <alias name='input1'/>
+    <alias name='input1'/>
     </input>
+    <!-- <graphics type='vnc' port='5900' autoport='yes' listen='0.0.0.0'> -->
+    <!--   <listen type='address' address='0.0.0.0'/> -->
+    <!-- </graphics> -->
     <memballoon model='virtio'>
       <alias name='balloon0'/>
     </memballoon>
