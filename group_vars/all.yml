@@ -60,7 +60,7 @@ pip_cache_proxy_port: 3141
 ############################
 # APT cache proxy defaults #
 ############################
-apt_cache_enabled: "True"
+apt_cache_enabled: "False"
 destroy_apt_cache: "False"
 apt_cache_proxy_ip: "{{ host_ip }}"
 apt_cache_proxy_port: 3142
