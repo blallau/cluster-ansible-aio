@@ -4,6 +4,10 @@
     command: list_nets
   register: net_exists
 
+- name: Collect facts about existing Libvirt networks
+  virt_net:
+    command: facts
+
 - name: Display networks
   debug:
     msg: "{{ lookup('template','network.xml.j2') }}"
@@ -29,4 +33,4 @@
         autostart: True
         name: "{{ item.name }}"
       with_items: "{{ host_interfaces }}"
-  when: item.name not in net_exists.list_nets
+  when: item.name in ansible_libvirt_networks and ansible_libvirt_networks[item.name].state == 'inactive'
