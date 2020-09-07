@@ -51,6 +51,12 @@
 #   become: True
 #   when: storage_volume_enabled | bool
 
+- name: "Clean nodes config in {{ tmp_dir }}"
+  file:
+    path: "{{ tmp_dir }}/{{ item.name }}"
+    state: absent
+  with_items: "{{ cluster_nodes }}"
+
 - name: Clean nodes from ssh_config
   become: True
   blockinfile:

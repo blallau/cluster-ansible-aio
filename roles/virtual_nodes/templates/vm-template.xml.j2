@@ -83,7 +83,7 @@
       <source bridge='{{ intf.bridge }}'/>
       <target dev='vnet{{ loop.index }}'/>
       {% if intf.mac is defined %}
-        <mac address='{{ intf.mac }}'/>
+      <mac address='{{ intf.mac }}'/>
       {% endif %}
       <model type='virtio'/>
       <driver name='vhost' queues='1'/>
