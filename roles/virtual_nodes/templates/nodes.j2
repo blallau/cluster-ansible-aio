@@ -52,21 +52,23 @@
   interfaces:
 {% set outer_worker_loop = loop %}
 {% for intf in host_interfaces %}
-{% if vm_os_distro == 'centos' %}
+{% if vm_os_distro == 'centos' or vm_os_distro == 'debian' %}
 {% set intf_nb = loop.index0 %}
     - name: "eth{{ intf_nb }}"
-{% elif vm_os_distro == 'ubuntu' or vm_os_distro == 'debian' %}
+{% elif vm_os_distro == 'ubuntu' %}
 {% set intf_nb = loop.index + 1 %}
     - name: "ens{{ intf_nb }}"
+{% elif vm_os_distro == 'fcos' %}
+{% set intf_nb = loop.index0 %}
+    - name: "enp1s{{ intf_nb }}"
 {% endif %}
       bridge: "{{ intf.bridge }}"
       mode: "{{ intf.mode }}"
       cidr: "{{ intf.cidr }}"
 {% set ip = 100 + outer_worker_loop.index * 10 + loop.index %}
       address: "{{ intf.cidr | ipaddr(ip) | ipaddr('address') }}"
-{% if intf.mode == 'dhcp' %}
       mac: "{{ mac_prefix }}:1{{ outer_worker_loop.index }}:0{{ loop.index }}"
-{% elif intf.mode == 'static' %}
+{% if intf.mode == 'static' %}
       netmask: "{{ intf.cidr | ipaddr('netmask') }}"
 {% endif %}
 {% endfor %}
