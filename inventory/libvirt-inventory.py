@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 '''
 libvirt external inventory script
@@ -14,7 +14,7 @@ info about all of your managed instances.
 '''
 
 import argparse
-import ConfigParser
+import configparser
 import os
 import sys
 import libvirt
@@ -49,7 +49,7 @@ class LibvirtInventory(object):
     def read_settings(self):
         ''' Reads the settings from the libvirt.ini file '''
 
-        config = ConfigParser.SafeConfigParser()
+        config = configparser.ConfigParser()
         config.read(
             os.path.dirname(os.path.realpath(__file__)) + '/libvirt.ini'
         )

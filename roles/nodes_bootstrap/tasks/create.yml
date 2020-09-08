@@ -37,18 +37,16 @@
 
 - name: Install CentOS packages
   yum:
-    name: "{{ item }}"
+    name: "{{ yum_packages }}"
     update_cache: True
-  with_items: "{{ yum_packages }}"
   when: ansible_distribution|lower == "centos"
 
 - name: Install Ubuntu packages
   apt:
-    name: "{{ item }}"
+    pkg: "{{ apt_packages }}"
     state: latest
     update_cache: True
-  with_items: "{{ apt_packages }}"
-  when: ansible_distribution|lower == "ubuntu"
+  when: ansible_distribution|lower == "ubuntu" or ansible_distribution|lower == "debian"
 
 - name: Start NTP service
   systemd:
