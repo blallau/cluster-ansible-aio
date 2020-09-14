@@ -18,7 +18,7 @@
     <dhcp>
       <range start='{{ dhcp_range_start }}' end='{{ dhcp_range_end }}'/>
 {% for node in cluster_nodes %}
-      <host mac='{{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | map(attribute='mac') | join }}' ip='{{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | map(attribute='address') | join }}'/>
+      <host mac='{{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | selectattr('bridge', 'equalto', item.name) | map(attribute='mac') | join }}' ip='{{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | selectattr('bridge', 'equalto', item.name) | map(attribute='address') | join }}'/>
 {% endfor %}
     </dhcp>
 {% endif %}
