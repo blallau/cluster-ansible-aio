@@ -73,7 +73,7 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.1.address is defined and item.1.mode == "dhcp"
+  when: item.1.address is defined and item.1.external is defined and item.1.external
 
 - name: "Clean {{ ansible_env.HOME }}/.ssh/known_hosts"
   known_hosts:

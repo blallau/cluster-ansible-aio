@@ -36,7 +36,7 @@ sudo pip install -U pip
 
 #Ubuntu
 sudo apt-get update
-sudo apt-get install python-pip
+sudo apt-get install python3-pip python-libvirt
 sudo pip install -U pip
 ```
 

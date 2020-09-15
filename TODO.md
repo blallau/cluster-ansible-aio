@@ -1,9 +1,12 @@
 Bug Fix
 -------
 - Fix root login on Centos
-- Fix issue when more than 1 network use DHCP mode
 - Fix bug when no network interface
 - Fix Docker registry deployment on 18.04
+- Fix snapshot
+- Fix DNS
+- Enhance image selection (vm_os_distro & vm_os_image)
+  => use Key/Value? [os_image: vm_os_image]
 
 Features
 --------
@@ -14,3 +17,4 @@ Features
 - Use block in some places to avoid 'when', 'sudo' statements repetition
   https://www.jeffgeerling.com/blog/new-features-ansible-20-blocks
 - Add precheck for: storage capacity
+- Generate Ansible host file for Kast

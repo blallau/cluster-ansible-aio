@@ -81,6 +81,7 @@ cat <<EOF
 --extra -e
 --limit
 --verbose -v
+create-virtual-network
 create-virtual-nodes
 nodes-bootstrap
 docker-bootstrap
@@ -165,6 +166,11 @@ case "$1" in
 (create-virtual-nodes)
         ACTION="Bootstrap hypervisor and create virtual nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e method=create"
+        PLAYBOOK="${BASEDIR}/virtual-nodes.yml"
+        ;;
+(create-virtual-networks)
+        ACTION="Bootstrap hypervisor and create virtual nodes"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=create -t network"
         PLAYBOOK="${BASEDIR}/virtual-nodes.yml"
         ;;
 (remove-virtual-nodes)

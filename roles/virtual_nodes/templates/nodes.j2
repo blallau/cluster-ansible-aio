@@ -23,6 +23,9 @@
 {% set intf_nb = loop.index0 %}
     - name: "enp1s{{ intf_nb }}"
 {% endif %}
+{% if intf.forward is defined and intf.forward == 'nat' %}
+      external: True
+{% endif %}
       bridge: "{{ intf.bridge }}"
       mode: "{{ intf.mode }}"
       cidr: "{{ intf.cidr }}"
@@ -45,7 +48,7 @@
 {% endif %}
 {% endfor %}
 {% for worker in range(worker_nb) %}
-- name: "{{ node_prefix }}node{{ worker }}"
+- name: "{{ node_prefix }}worker{{ worker }}"
   ram: {{ worker_ram }}
   vcpu: {{ worker_cpu }}
   role: worker
@@ -61,6 +64,9 @@
 {% elif vm_os_distro == 'fcos' %}
 {% set intf_nb = loop.index0 %}
     - name: "enp1s{{ intf_nb }}"
+{% endif %}
+{% if intf.forward is defined and intf.forward == 'nat' %}
+      external: True
 {% endif %}
       bridge: "{{ intf.bridge }}"
       mode: "{{ intf.mode }}"

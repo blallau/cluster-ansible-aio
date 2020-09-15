@@ -41,16 +41,22 @@
     update_cache: True
   when: ansible_distribution|lower == "centos"
 
-- name: Install Ubuntu packages
+- name: Install Ubuntu or Debian packages
   apt:
     pkg: "{{ apt_packages }}"
     state: latest
     update_cache: True
   when: ansible_distribution|lower == "ubuntu" or ansible_distribution|lower == "debian"
 
+- name: "Adding user {{ os_default_user }} to group sudo"
+  user:
+    name: "{{ os_default_user }}"
+    groups: sudo
+    append: yes
+
 - name: Start NTP service
   systemd:
-    name: "{{ 'ntp' if ansible_distribution|lower == 'ubuntu' else 'ntpd' }}"
+    name: "{{ 'ntp' if ansible_distribution|lower == 'ubuntu' or ansible_distribution|lower == 'debian' else 'ntpd' }}"
     enabled: True
     state: started
 
@@ -61,5 +67,5 @@
     state: started
   when: network_manager_enabled | bool
 
-- import_tasks: configure_ssh.yml
-  tags: ssh
+# - import_tasks: configure_ssh.yml
+#   tags: ssh

@@ -8,8 +8,22 @@
   virt_net:
     command: facts
 
+- name: "Copy host_interfaces in {{ tmp_dir }}"
+  blockinfile:
+    path: "{{ tmp_dir }}/host_interfaces"
+    create: True
+    block: |
+        {{ host_interfaces | to_nice_json(indent=2) }}
+
 - name: Steps to setup network using Libvirt
   block:
+    - name: "Copy Libvirt XML network domain in {{ tmp_dir }}"
+      blockinfile:
+        path: "{{ tmp_dir }}/{{ item.name }}.xml"
+        create: True
+        block: |
+            {{ lookup('template', 'network.xml.j2') }}
+      with_items: "{{ host_interfaces }}"
     - name: Define virtual networks
       virt_net:
         command: define

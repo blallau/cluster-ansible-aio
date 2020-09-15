@@ -68,8 +68,10 @@ apt_cache_proxy_port: 3142
 ############################
 #   DNS server defaults    #
 ############################
-dns_server_enabled: "True"
+libvirt_dns_enabled: "True"
+dns_server_enabled: "False"
 destroy_dns_server: "False"
+
 dns_server_proxy_ip: "{{ host_ip }}"
 dns_server_port: 53
 dns_server_webproc_port: 5380

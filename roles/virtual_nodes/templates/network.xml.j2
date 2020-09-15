@@ -10,7 +10,12 @@
   <forward mode='nat'/>
 {% endif %}
   <bridge name='{{ item.bridge }}' stp='on' delay='0'/>
+{% if libvirt_dns_enabled and item.forward is defined and item.forward == 'nat' %}
+  <dns enable='yes'/>
+  <domain name='{{ dns_domain }}' localOnly='yes'/>
+{% else %}
   <dns enable='no'/>
+{% endif %}
   <ip address='{{ ip }}' netmask='{{ netmask }}'>
 {% if item.mode == 'dhcp' %}
     {% set dhcp_range_start = item.cidr | ipaddr('100') | ipaddr('address') -%}

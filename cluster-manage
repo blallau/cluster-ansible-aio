@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NODE_PREFIX=""
-SERVICES="${NODE_PREFIX}master-* ${NODE_PREFIX}node-*"
+SERVICES="${NODE_PREFIX}master-* ${NODE_PREFIX}worker-*"
 SNAPSHOT_NAME=""
 TIMEOUT=300
 
