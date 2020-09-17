@@ -22,6 +22,9 @@
     {% set dhcp_range_end = item.cidr | ipaddr('254') | ipaddr('address') -%}
     <dhcp>
       <range start='{{ dhcp_range_start }}' end='{{ dhcp_range_end }}'/>
+{% if item.pxe is defined and item.pxe %}
+      <bootp file='http://{{ ip }}/boot.ipxe'/>
+{% endif %}
 {% for node in cluster_nodes %}
       <host mac='{{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | selectattr('bridge', 'equalto', item.name) | map(attribute='mac') | join }}' ip='{{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | selectattr('bridge', 'equalto', item.name) | map(attribute='address') | join }}'/>
 {% endfor %}

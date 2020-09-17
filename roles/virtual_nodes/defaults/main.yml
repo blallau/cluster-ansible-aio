@@ -17,23 +17,16 @@ worker_cpu: 1
 # Networking info
 #################
 host_interfaces:
-  - name: prov-br
+  - name: overlay-br
+    mode: dhcp
+    cidr: 10.150.150.0/24
+    bridge: overlay-br
+  - name: ext-br
     forward: nat
     mode: dhcp
     cidr: 10.100.100.0/24
-    bridge: prov-br
-  - name: mgmt-br
-    mode: static
-    cidr: 10.150.150.0/24
-    bridge: mgmt-br
-  # - name: br0-br
-  #   forward: bridge
-  #   mode: static
-  #   cidr: 10.200.200.0/24
-  #   bridge: br0
-  # - name: ext-br
-  #   cidr: 10.200.200.0/24
-  #   bridge: ext-br
+    bridge: ext-br
+    pxe: True
 
 dns_domain: "mydomain.org"
 
