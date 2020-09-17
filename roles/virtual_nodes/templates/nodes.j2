@@ -10,6 +10,7 @@
   ram: {{ master_ram }}
   vcpu: {{ master_cpu }}
   role: master
+{% if host_interfaces %}
   interfaces:
 {% set outer_master_loop = loop %}
 {% for intf in host_interfaces %}
@@ -36,6 +37,9 @@
       netmask: "{{ intf.cidr | ipaddr('netmask') }}"
 {% endif %}
 {% endfor %}
+{% else %}
+  interfaces: []
+{% endif %}
 {% if storage_volume_enabled %}
   disks:
 {% for volume in host_volumes %}
@@ -52,6 +56,7 @@
   ram: {{ worker_ram }}
   vcpu: {{ worker_cpu }}
   role: worker
+{% if host_interfaces %}
   interfaces:
 {% set outer_worker_loop = loop %}
 {% for intf in host_interfaces %}
@@ -78,6 +83,9 @@
       netmask: "{{ intf.cidr | ipaddr('netmask') }}"
 {% endif %}
 {% endfor %}
+{% else %}
+  interfaces: []
+{% endif %}
 {% if storage_volume_enabled %}
   disks:
 {% for volume in host_volumes %}
