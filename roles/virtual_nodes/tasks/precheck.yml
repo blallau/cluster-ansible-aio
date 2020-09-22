@@ -3,7 +3,7 @@
   block:
     - name: check physical_disks is set
       fail:
-        msg: "when storage_volume_enabled==True, physical_disks MUST be set"
+        msg: "when vm_volumes|length > 0, physical_disks MUST be set"
       when: physical_disks is not defined
 
     - name: List storage pool
@@ -39,4 +39,4 @@
         autostart: True
         name: "{{ virt_volume_group }}"
 
-  when: storage_volume_enabled | bool
+  when: vm_volumes|length > 0

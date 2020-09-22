@@ -40,7 +40,7 @@
 {% else %}
   interfaces: []
 {% endif %}
-{% if storage_volume_enabled %}
+{% if vm_volumes|length > 0 %}
   disks:
 {% for volume in vm_volumes %}
 {% set device = disk_device(loop.index) %}
@@ -86,7 +86,7 @@
 {% else %}
   interfaces: []
 {% endif %}
-{% if storage_volume_enabled %}
+{% if vm_volumes|length > 0 %}
   disks:
 {% for volume in vm_volumes %}
 {% set device = disk_device(loop.index) %}

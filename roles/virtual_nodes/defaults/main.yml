@@ -8,11 +8,11 @@ node_prefix: ""
 #####################
 master_nb: 1
 master_ram: 4
-master_cpu: 1
+master_cpu: 2
 
-worker_nb: 2
-worker_ram: 4
-worker_cpu: 1
+worker_nb: 1
+worker_ram: {{ master_ram }}
+worker_cpu: {{ master_cpu }}
 
 # Networking info
 #################
@@ -34,16 +34,25 @@ dns_domain: "mydomain.org"
 ##############
 root_disk_size: "20"
 
-storage_volume_enabled: False
+# Additional disks (LVM)
 virt_volume_group: "virtvg"
 
-host_volumes:
-  - name: volume1
-    size: 10
+physical_disks:
+  - /dev/nvme0n1p6
+
+vm_volumes:
+  - name: vol1
+    size: 20
     format: raw
-  - name: volume2
-    size: 10
+  - name: vol2
+    size: 20
     format: raw
-  - name: volume3
-    size: 10
-    format: raw
+
+# # kubernetes
+# ############
+# cni_version: v0.8.6
+# kubernetes_version: v1.18.8
+# crictl_version: v1.18.0
+# setup_command: "kubeadm init --config=/etc/kubernetes/kubeadm-custom-config.yaml"
+# pod_subnet: "10.244.0.0/16"
+# kube_binaries_path: "/usr/local/bin"

@@ -66,7 +66,7 @@
       <readonly/>
     </disk>
     {% endif %}
-    {% if storage_volume_enabled %}
+    {% if vm_volumes|length > 0 %}
     {% for disk in item.disks %}
     <disk type='block' device='disk'>
       <driver name='qemu' type='raw' cache='none' io='native'/>

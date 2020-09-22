@@ -6,7 +6,6 @@
     pool: "{{ virt_volume_group }}"
     format: "{{ item.1.format | default('raw') }}"
     state: present
-    # strategy: least
   with_subelements:
     - "{{ cluster_nodes }}"
     - disks

@@ -56,7 +56,7 @@
   tags: network
 
 - include_tasks: libvirt/setup_libvirt_storages.yml
-  when: storage_volume_enabled | bool
+  when: vm_volumes|length > 0
 
 - import_tasks: docker/enable_apt_proxy.yml
   when: apt_cache_enabled | bool

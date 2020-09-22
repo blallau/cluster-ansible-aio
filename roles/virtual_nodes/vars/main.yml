@@ -48,8 +48,12 @@ pip_dependencies:
 
 destroy_images: False
 
-#vm_os_image: "ubuntu-16.04-server-cloudimg-amd64-disk1.img"
-#vm_os_image: "CentOS-7-x86_64-GenericCloud.qcow2"
-vm_os_image: "debian-10-openstack-amd64.qcow2"
-
 os_default_user: "{{ vm_os_distro }}"
+
+vm_os_images:
+  ubuntu: "ubuntu-16.04-server-cloudimg-amd64-disk1.img"
+  debian: "debian-10-openstack-amd64.qcow2"
+  fcos: "fedora-coreos-32.qcow2"
+  centos: "CentOS-7-x86_64-GenericCloud.qcow2"
+
+vm_os_image: "{{ vm_os_images[vm_os_distro] }}"
