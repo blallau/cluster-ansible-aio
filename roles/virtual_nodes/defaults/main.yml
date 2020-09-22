@@ -11,8 +11,8 @@ master_ram: 4
 master_cpu: 2
 
 worker_nb: 1
-worker_ram: {{ master_ram }}
-worker_cpu: {{ master_cpu }}
+worker_ram: "{{ master_ram }}"
+worker_cpu: "{{ master_cpu }}"
 
 # Networking info
 #################
