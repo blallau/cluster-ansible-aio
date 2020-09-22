@@ -1,12 +1,9 @@
 Bug Fix
 -------
 - Fix root login on Centos
-- Fix bug when no network interface
 - Fix Docker registry deployment on 18.04
 - Fix snapshot
 - Fix DNS
-- Enhance image selection (vm_os_distro & vm_os_image)
-  => use Key/Value? [os_image: vm_os_image]
 
 Features
 --------

@@ -8,12 +8,12 @@
   virt_net:
     command: facts
 
-- name: "Copy host_interfaces in {{ tmp_dir }}"
+- name: "Copy net_interfaces in {{ tmp_dir }}"
   blockinfile:
-    path: "{{ tmp_dir }}/host_interfaces"
+    path: "{{ tmp_dir }}/net_interfaces"
     create: True
     block: |
-        {{ host_interfaces | to_nice_json(indent=2) }}
+        {{ net_interfaces | to_nice_json(indent=2) }}
 
 - name: Steps to setup network using Libvirt
   block:
@@ -23,22 +23,22 @@
         create: True
         block: |
             {{ lookup('template', 'network.xml.j2') }}
-      with_items: "{{ host_interfaces }}"
+      with_items: "{{ net_interfaces }}"
     - name: Define virtual networks
       virt_net:
         command: define
         name: "{{ item.name }}"
         xml: '{{ lookup("template", "network.xml.j2") }}'
-      with_items: "{{ host_interfaces }}"
+      with_items: "{{ net_interfaces }}"
     - name: Autostart virtual networks
       virt_net:
         autostart: True
         name: "{{ item.name }}"
-      with_items: "{{ host_interfaces }}"
+      with_items: "{{ net_interfaces }}"
     - name: Start virtual networks
       virt_net:
         state: active
         autostart: True
         name: "{{ item.name }}"
-      with_items: "{{ host_interfaces }}"
+      with_items: "{{ net_interfaces }}"
   when: (item.name not in ansible_libvirt_networks) or (item.name in ansible_libvirt_networks and ansible_libvirt_networks[item.name].state == 'inactive')

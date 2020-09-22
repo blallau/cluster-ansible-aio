@@ -1,5 +1,5 @@
 {% set mac_prefix = "52:54:00:33" %}
-{% set lettres = ['a', 'b', 'c', 'd', 'e', 'f'] %}
+{% set lettres = ['b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
 {% macro disk_device(index) -%}
 {% set device = lettres[index | int] -%}
 {{ device }}
@@ -10,10 +10,10 @@
   ram: {{ master_ram }}
   vcpu: {{ master_cpu }}
   role: master
-{% if host_interfaces %}
+{% if net_interfaces %}
   interfaces:
 {% set outer_master_loop = loop %}
-{% for intf in host_interfaces %}
+{% for intf in net_interfaces %}
 {% if vm_os_distro == 'centos' or vm_os_distro == 'debian' %}
 {% set intf_nb = loop.index0 %}
     - name: "eth{{ intf_nb }}"
@@ -42,7 +42,7 @@
 {% endif %}
 {% if storage_volume_enabled %}
   disks:
-{% for volume in host_volumes %}
+{% for volume in vm_volumes %}
 {% set device = disk_device(loop.index) %}
     - name: "vol-{{ node_prefix }}master{{ master }}-{{ loop.index }}"
       device: "vd{{ device }}"
@@ -56,10 +56,10 @@
   ram: {{ worker_ram }}
   vcpu: {{ worker_cpu }}
   role: worker
-{% if host_interfaces %}
+{% if net_interfaces %}
   interfaces:
 {% set outer_worker_loop = loop %}
-{% for intf in host_interfaces %}
+{% for intf in net_interfaces %}
 {% if vm_os_distro == 'centos' or vm_os_distro == 'debian' %}
 {% set intf_nb = loop.index0 %}
     - name: "eth{{ intf_nb }}"
@@ -88,7 +88,7 @@
 {% endif %}
 {% if storage_volume_enabled %}
   disks:
-{% for volume in host_volumes %}
+{% for volume in vm_volumes %}
 {% set device = disk_device(loop.index) %}
     - name: "vol-{{ node_prefix }}node{{ worker }}-{{ loop.index }}"
       device: "vd{{ device }}"

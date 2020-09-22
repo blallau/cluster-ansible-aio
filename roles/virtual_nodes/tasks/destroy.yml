@@ -45,11 +45,9 @@
   ignore_errors: True
 
 - import_tasks: libvirt/destroy_libvirt_networks.yml
-  become: True
 
-# - include_tasks: libvirt/destroy_libvirt_storages.yml
-#   become: True
-#   when: storage_volume_enabled | bool
+- include_tasks: libvirt/destroy_libvirt_storages.yml
+  when: storage_volume_enabled | bool
 
 - name: "Clean nodes config in {{ tmp_dir }}"
   file:

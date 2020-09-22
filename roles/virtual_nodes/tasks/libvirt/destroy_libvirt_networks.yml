@@ -10,11 +10,11 @@
       virt_net:
         command: destroy
         name: "{{ item.name }}"
-      with_items: "{{ host_interfaces }}"
+      with_items: "{{ net_interfaces }}"
     - name: Undefine virtual bridges
       virt_net:
         command: undefine
         name: "{{ item.name }}"
-      with_items: "{{ host_interfaces }}"
+      with_items: "{{ net_interfaces }}"
   when: item.name in bridge_exists.list_nets
   ignore_errors: True

@@ -87,11 +87,12 @@ EXAMPLES = '''
 
 import sys
 import random
+import xml.dom.minidom
 
 try:
     import libvirt
 except ImportError:
-    print "failed=True msg='libvirt python module unavailable'"
+    print("failed=True msg='libvirt python module unavailable'")
     sys.exit(1)
 
 try:
@@ -100,7 +101,7 @@ except ImportError:
     try:
         import elementtree.ElementTree as ET
     except ImportError:
-        print "failed=True msg='ElementTree python module unavailable'"
+        print("failed=True msg='ElementTree python module unavailable'")
         sys.exit(1)
 
 def sizeToBytes(size):
@@ -153,7 +154,7 @@ def main():
 
     try:
         server = libvirt.open(uri)
-    except libvirt.libvirtError, e:
+    except libvirt.libvirtError as e:
         module.fail_json(msg=str(e))
 
     if not server:
@@ -253,9 +254,12 @@ def main():
                 volume.find('./target/path').text = '%s/%s' % (pool_path, vol_name)
                 volume.find('./target/format').attrib['type'] = vol_format
 
+                # hack(bl) use xml.dom.minidom in order to get str instead of bytes :(
+                xml_buf = xml.dom.minidom.parseString(ET.tostring(volume))
+
                 try:
-                    res = p.createXML(ET.tostring(volume),0)
-                except libvirt.libvirtError, e:
+                    res = p.createXML(xml_buf.toprettyxml(), 0)
+                except libvirt.libvirtError as e:
                     module.fail_json(msg="Failed to create the storage volume: %s" % str(e))
                 except:
                     msg_str = "Failed to create the storage volume: %s, %s" % (str(sys.exc_info()[0]), ET.tostring(volume))
@@ -277,7 +281,7 @@ def main():
             else:
                 try:
                     p.storageVolLookupByName(vol_name).delete()
-                except libvirt.libvirtError, e:
+                except libvirt.libvirtError as e:
                     module.fail_json(msg="Failed to delete the storage volume: %s" % str(e))
                 except:
                     module.fail_json(msg="Failed to delete the storage volume.")
@@ -297,7 +301,7 @@ def main():
                 else:
                      try:
                          p.storageVolLookupByName(vol_name).wipe()
-                     except libvirt.libvirtError, e:
+                     except libvirt.libvirtError as e:
                          module.fail_json(msg="Failed to wipe the storage volume: %s" % str(e))
                      except:
                          module.fail_json(msg="Failed to wipe the storage volume.")

@@ -16,7 +16,7 @@ worker_cpu: 1
 
 # Networking info
 #################
-host_interfaces:
+net_interfaces:
   - name: overlay-br
     mode: dhcp
     cidr: 10.150.150.0/24

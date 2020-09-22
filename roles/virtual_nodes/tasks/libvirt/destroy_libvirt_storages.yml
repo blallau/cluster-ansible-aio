@@ -1,5 +1,5 @@
 ---
-- name: Destroy volume
+- name: Destroy virtual volumes
   virt_volume:
     name: "{{ item.1.name }}"
     pool: "{{ virt_volume_group }}"

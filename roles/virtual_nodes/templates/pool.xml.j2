@@ -1,0 +1,11 @@
+<pool type='logical'>
+  <name>{{ virt_volume_group }}</name>
+  <source>
+{% for physical_disk in physical_disks %}
+    <device path="{{ physical_disk }}"/>
+{% endfor %}
+  </source>
+  <target>
+    <path>"{{ virt_volume_group }}"</path>
+  </target>
+</pool>
