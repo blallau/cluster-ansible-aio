@@ -1,12 +1,12 @@
 #!/bin/bash
 
 NODE_PREFIX=""
-SERVICES="${NODE_PREFIX}master-* ${NODE_PREFIX}worker-*"
+SERVICES="${NODE_PREFIX}master* ${NODE_PREFIX}worker*"
 SNAPSHOT_NAME=""
 TIMEOUT=300
 
 function start {
-    docker start docker-dnsmasq
+#    docker start docker-dnsmasq
 	list_inactive_domains | while read DOMAIN; do
         for service in $SERVICES; do
             if [[ "$DOMAIN" =~ $service ]]; then
@@ -17,23 +17,26 @@ function start {
 }
 
 function destroy {
-    for service in $SERVICES; do
-        virsh destroy $service
-    done
-}
-
-function undefine {
-    for service in $SERVICES; do
-        virsh undefine $service
-    done
+	list_all_domains | while read DOMAIN; do
+        for service in $SERVICES; do
+            if [[ "$DOMAIN" =~ $service ]]; then
+                virsh destroy $DOMAIN
+		        virsh undefine --remove-all-storage $DOMAIN
+            fi
+        done
+	done
 }
 
 function list_inactive_domains() {
-    virsh list --inactive | grep "shut off" | awk '{ print $2}'
+    virsh -q list --inactive | grep "shut off" | awk '{print $2}'
 }
 
 function list_running_domains() {
-    virsh list | grep "running" | awk '{ print $2}'
+    virsh -q list | grep "running" | awk '{ print $2}'
+}
+
+function list_all_domains() {
+    virsh -q list | awk '{ print $2}'
 }
 
 function gracefully_shutdown {
@@ -66,30 +69,50 @@ function gracefully_shutdown {
 
 function snap-create {
     gracefully_shutdown
-    for service in $SERVICES; do
-        virsh snapshot-create-as --domain $service --name $SNAPSHOT_NAME
-        echo "Domain $service snapshoted"
+	list_inactive_domains | while read DOMAIN; do
+        for service in $SERVICES; do
+            if [[ "$DOMAIN" =~ $service ]]; then
+                virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME
+                echo "Snapshot $SNAPSHOT_NAME create for domain $DOMAIN"
+            fi
+        done
     done
     start
 }
 
 function snap-delete {
-    for service in $SERVICES; do
-        virsh snapshot-delete $service --snapshotname $SNAPSHOT_NAME
+    gracefully_shutdown
+	list_inactive_domains | while read DOMAIN; do
+        for service in $SERVICES; do
+            if [[ "$DOMAIN" =~ $service ]]; then
+                virsh snapshot-delete $DOMAIN --snapshotname $SNAPSHOT_NAME
+                echo "Snapshot $SNAPSHOT_NAME remove for domain $DOMAIN"
+            fi
+        done
     done
+    start
 }
 
 function snap-revert {
-    destroy
-    for service in $SERVICES; do
-        virsh snapshot-revert $service --snapshotname $SNAPSHOT_NAME
+    gracefully_shutdown
+	list_inactive_domains | while read DOMAIN; do
+        for service in $SERVICES; do
+            if [[ "$DOMAIN" =~ $service ]]; then
+                virsh snapshot-revert $DOMAIN --snapshotname $SNAPSHOT_NAME
+                echo "Snapshot $SNAPSHOT_NAME revert for domain $DOMAIN"
+            fi
+        done
     done
     start
 }
 
 function snap-list {
-    for service in $SERVICES; do
-        virsh snapshot-list $service
+	list_all_domains | while read DOMAIN; do
+        for service in $SERVICES; do
+            if [[ "$DOMAIN" =~ $service ]]; then
+                virsh -q snapshot-list --domain $DOMAIN
+            fi
+        done
     done
 }
 
@@ -98,7 +121,7 @@ function usage {
 Usage: $0 COMMAND
 
 Commands:
-    --purge                          Purge cluster
+    --cleanup                        Cleanup (destroy & undefine) cluster
     --start                          Start cluster
     --shutdown                       Shutdown cluster
     --snap-create <snapshot name>    Create cluster snapshot
