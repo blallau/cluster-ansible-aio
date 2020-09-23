@@ -17,7 +17,7 @@
   set_fact:
     cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
 
-# TODO(bl) destroy snapshot if present
+# TODO(bl) destroy snapshots if present
 - name: Steps to destroy VM using Libvirt
   block:
     - name: Destroy VMs

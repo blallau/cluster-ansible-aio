@@ -61,5 +61,3 @@ vm_os_images:
 vm_os_image: "{{ vm_os_images[vm_os_distro] }}"
 
 destroy_images: False
-
-os_default_user: "{{ vm_os_distro }}"

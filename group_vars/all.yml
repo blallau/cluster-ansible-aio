@@ -1,45 +1,9 @@
 ---
-##############################
-# Kolla-ansible-aio defaults #
-##############################
-
-# virtual nodes params
 vm_os_distro: "{{ ansible_distribution | lower }}"
 os_default_user: "{{ vm_os_distro }}"
 
-# Network params
-host_ip: 10.100.100.1
-node_internal_intf: ens4
-node_external_intf: ens5
-
-# Path to Kolla configuration directory.
-kolla_config_path: "{{ lookup('env', 'KOLLA_CONFIG_PATH') | default('/etc/kolla', true) }}"
-myvirt_config_path: "{{ ansible_env.HOME }}/.myvirt"
-
 config_owner_group: "kolla"
 config_owner_user: "kolla"
-
-########################
-# Kolla build defaults #
-########################
-
-# When building Kolla images, there are two methods of the OpenStack install.
-# One is "binary". Another is "source". The "binary" means that OpenStack will be
-# installed from apt/yum. And the "source" means that OpenStack will be
-# installed from source code.
-kolla_install_type: "source"
-
-# Docker image tag and namespace
-kolla_build_tag: "5.0.0"
-kolla_image_namespace: "kolla-ansible-aio"
-
-# The set of Kolla images built can be defined as a profile
-# Kolla provides some pre-defined profiles:
-# - "infra" infrastructure-related images
-# - "main" core OpenStack images
-# - "aux" auxiliary images such as trove, magnum, ironic
-# - "default" minimal set of images for a working deploy
-kolla_build_profile: "myprofile"
 
 ############################
 # Docker registry defaults #

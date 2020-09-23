@@ -25,6 +25,7 @@ net_interfaces:
     bridge: ext-br
     pxe: True
 
+host_ip: net_interfaces | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address')
 dns_domain: "mydomain.org"
 
 # Storage

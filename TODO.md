@@ -6,6 +6,7 @@ Bug Fix
 
 Features
 --------
+- Add QCOW2 disks
 - Manage static IP using a IP range not a CIDR
 - Speedup deployment (async task, pipelining, strategy, disabling fact)
   https://shadow-soft.com/turbo-charge-your-ansible/
