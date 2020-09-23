@@ -2,7 +2,7 @@
 {% for node in cluster_nodes %}
 
 Host {{ node.name }}
-  Hostname {{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | map(attribute='address') | join }}
+  Hostname {{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | map(attribute='address') | first | join }}
   UserKnownHostsFile /dev/null
   StrictHostKeyChecking no
   User {{ os_default_user }}
