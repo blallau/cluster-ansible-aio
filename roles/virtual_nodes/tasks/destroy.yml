@@ -17,7 +17,7 @@
   set_fact:
     cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
 
-# TODO destroy snapshot if present
+# TODO(bl) destroy snapshot if present
 - name: Steps to destroy VM using Libvirt
   block:
     - name: Destroy VMs
@@ -25,6 +25,7 @@
         command: destroy
         name: "{{ item.name }}"
       with_items: "{{ cluster_nodes }}"
+      ignore_errors: True
     - name: Undefine VMs
       virt:
         command: undefine
@@ -42,7 +43,6 @@
         state: absent
       with_items: "{{ cluster_nodes }}"
       when: destroy_images | bool
-  ignore_errors: True
 
 - import_tasks: libvirt/destroy_libvirt_networks.yml
 

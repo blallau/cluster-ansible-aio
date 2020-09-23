@@ -1,58 +1,65 @@
 ---
-####################
-# Host OS variables
-####################
-node_prefix: ""
+###########
+# Globals #
+###########
+home_dir: "{{ ansible_user_dir }}"
+tmp_dir: "{{ home_dir}}/tmp"
+libvirt_dir: "/var/lib/libvirt/images"
 
-# Cluster sizing info
 #####################
-master_nb: 1
-master_ram: 4
-master_cpu: 2
+# Docker containers #
+#####################
+docker_registry_name: "registry"
+docker_registry_image: "registry:2"
 
-worker_nb: 1
-worker_ram: "{{ master_ram }}"
-worker_cpu: "{{ master_cpu }}"
+docker_pip_cache_name: "devpi_proxy"
+docker_pip_cache_image: "127.0.0.1:5000/devpi"
 
-# Networking info
-#################
-net_interfaces:
-  - name: overlay-br
-    mode: dhcp
-    cidr: 10.150.150.0/24
-    bridge: overlay-br
-  - name: ext-br
-    forward: nat
-    mode: dhcp
-    cidr: 10.100.100.0/24
-    bridge: ext-br
-    pxe: True
+docker_apt_cache_name: "apt-cacher-ng_proxy"
+docker_apt_cache_image: "127.0.0.1:5000/apt-cacher-ng"
 
-dns_domain: "mydomain.org"
+docker_dns_server_name: "docker-dnsmasq"
+docker_dns_server_image: "127.0.0.1:5000/docker-dnsmasq"
 
-# Storage info
-##############
-root_disk_size: "20"
+############
+# Packages #
+############
+yum_dependencies:
+  - libvirt
+  - libvirt-devel
+  - bridge-utils
+  - genisoimage
+  - python-requests
+  - qemu-kvm
 
-# Additional disks (LVM)
-virt_volume_group: "virtvg"
+# ImportError: No module named ssl_match_hostname'
+#  - remove python-configparser
+apt_dependencies:
+  - openssh-server
+  - libvirt-daemon
+  - bridge-utils
+  - genisoimage
+  - python3-requests
+  - qemu-kvm
 
-physical_disks:
-  - /dev/nvme0n1p6
+pip_dependencies:
+  - netaddr
+  - docker
+  # - libvirt-python
+  - lxml
+  - pip
 
-vm_volumes:
-  - name: vol1
-    size: 20
-    format: raw
-  - name: vol2
-    size: 20
-    format: raw
+#############
+# OS images #
+#############
+vm_os_images:
+  ubuntu: "ubuntu-16.04-server-cloudimg-amd64-disk1.img"
+  debian: "debian-10-openstack-amd64.qcow2"
+  fcos: "fedora-coreos-32.qcow2"
+  centos: "CentOS-7-x86_64-GenericCloud.qcow2"
 
-# # kubernetes
-# ############
-# cni_version: v0.8.6
-# kubernetes_version: v1.18.8
-# crictl_version: v1.18.0
-# setup_command: "kubeadm init --config=/etc/kubernetes/kubeadm-custom-config.yaml"
-# pod_subnet: "10.244.0.0/16"
-# kube_binaries_path: "/usr/local/bin"
+vm_os_image: "{{ vm_os_images[vm_os_distro] }}"
+
+destroy_images: False
+
+os_default_user: "{{ vm_os_distro }}"

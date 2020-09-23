@@ -15,7 +15,7 @@ Features
 -   Multi-nodes (N master and N worker)
 -   Multi OS (CentOS, Ubuntu)
 -   Multi guest OS (CentOS, Ubuntu, Debian)
--   Multi Networks (DHCP, static)
+-   Multi networks using DHCP or static IPs
 -   Multi block storage (LVM disks)
 -   Heavily automated using Ansible
 -   Quick deployment: using PIP cache proxy (Devpi) and APT cache proxy (apt-cacher-ng)

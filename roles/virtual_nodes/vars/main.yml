@@ -1,59 +1,53 @@
 ---
-###########
-# Globals #
-###########
-home_dir: "{{ ansible_user_dir }}"
-tmp_dir: "{{ home_dir}}/tmp"
-libvirt_dir: "/var/lib/libvirt/images"
+node_prefix: ""
 
+# Cluster sizing info
 #####################
-# Docker containers #
-#####################
-docker_registry_name: "registry"
-docker_registry_image: "registry:2"
+master_nb: 1
+master_ram: 4
+master_cpu: 2
 
-docker_pip_cache_name: "devpi_proxy"
-docker_pip_cache_image: "127.0.0.1:5000/devpi"
+worker_nb: 1
+worker_ram: "{{ master_ram }}"
+worker_cpu: "{{ master_cpu }}"
 
-docker_apt_cache_name: "apt-cacher-ng_proxy"
-docker_apt_cache_image: "127.0.0.1:5000/apt-cacher-ng"
-
-docker_dns_server_name: "docker-dnsmasq"
-docker_dns_server_image: "127.0.0.1:5000/docker-dnsmasq"
-
+# Networking
 ############
-# Packages #
-############
-yum_dependencies:
-  - libvirt
-  - libvirt-devel
-  - bridge-utils
-  - genisoimage
-  - python-requests
-  - qemu-kvm
+net_interfaces:
+  - name: overlay-br
+    mode: dhcp
+    cidr: 10.150.150.0/24
+    bridge: overlay-br
+  - name: ext-br
+    forward: nat
+    mode: dhcp
+    cidr: 10.100.100.0/24
+    bridge: ext-br
+    pxe: True
 
-apt_dependencies:
-  - openssh-server
-  - libvirt-bin
-  - bridge-utils
-  - genisoimage
-  - python-requests
-  - qemu-kvm
+dns_domain: "mydomain.org"
 
-pip_dependencies:
-  - docker
-  - libvirt-python
-  - lxml
-  - pip
+# Storage
+#########
+root_disk_size: "20"
+# Additional disks (LVM)
+physical_disks:
+  - /dev/nvme0n1p6
+virt_volume_group: "virtvg"
 
-destroy_images: False
+vm_volumes: []
+  # - name: vol1
+  #   size: 20
+  #   format: raw
+  # - name: vol2
+  #   size: 20
+  #   format: raw
 
-os_default_user: "{{ vm_os_distro }}"
-
-vm_os_images:
-  ubuntu: "ubuntu-16.04-server-cloudimg-amd64-disk1.img"
-  debian: "debian-10-openstack-amd64.qcow2"
-  fcos: "fedora-coreos-32.qcow2"
-  centos: "CentOS-7-x86_64-GenericCloud.qcow2"
-
-vm_os_image: "{{ vm_os_images[vm_os_distro] }}"
+# # kubernetes
+# ############
+# cni_version: v0.8.6
+# kubernetes_version: v1.18.8
+# crictl_version: v1.18.0
+# setup_command: "kubeadm init --config=/etc/kubernetes/kubeadm-custom-config.yaml"
+# pod_subnet: "10.244.0.0/16"
+# kube_binaries_path: "/usr/local/bin"
