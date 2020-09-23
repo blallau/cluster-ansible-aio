@@ -1,3 +1,0 @@
----
-- name: Kolla-ansible cleanup all deployed Kolla containers, volumes and host configuration
-  command: "kolla-ansible destroy -i {{ kolla_node_home_dir }}/multinode --yes-i-really-really-mean-it"
