@@ -39,6 +39,7 @@
     regexp: '^INSECURE_REGISTRY=.*'
     line: "INSECURE_REGISTRY='--insecure-registry {{ docker_registry_ip }}:{{ docker_registry_port }}'"
   when: ansible_distribution|lower == "centos"
+  register: configfile
 
 - name: Create the CentOS drop-in unit file
   lineinfile:
@@ -50,6 +51,7 @@
       ExecStart=
       ExecStart=/usr/bin/dockerd $INSECURE_REGISTRY
   when: ansible_distribution|lower == "centos"
+  register: unitfile
 
 - name: Enable Ubuntu insecure registry
   lineinfile:
@@ -59,6 +61,7 @@
     regexp: '^DOCKER_OPTS=.*'
     line: "DOCKER_OPTS='--insecure-registry {{ docker_registry_ip }}:{{ docker_registry_port }}'"
   when: ansible_distribution|lower == "ubuntu"
+  register: configfile
 
 - name: Create the Ubuntu drop-in unit file
   blockinfile:
@@ -80,7 +83,7 @@
     daemon_reload: True
     state: restarted
     enabled: True
-  when: unitfile.changed
+  when: unitfile.changed or configfile.changed
 
 - name: "Add {{ os_default_user }} user to Docker group"
   user:
