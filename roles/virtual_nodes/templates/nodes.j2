@@ -30,7 +30,7 @@
       bridge: "{{ intf.bridge }}"
       mode: "{{ intf.mode }}"
       cidr: "{{ intf.cidr }}"
-{% set ip = 200 + outer_master_loop.index * 10 + loop.index %}
+{% set ip = 10 + outer_master_loop.index %}
       address: "{{ intf.cidr | ipaddr(ip) | ipaddr('address') }}"
       mac: "{{ mac_prefix }}:2{{ outer_master_loop.index }}:0{{ loop.index }}"
 {% if intf.mode == 'static' %}
@@ -76,7 +76,7 @@
       bridge: "{{ intf.bridge }}"
       mode: "{{ intf.mode }}"
       cidr: "{{ intf.cidr }}"
-{% set ip = 100 + outer_worker_loop.index * 10 + loop.index %}
+{% set ip = 20 + outer_worker_loop.index %}
       address: "{{ intf.cidr | ipaddr(ip) | ipaddr('address') }}"
       mac: "{{ mac_prefix }}:1{{ outer_worker_loop.index }}:0{{ loop.index }}"
 {% if intf.mode == 'static' %}
