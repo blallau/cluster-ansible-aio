@@ -1,11 +1,11 @@
 Cluster-ansible-aio
 ===================
 
-Multi-node deployment of cluster apps (Kolla, oVirt, Kubernetes, GlusterFS) on a single host, using heavily Libvirt, Docker and Ansible.
+Multi-node deployment of cluster apps on a single physical host, using heavily Libvirt, Docker and Ansible.
 
 ![cluster-ansible-aio](https://user-images.githubusercontent.com/9655027/31175714-6e453b1e-a910-11e7-8a60-f7c6d2114b1a.png)
 
-Cluster-ansible-aio is an open source tool for automating deployment of cluster apps (oVirt, Kubernetes, GlusterFS), on a single physical machine.
+Cluster-ansible-aio is an open source tool for automating deployment of cluster apps on a single physical machine.
 
 -   Source: <https://github.com/blallau/cluster-ansible-aio>
 

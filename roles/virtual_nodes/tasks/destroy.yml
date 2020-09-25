@@ -26,18 +26,21 @@
         name: "{{ item.name }}"
       with_items: "{{ cluster_nodes }}"
       ignore_errors: True
+
     - name: Undefine VMs
       virt:
         command: undefine
         name: "{{ item.name }}"
       with_items: "{{ cluster_nodes }}"
       ignore_errors: True
+
     - name: Remove OS images from libvirt directory
       become: True
       file:
         path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
         state: absent
       with_items: "{{ cluster_nodes }}"
+
     - name: Delete qcow2 images
       file:
         path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"

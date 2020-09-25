@@ -1,6 +1,6 @@
 Bug Fix
 -------
-- Fix DNS
+- Fix DNS issue when using Docker DNS server instead of Libvirt dnsmasq
 
 Features
 --------
