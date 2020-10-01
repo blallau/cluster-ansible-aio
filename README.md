@@ -81,7 +81,7 @@ Example: in case of Ubuntu hypervisor and Debian virtual nodes wanted.
     ./cluster-ansible-aio create-virtual-nodes -e vm_os_distro=debian
 
 Any of the default role variables can be easily overridden with variables from **group_vars/all.yml**
-
+and **roles/virtual_nodes/vars/main.yml**.
 
 Clean-up
 --------
