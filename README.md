@@ -1,5 +1,5 @@
-Cluster-ansible-aio
-===================
+Cluster-ansible-aio (all-in-one)
+================================
 
 Multi-node deployment of cluster apps on a single physical host, using heavily Libvirt, Docker and Ansible.
 
@@ -82,18 +82,6 @@ Example: in case of Ubuntu hypervisor and Debian virtual nodes wanted.
 
 Any of the default role variables can be easily overridden with variables from **group_vars/all.yml**
 
-3. [Bootstrap all virtual nodes (install packages, configure Docker,
-configure SSH...).]
-
-Command:
-
-    ./cluster-ansible-aio nodes-bootstrap
-
-4. [Bootstrap Docker in virtual nodes.]
-
-Command:
-
-    ./cluster-ansible-aio docker-bootstrap
 
 Clean-up
 --------
