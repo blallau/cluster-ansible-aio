@@ -10,6 +10,29 @@ chpasswd:
   expire: False
 ssh_pwauth: True
 bootcmd:
-- if grep -Gq "^\s*UseDNS" /etc/ssh/sshd_config; then sed -re "s/^\s*(UseDNS)\s+(yes|no)/\1 no/" -i.$(date -u +%Y%m%d%H%M%S) /etc/ssh/sshd_config; else echo "UseDNS no" >> /etc/ssh/sshd_config; fi
+  - if grep -Gq "^\s*UseDNS" /etc/ssh/sshd_config; then sed -re "s/^\s*(UseDNS)\s+(yes|no)/\1 no/" -i.$(date -u +%Y%m%d%H%M%S) /etc/ssh/sshd_config; else echo "UseDNS no" >> /etc/ssh/sshd_config; fi
 runcmd:
-- systemctl restart sshd &
+  - systemctl restart sshd &
+{% if vm_os_distro == 'debian' or vm_os_distro == 'ubuntu' %}
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration console-setup
+{% endif %}
+# {% if vm_os_distro == 'debian' or vm_os_distro == 'ubuntu' %}
+#   - /usr/sbin/dpkg-reconfigure -f noninteractive keyboard-configuration
+# {% elif vm_os_distro == 'centos' %}
+#   - loadkeys fr
+# {% endif %}
+# packages:
+#   - console-setup
+#   - keyboard-configuration
+{% if vm_os_distro == 'debian' or vm_os_distro == 'ubuntu' %}
+write_files:
+- content: |
+    XKBMODEL="pc105"
+    XKBLAYOUT="fr"
+    XKBVARIANT=""
+    XKBOPTIONS=""
+    BACKSPACE="guess"
+  path: /etc/default/keyboard
+  owner: root:root
+  permissions: '0644'
+{% endif %}

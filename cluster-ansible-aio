@@ -3,7 +3,7 @@
 #set -x
 
 function find_base_dir {
-    local real_path=$(python -c "import os;print(os.path.realpath('$0'))")
+    local real_path=$(python3 -c "import os;print(os.path.realpath('$0'))")
     local dir_name="$(dirname "$real_path")"
     if [[ ${dir_name} == "/usr/bin" ]]; then
         BASEDIR="/usr/share/cluster-ansible-aio"
@@ -21,8 +21,8 @@ function check_ansible {
 
     version=$(ansible --version 2>&1 | head -1 | cut -d ' ' -f2)
     echo version "ansible $version"
-    if [[ "$version" < "2.4.0.0" ]]; then
-        echo -e "Ansible version < 2.4.0.0"
+    if [[ "$version" < "2.9.13" ]]; then
+        echo -e "Ansible version < 2.9.13"
         echo -e "Install it using: sudo pip install -U ansible" && exit 1
     fi
 }
@@ -238,5 +238,5 @@ esac
 
 check_ansible
 
-CMD="ansible-playbook -i $INVENTORY $EXTRA_OPTS $PLAYBOOK $VERBOSITY"
+CMD="python3 $(which ansible-playbook) -i $INVENTORY $EXTRA_OPTS $PLAYBOOK $VERBOSITY"
 process_cmd

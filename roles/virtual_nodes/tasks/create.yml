@@ -192,6 +192,7 @@
 - name: Insert nodes into ssh_config
   become: True
   blockinfile:
+    create: True
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ ansible_env.HOME }}/.ssh/config"
 
