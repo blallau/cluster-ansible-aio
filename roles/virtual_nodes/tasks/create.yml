@@ -85,32 +85,7 @@
         {{ lookup('template', 'vm-template.xml.j2') }}
   with_items: "{{ cluster_nodes }}"
 
-- name: Prepare Ubuntu or CentOS VMs config
-  block:
-    - name: Instantiate meta-data file
-      template:
-        src: "meta-data.j2"
-        dest: "{{ tmp_dir }}/{{ item.name }}/meta-data"
-      with_items: "{{ cluster_nodes }}"
-    - name: Instantiate user-data file
-      template:
-        src: "user-data.j2"
-        dest: "{{ tmp_dir}}/{{ item.name }}/user-data"
-      with_items: "{{ cluster_nodes }}"
-    - name: Remove config drive files
-      file:
-        path: "{{ tmp_dir }}/{{ item.name }}/config.iso"
-        state: absent
-      with_items: "{{ cluster_nodes }}"
-    - name: Create config drive
-      command: "genisoimage -input-charset utf-8 \
-               -o {{ tmp_dir }}/{{ item.name }}/config.iso \
-               -V cidata -r -J {{ tmp_dir }}/{{ item.name }}/meta-data \
-               {{ tmp_dir }}/{{ item.name }}/user-data"
-      with_items: "{{ cluster_nodes }}"
-  when: vm_os_distro == "ubuntu" or vm_os_distro == "centos"
-
-- name: Prepare Debian VMs config
+- name: Prepare VMs config
   block:
     - name: Instantiate meta-data file
       template:
@@ -138,7 +113,7 @@
                   {{ tmp_dir }}/{{ item.name }}/user-data \
                   {{ tmp_dir }}/{{ item.name }}/meta-data"
       with_items: "{{ cluster_nodes }}"
-  when: vm_os_distro == "debian"
+  when: vm_os_distro == "debian" or vm_os_distro == "centos"
 
 - name: Prepare FCOS VMs config
   block:

@@ -48,24 +48,14 @@
       <target dev='vda' bus='virtio'/>
       <boot order='1'/>
     </disk>
-    {% if vm_os_distro == 'debian' %}
     <disk type='file' device='disk'>
       <driver name='qemu' type='raw'/>
       <source file='{{ tmp_dir }}/{{ item.name }}/seed.img'/>
       <backingStore/>
       <target dev='vdb' bus='virtio'/>
       <boot order='2'/>
-    </disk>
-    {% elif vm_os_distro == 'centos' or vm_os_distro == 'ubuntu' %}
-    <disk type='file' device='cdrom'>
-      <driver name='qemu' type='raw'/>
-      <source file='{{ tmp_dir }}/{{ item.name }}/config.iso'/>
-      <backingStore/>
-      <target dev='hda' bus='ide'/>
-      <boot order='2'/>
       <readonly/>
     </disk>
-    {% endif %}
     {% if vm_volumes|length > 0 %}
     {% for disk in item.disks %}
     <disk type='block' device='disk'>
@@ -83,7 +73,7 @@
       <source bridge='{{ intf.bridge }}'/>
       <target dev='vnet{{ loop.index }}'/>
       {% if intf.mac is defined %}
-        <mac address='{{ intf.mac }}'/>
+      <mac address='{{ intf.mac }}'/>
       {% endif %}
       <model type='virtio'/>
       <driver name='vhost' queues='1'/>
