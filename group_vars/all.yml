@@ -27,7 +27,7 @@ net_interfaces:
     mode: dhcp
     cidr: 10.100.100.0/24
     bridge: ext-br
-    pxe: True
+    pxe: False
 
 guest_os_distro: "{{ ansible_distribution | lower }}"
 os_default_user: "{{ guest_os_distro }}"

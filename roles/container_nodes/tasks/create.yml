@@ -66,6 +66,8 @@
     state: "present"
     config:
       boot.autostart: "false"
+      limits.cpu: "{{ item.vcpu }}"
+      limits.memory: "{{ item.ram }}GB"
       linux.kernel_modules: ip_vs,ip_vs_rr,ip_vs_wrr,ip_vs_sh,ip_tables,ip6_tables,netlink_diag,nf_nat,overlay,br_netfilter
       raw.lxc: |
         lxc.apparmor.profile=unconfined
@@ -103,7 +105,7 @@
       mode: "pull"
       server: "{{ lxd_image_url }}"
       protocol: "simplestreams"
-      alias: "{{ lxd_image_alias }}"
+      alias: "{{ container_os_image }}"
     profiles: "{{ item.name }}_profile"
     devices: {}
     wait_for_ipv4_addresses: true
@@ -121,7 +123,7 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.0.address is defined and item.0.mode == "dhcp"
+  when: item.1.address is defined and item.1.external is defined and item.1.external
 
 - name: Insert nodes into ssh_config
   become: True
@@ -140,7 +142,7 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.1.address is defined and item.1.mode == "dhcp"
+  when: item.1.address is defined and item.1.external is defined and item.1.external
 
 - name: Populate /etc/hosts file
   become: True

@@ -157,7 +157,7 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.1.address is defined and item.1.mode == "dhcp"
+  when: item.1.address is defined and item.1.external is defined and item.1.external
 
 - name: Detach vdb config drive disk
   command: virsh detach-disk {{ item.name }} --target vdb --persistent --live
@@ -182,7 +182,7 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.1.address is defined and item.1.mode == "dhcp"
+  when: item.1.address is defined and item.1.external is defined and item.1.external
 
 - name: Populate /etc/hosts file
   become: True
