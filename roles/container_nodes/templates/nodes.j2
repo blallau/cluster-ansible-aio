@@ -90,7 +90,7 @@
   disks:
 {% for volume in vm_volumes %}
 {% set device = disk_device(loop.index) %}
-    - name: "vol-{{ node_prefix }}node{{ worker }}-{{ loop.index }}"
+    - name: "vol-{{ node_prefix }}worker{{ worker }}-{{ loop.index }}"
       device: "vd{{ device }}"
       size: {{ volume.size }}
       format: {{ volume.format }}

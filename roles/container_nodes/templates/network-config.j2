@@ -4,6 +4,7 @@ config:
 {% for intf in item.interfaces %}
 - type: physical
   name: {{ intf.name }}
+  mac_address: {{ intf.mac }}
   subnets:
 {% if intf.mode == 'dhcp' %}
   - type: dhcp
