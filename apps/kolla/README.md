@@ -15,11 +15,11 @@ By default, virtual nodes OS will be same as hypervisor OS.
 
     ./cluster-ansible-aio create-virtual-nodes
 
-Virtual nodes OS can be override using **vm_os_distro** variable.
+Virtual nodes OS can be override using **guest_os_distro** variable.
 
 Example: in case of Ubuntu hypervisor and CentOS virtual nodes wanted.
 
-    ./cluster-ansible-aio create-virtual-nodes -e vm_os_distro=centos
+    ./cluster-ansible-aio create-virtual-nodes -e guest_os_distro=centos
 
 Any of the default role variables can be easily overridden with variables from **group_vars/all.yml**
 

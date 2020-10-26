@@ -3,3 +3,4 @@ ansible.log
 *.pyc
 .*
 !/.gitignore
+*.qcow2

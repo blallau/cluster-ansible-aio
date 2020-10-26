@@ -1,0 +1,11 @@
+---
+
+- name: Remove LXD networks
+  lxd_network:
+    name: "{{ item.name }}"
+    state: "absent"
+    url: "{{ lxd_snap_url }}"
+  with_items: "{{ net_interfaces }}"
+  when: "net_interfaces is defined"
+
+...

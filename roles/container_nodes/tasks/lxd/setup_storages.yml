@@ -1,0 +1,10 @@
+---
+- name: Create default LXD storage
+  shell: "{{ lxd_bin_folder }}/lxc storage create default dir source=/var/snap/lxd/common/lxd/storage-pools/default"
+  register: default_storage_add
+  changed_when: "default_storage_add.rc == 0"
+  failed_when:
+    - "default_storage_add.rc != 0"
+    - "'already exists' not in default_storage_add.stderr"
+
+...

@@ -1,0 +1,39 @@
+---
+- name: Create containers
+  hosts: hypervisors
+  gather_facts: false
+  pre_tasks:
+   - setup:
+       gather_subset: min
+  roles:
+    - container_nodes
+
+# Python not present on Ubuntu and used by Ansible
+- name: Wait for Python 2 to be installed
+  hosts: created_nodes
+  gather_facts: false
+  become: True
+  tasks:
+    # - raw: echo "nameserver {{ host_ip }}" > /etc/resolv.conf
+    - raw: test -e /usr/bin/python || (apt -y update && apt install -y python3-minimal)
+      when: method == "create" and ansible_distribution|lower == "ubuntu"
+
+# - name: Populate /etc/resolv.conf file
+#   hosts: created_nodes
+#   gather_facts: false
+#   become: True
+#   tasks:
+#     - name: Set {{ host_ip }} as nameserver in resolv.conf
+#       lineinfile:
+#         path: "/etc/resolv.conf"
+#         regexp: '^nameserver .*'
+#         line: 'nameserver {{ host_ip }}'
+#       when: method == "create"
+
+#     - name: Set search domain in resolv.conf
+#       lineinfile:
+#         path: "/etc/resolv.conf"
+#         regexp: '^search .*'
+#         #Fix using {{ dns_domain }} from virtual-nodes playbook
+#         line: 'search mydomain.org'
+#       when: method == "create" and not ansible_distribution|lower == "fedora"

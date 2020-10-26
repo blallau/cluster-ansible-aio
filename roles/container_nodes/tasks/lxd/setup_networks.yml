@@ -1,0 +1,26 @@
+---
+
+- name: Create LXD networks
+  lxd_network:
+    name: "{{ item.name }}"
+    state: "present"
+    config:
+      bridge.driver: native
+      bridge.mode: standard
+      dns.mode: "{% if local_dns_enabled and item.forward is defined and item.forward == 'nat' %}dynamic{% else %}none{% endif %}"
+      dns.search: "{{ dns_domain }}"
+      # dns.domain: "{{ dns_domain }}"
+      ipv4.dhcp: "true"
+      ipv4.dhcp.expiry: "1h"
+      ipv4.firewall: "true"
+      ipv4.nat: "{% if item.forward is defined and item.forward == 'nat' %}true{% else %}false{% endif %}"
+      ipv4.nat.address: "{{ item.cidr | ipaddr('1') | ipaddr('address') }}"
+      ipv4.routing: "{% if item.forward is defined and item.forward == 'nat' %}true{% else %}false{% endif %}"
+      ipv4.address: "{{ item.cidr | ipaddr('1') | ipaddr('host/prefix') }}"
+      ipv6.address: "none"
+    description: "cluster-ansible-aio network"
+    url: "{{ lxd_snap_url }}"
+  with_items: "{{ net_interfaces }}"
+  when: "net_interfaces is defined"
+
+...

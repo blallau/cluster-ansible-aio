@@ -1,0 +1,25 @@
+---
+# https://github.com/z3dm4n/microk8s-lxd-ansible/blob/master/01-setup-lxd.yml
+
+- name: Create a profile
+  lxd_profile:
+    name: "{{ item.name }}_profile"
+    state: "present"
+    config:
+      boot.autostart: "false"
+      linux.kernel_modules: ip_vs,ip_vs_rr,ip_vs_wrr,ip_vs_sh,ip_tables,ip6_tables,netlink_diag,nf_nat,overlay,br_netfilter
+      raw.lxc: |
+        lxc.apparmor.profile=unconfined
+        lxc.mount.auto=proc:rw sys:rw cgroup:rw
+        lxc.cgroup.devices.allow=a
+        lxc.cap.drop=
+      security.nesting: "true"
+      security.privileged: "true"
+      user.user-data: "{{ lookup('template', './user-data.j2') }}"
+      user.meta-data: "{{ lookup('template', './meta-data.j2') }}"
+      user.network-config: "{{ lookup('template', './network-config.j2') }}"
+    snap_url: "{{ lxd_snap_url }}"
+    description: "description"
+    devices: "{{ lookup('template', './lxd_profile_devices.j2') }}"
+
+...
