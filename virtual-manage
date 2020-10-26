@@ -6,7 +6,7 @@ SNAPSHOT_NAME=""
 TIMEOUT=300
 
 function start {
-#    docker start docker-dnsmasq
+    #    docker start docker-dnsmasq
 	list_inactive_domains | while read DOMAIN; do
         for service in $SERVICES; do
             if [[ "$DOMAIN" =~ $service ]]; then
@@ -16,7 +16,7 @@ function start {
 	done
 }
 
-function destroy {
+function cleanup {
 	list_all_domains | while read DOMAIN; do
         for service in $SERVICES; do
             if [[ "$DOMAIN" =~ $service ]]; then
@@ -40,7 +40,7 @@ function list_all_domains() {
 }
 
 function gracefully_shutdown {
-	echo -e "Try to cleanly shut down all running KVM domains...\n"
+	echo -e "Try to cleanly shutdown all running KVM domains...\n"
 
 	# Try to shutdown each domain, one by one.
 	list_running_domains | while read DOMAIN; do
@@ -131,53 +131,52 @@ Commands:
 EOF
 }
 
-LONG_OPTS="purge,start,shutdown,snap-delete:,snap-create:,snap-revert:,snap-list,help"
+LONG_OPTS="cleanup,start,shutdown,snap-delete:,snap-create:,snap-revert:,snap-list,help"
 ARGS=$(getopt -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
-    (--purge)
-        destroy
-        undefine
-        exit 0
-        ;;
-    (--start)
-        start
-        exit 0
-        ;;
-    (--shutdown)
-        gracefully_shutdown
-        exit 0
-        ;;
-    (--snap-delete)
-        SNAPSHOT_NAME=$2
-        shift 2
-        snap-delete
-        exit 0
-        ;;
-    (--snap-create)
-        SNAPSHOT_NAME=$2
-        shift 2
-        snap-create
-        exit 0
-        ;;
-    (--snap-revert)
-        SNAPSHOT_NAME=$2
-        shift 2
-        snap-revert
-        exit 0
-        ;;
-    (--snap-list)
-        snap-list
-        exit 0
-        ;;
-    (--help|-h)
-        usage
-        exit 0
-        ;;
-    (*)
-        usage
-        exit 3
-        ;;
-esac
+        (--cleanup)
+            cleanup
+            exit 0
+            ;;
+        (--start)
+            start
+            exit 0
+            ;;
+        (--shutdown)
+            gracefully_shutdown
+            exit 0
+            ;;
+        (--snap-delete)
+            SNAPSHOT_NAME=$2
+            shift 2
+            snap-delete
+            exit 0
+            ;;
+        (--snap-create)
+            SNAPSHOT_NAME=$2
+            shift 2
+            snap-create
+            exit 0
+            ;;
+        (--snap-revert)
+            SNAPSHOT_NAME=$2
+            shift 2
+            snap-revert
+            exit 0
+            ;;
+        (--snap-list)
+            snap-list
+            exit 0
+            ;;
+        (--help|-h)
+            usage
+            exit 0
+            ;;
+        (*)
+            usage
+            exit 3
+            ;;
+    esac
 done

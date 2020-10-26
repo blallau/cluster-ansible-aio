@@ -1,0 +1,132 @@
+#!/bin/bash
+
+NODE_PREFIX=""
+SERVICES="${NODE_PREFIX}master* ${NODE_PREFIX}worker*"
+SNAPSHOT_NAME=""
+TIMEOUT=300
+
+function start {
+    #    docker start docker-dnsmasq
+	list_inactive_domains | while read DOMAIN; do
+        for service in $SERVICES; do
+            if [[ "$DOMAIN" =~ $service ]]; then
+		        lxc start $DOMAIN
+            fi
+        done
+	done
+}
+
+function cleanup {
+	list_all_domains | while read DOMAIN; do
+        for service in $SERVICES; do
+            if [[ "$DOMAIN" =~ $service ]]; then
+                lxc stop --force $DOMAIN
+                lxc delete --force $DOMAIN
+            fi
+        done
+	done
+}
+
+function list_inactive_domains() {
+    lxc ls --format csv --columns sn | grep "STOPPED" | awk -F',' '{print $2}'
+}
+
+function list_running_domains() {
+    lxc ls --format csv --columns sn | grep "RUNNING" | awk -F',' '{ print $2}'
+}
+
+function list_all_domains() {
+    lxc ls --format csv --columns sn | awk -F',' '{ print $2}'
+}
+
+function gracefully_shutdown {
+	echo -e "Try to cleanly shutdown all running containers...\n"
+
+	# Try to shutdown each domain, one by one.
+	list_running_domains | while read DOMAIN; do
+		# Try to shutdown given domain.
+		lxc stop $DOMAIN
+	done
+	# Wait until all domains are shut down or timeout has reached.
+	END_TIME=$(date -d "$TIMEOUT seconds" +%s)
+
+	while [ $(date +%s) -lt $END_TIME ]; do
+		# Break while loop when no domains are left.
+		test -z "$(list_running_domains)" && break
+		# Wait a litte, we don't want to DoS libvirt.
+		sleep 1
+	done
+
+	# Clean up left over domains, one by one.
+	list_running_domains | while read DOMAIN; do
+		# Try to shutdown given domain.
+		lxc stop --force $DOMAIN
+		# Give libvirt some time for killing off the domain.
+		sleep 3
+	done
+}
+
+function usage {
+    cat <<EOF
+Usage: $0 COMMAND
+
+Commands:
+    --cleanup                          Cleanup cluster
+    --start                            Start cluster
+    --shutdown                         Shutdown cluster
+EOF
+}
+
+LONG_OPTS="cleanup,start,shutdown,snap-delete:,snap-create:,snap-revert:,snap-list,help"
+ARGS=$(getopt -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        (--cleanup)
+            destroy
+            exit 0
+            ;;
+        (--start)
+            start
+            exit 0
+            ;;
+        (--shutdown)
+            gracefully_shutdown
+            exit 0
+            ;;
+        (--snap-delete)
+            exit 0
+            SNAPSHOT_NAME=$2
+            shift 2
+            snap-delete
+            exit 0
+            ;;
+        (--snap-create)
+            exit 0
+            SNAPSHOT_NAME=$2
+            shift 2
+            snap-create
+            exit 0
+            ;;
+        (--snap-revert)
+            exit 0
+            SNAPSHOT_NAME=$2
+            shift 2
+            snap-revert
+            exit 0
+            ;;
+        (--snap-list)
+            exit 0
+            snap-list
+            exit 0
+            ;;
+        (--help|-h)
+            usage
+            exit 0
+            ;;
+        (*)
+            usage
+            exit 3
+            ;;
+    esac
+done
