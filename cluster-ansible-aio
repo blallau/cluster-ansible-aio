@@ -53,20 +53,12 @@ Options:
 Commands:
     ### GENERAL ###
     create-virtual-nodes      Bootstrap hypervisor and create virtual nodes
+    create-container-nodes    Bootstrap host and create container nodes
     nodes-bootstrap           Bootstrap all virtual nodes
     [docker-bootstrap]        Bootstrap Docker on nodes
 
     remove-virtual-nodes      Cleanup hypervisor and remove virtual nodes
-
-    ### KOLLA ###
-    kolla-build               Build Kolla images
-    kolla-ansible-deploy      Deploy Openstack on nodes using Kolla-ansible
-    kolla-ansible-cleanup     Cleanup all deployed Kolla containers and volumes
-
-    ### OVIRT ###
-    nfs-server                Deploy a NFS server
-    ovirt-deploy              Deploy oVirt
-    ovirt-populate            Populate oVirt resources
+    remove-container-nodes    Cleanup host and remove container nodes
 
 EOF
 }
@@ -81,20 +73,13 @@ cat <<EOF
 --extra -e
 --limit
 --verbose -v
-create-virtual-network
 create-virtual-nodes
+create-container-nodes
 nodes-bootstrap
 docker-bootstrap
 
-kolla-build
-kolla-ansible-deploy
-kolla-ansible-cleanup
-
-nfs-server
-ovirt-deploy
-ovirt-populate
-
 remove-virtual-nodes
+remove-container-nodes
 EOF
 }
 
@@ -168,10 +153,10 @@ case "$1" in
         EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/virtual-nodes.yml"
         ;;
-(create-virtual-networks)
-        ACTION="Bootstrap hypervisor and create virtual nodes"
-        EXTRA_OPTS="$EXTRA_OPTS -e method=create -t network"
-        PLAYBOOK="${BASEDIR}/virtual-nodes.yml"
+(create-container-nodes)
+        ACTION="Bootstrap host and create container nodes"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
+        PLAYBOOK="${BASEDIR}/container-nodes.yml"
         ;;
 (remove-virtual-nodes)
         ACTION="Cleanup hypervisor and remove virtual nodes"
@@ -180,14 +165,26 @@ case "$1" in
         if [[ "${DANGER_CONFIRM}" != "--yes-i-really-really-mean-it" ]]; then
             cat << EOF
 WARNING:
-    This will PERMANENTLY DESTROY all virtual nodes: so all deployed Kolla containers,
-    volumes and host configuration.
+    This will PERMANENTLY DESTROY all virtual nodes: so all deployed volumes and host configuration.
     There is no way to recover from this action. To confirm, please add the following option:
     --yes-i-really-really-mean-it
 EOF
             exit 1
         fi
-
+        ;;
+(remove-container-nodes)
+        ACTION="Cleanup host and remove container nodes"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=destroy"
+        PLAYBOOK="${BASEDIR}/container-nodes.yml"
+        if [[ "${DANGER_CONFIRM}" != "--yes-i-really-really-mean-it" ]]; then
+            cat << EOF
+WARNING:
+    This will PERMANENTLY DESTROY all virtual nodes: so all deployed volumes and host configuration.
+    There is no way to recover from this action. To confirm, please add the following option:
+    --yes-i-really-really-mean-it
+EOF
+            exit 1
+        fi
         ;;
 (nodes-bootstrap)
         ACTION="Bootstrap all virtual nodes"
@@ -198,33 +195,6 @@ EOF
         ACTION="Bootstrap Docker on nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/docker-bootstrap.yml"
-        ;;
-(kolla-build)
-        ACTION="Build Kolla images"
-        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
-        PLAYBOOK="${BASEDIR}/kolla-build.yml"
-        ;;
-(nfs-server)
-        ACTION="Deploy NFS server"
-        PLAYBOOK="${BASEDIR}/nfs-server.yml"
-        ;;
-(ovirt-deploy)
-        ACTION="Deploy Ovirt"
-        PLAYBOOK="${BASEDIR}/ovirt-deploy.yml"
-        ;;
-(ovirt-populate)
-        ACTION="Populate Ovirt resources"
-        PLAYBOOK="${BASEDIR}/ovirt-populate.yml"
-        ;;
-(kolla-ansible-deploy)
-        ACTION="Deploy Openstack using kolla-ansible"
-        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
-        PLAYBOOK="${BASEDIR}/kolla-ansible-deploy.yml"
-        ;;
-(kolla-ansible-cleanup)
-        ACTION="Cleanup Kolla containers and volumes"
-        EXTRA_OPTS="$EXTRA_OPTS -e method=destroy"
-        PLAYBOOK="${BASEDIR}/kolla-ansible-deploy.yml"
         ;;
 (bash-completion)
         bash_completion

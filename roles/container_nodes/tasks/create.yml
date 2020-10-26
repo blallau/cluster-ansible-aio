@@ -1,0 +1,155 @@
+---
+- name: Install Ubuntu packages
+  become: True
+  apt:
+    pkg: "{{ apt_dependencies }}"
+  when: ansible_distribution|lower == "ubuntu"
+  register: install_snap
+
+- name: Restart the snapd service
+  become: True
+  systemd:
+    name: snapd.service
+    enabled: yes
+    state: restarted
+  when: install_snap.changed
+
+- name: Install lxd snap
+  snap:
+    name:
+      - lxd
+
+- name: Add user to the lxd secondary group
+  user:
+    name: "{{ lookup('env', 'USER') }}"
+    append: yes
+    groups: lxd
+
+# - name: Reset ssh connection to allow user changes to affect current user
+#   meta: reset_connection
+
+- name: Load cluster_nodes variables
+  set_fact:
+    cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
+  tags: network
+
+- name: "Copy cluster_nodes in {{ tmp_dir }}"
+  blockinfile:
+    path: "{{ tmp_dir }}/cluster_nodes"
+    create: True
+    block: |
+        {{ cluster_nodes | to_nice_json(indent=2) }}
+  tags: network
+
+- name: Display cluster_nodes
+  debug:
+    msg: "{{ cluster_nodes | to_nice_yaml(indent=2) }}"
+  tags: network
+
+# - import_tasks: lxd/setup_networks.yml
+#   when: net_interfaces | length > 0
+#   tags: network
+
+- import_tasks: ../../virtual_nodes/tasks/libvirt/setup_networks.yml
+  when: net_interfaces | length > 0
+  tags: network
+
+# - include_tasks: lxd/setup_storages.yml
+#   when: vm_volumes|length > 0
+
+# - import_tasks: lxd/setup_profiles.yml
+#   tags: network
+
+- name: Create a profile
+  lxd_profile:
+    name: "{{ item.name }}_profile"
+    state: "present"
+    config:
+      boot.autostart: "false"
+      linux.kernel_modules: ip_vs,ip_vs_rr,ip_vs_wrr,ip_vs_sh,ip_tables,ip6_tables,netlink_diag,nf_nat,overlay,br_netfilter
+      raw.lxc: |
+        lxc.apparmor.profile=unconfined
+        lxc.mount.auto=proc:rw sys:rw cgroup:rw
+        lxc.cgroup.devices.allow=a
+        lxc.cap.drop=
+      security.nesting: "true"
+      security.privileged: "true"
+      user.user-data: "{{ lookup('template', './user-data.j2') }}"
+      user.meta-data: "{{ lookup('template', './meta-data.j2') }}"
+      user.network-config: "{{ lookup('template', './network-config.j2') }}"
+    snap_url: "{{ lxd_snap_url }}"
+    description: "description"
+    devices: "{{ lookup('template', './lxd_profile_devices.j2') }}"
+  with_items: "{{ cluster_nodes }}"
+
+- name: "Copy cluster config for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
+  blockinfile:
+    path: "{{ tmp_dir }}/{{ item.name }}/cluster_config"
+    create: True
+    block: |
+        {{ item | to_nice_json(indent=2) }}
+  with_items: "{{ cluster_nodes }}"
+  tags: network
+
+# https://github.com/Nani-o/ansible-role-lxd/blob/master/tasks/containers.yml
+# https://github.com/hispanico/ansible-lxd/blob/master/tasks/main.yml
+# https://github.com/andreasscherbaum/ansible-lxd-container/blob/master/tasks/main.yml
+- name: Create containers
+  lxd_container:
+    name: "{{ item.name }}"
+    state: "started"
+    source:
+      type: "image"
+      mode: "pull"
+      server: "{{ lxd_image_url }}"
+      protocol: "simplestreams"
+      alias: "{{ lxd_image_alias }}"
+    profiles: "{{ item.name }}_profile"
+    devices: {}
+    wait_for_ipv4_addresses: true
+    snap_url: "{{ lxd_snap_url }}"
+    timeout: 600
+  with_items: "{{ cluster_nodes }}"
+  when: "cluster_nodes is defined"
+
+- name: Wait for VMs to be ready
+  wait_for:
+    host: "{{ item.1.address }}"
+    port: 22
+    delay: 10
+    timeout: 250
+  with_subelements:
+    - "{{ cluster_nodes }}"
+    - interfaces
+  when: item.0.address is defined and item.0.mode == "dhcp"
+
+- name: Insert nodes into ssh_config
+  become: True
+  blockinfile:
+    create: True
+    block: "{{ lookup('template', 'ssh_config.j2') }}"
+    path: "{{ ansible_env.HOME }}/.ssh/config"
+
+- name: Add new nodes to created_nodes Ansible group
+  add_host:
+    name: "{{ item.1.address }}"
+    instance_name: "{{ item.0.name }}.{{ dns_domain }}"
+    ansible_distribution: "{{ guest_os_distro }}"
+    ansible_user: "{{ guest_os_distro }}"
+    groups: created_nodes
+  with_subelements:
+    - "{{ cluster_nodes }}"
+    - interfaces
+  when: item.1.address is defined and item.1.mode == "dhcp"
+
+- name: Populate /etc/hosts file
+  become: True
+  lineinfile:
+    path: /etc/hosts
+    insertafter: EOF
+    regexp: "^{{ item.1.address }} {{ item.0.name }}.{{ dns_domain }} {{ item.0.name }}"
+    line: "{{ item.1.address }} {{ item.0.name }}.{{ dns_domain }} {{ item.0.name }}"
+  with_subelements:
+    - "{{ cluster_nodes }}"
+    - interfaces
+  when: item.1.address is defined and item.1.external is defined and item.1.external

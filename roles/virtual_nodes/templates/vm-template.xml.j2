@@ -1,16 +1,16 @@
 #jinja2: lstrip_blocks: True
-<domain type='kvm'{% if vm_os_distro == 'fcos' %} xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'{% endif %}>
+<domain type='kvm'{% if guest_os_distro == 'fcos' %} xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'{% endif %}>
   <name>{{ item.name }}</name>
   <metadata>
     <aio:instance xmlns:aio="https://github.com/blallau/ansible-aio">
-      <aio:inventory group="{{ item.role }}" distro="{{ vm_os_distro }}"/>
+      <aio:inventory group="{{ item.role }}" distro="{{ guest_os_distro }}"/>
     </aio:instance>
   </metadata>
-  {% if vm_os_distro == 'fcos' %}
-  <qemu:commandline>
-    <qemu:arg value='-fw_cfg'/>
-    <qemu:arg value='name=opt/com.coreos/config,file={{ tmp_dir }}/{{ item.name }}/config.ign'/>
-  </qemu:commandline>
+  {% if guest_os_distro == 'fcos' %}
+    <qemu:commandline>
+      <qemu:arg value='-fw_cfg'/>
+      <qemu:arg value='name=opt/com.coreos/config,file={{ tmp_dir }}/{{ item.name }}/config.ign'/>
+    </qemu:commandline>
   {% endif %}
   <memory unit='GiB'>{{ item.ram }}</memory>
   <vcpu placement='static'>{{ item.vcpu }}</vcpu>
@@ -57,28 +57,28 @@
       <readonly/>
     </disk>
     {% if vm_volumes|length > 0 %}
-    {% for disk in item.disks %}
-    <disk type='block' device='disk'>
-      <driver name='qemu' type='raw' cache='none' io='native'/>
-      <source dev='/dev/{{ virt_volume_group }}/{{ disk.name }}'/>
-      <target dev='{{ disk.device }}' bus='virtio'/>
-    </disk>
-    {% endfor %}
+      {% for disk in item.disks %}
+        <disk type='block' device='disk'>
+          <driver name='qemu' type='raw' cache='none' io='native'/>
+          <source dev='/dev/{{ virt_volume_group }}/{{ disk.name }}'/>
+          <target dev='{{ disk.device }}' bus='virtio'/>
+        </disk>
+      {% endfor %}
     {% endif %}
     <controller type='virtio-serial' index='0'>
       <alias name='virtio-serial0'/>
     </controller>
     {% for intf in item.interfaces %}
-    <interface type='bridge'>
-      <source bridge='{{ intf.bridge }}'/>
-      <target dev='vnet{{ loop.index }}'/>
-      {% if intf.mac is defined %}
-      <mac address='{{ intf.mac }}'/>
-      {% endif %}
-      <model type='virtio'/>
-      <driver name='vhost' queues='1'/>
-      <alias name='net{{ loop.index }}'/>
-    </interface>
+      <interface type='bridge'>
+        <source bridge='{{ intf.bridge }}'/>
+        <target dev='vnet{{ loop.index }}'/>
+        {% if intf.mac is defined %}
+          <mac address='{{ intf.mac }}'/>
+        {% endif %}
+        <model type='virtio'/>
+        <driver name='vhost' queues='1'/>
+        <alias name='net{{ loop.index }}'/>
+      </interface>
     {% endfor %}
     <serial type='pty'>
       <source path='/dev/pts/1'/>

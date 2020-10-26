@@ -10,7 +10,7 @@
   <forward mode='nat'/>
 {% endif %}
   <bridge name='{{ item.bridge }}' stp='on' delay='0'/>
-{% if libvirt_dns_enabled and item.forward is defined and item.forward == 'nat' %}
+{% if local_dns_enabled and item.forward is defined and item.forward == 'nat' %}
   <dns enable='yes'/>
   <domain name='{{ dns_domain }}' localOnly='yes'/>
 {% else %}

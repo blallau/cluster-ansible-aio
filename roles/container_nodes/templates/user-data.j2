@@ -1,5 +1,4 @@
 #cloud-config
-# https://cloudinit.readthedocs.io/en/latest/topics/format.html #
 disable_root: False
 users:
   - default
@@ -9,6 +8,8 @@ chpasswd:
     {{ os_default_user }}:{{ os_default_user }}
   expire: False
 ssh_pwauth: True
+packages:
+  - openssh-server
 bootcmd:
   - if grep -Gq "^\s*UseDNS" /etc/ssh/sshd_config; then sed -re "s/^\s*(UseDNS)\s+(yes|no)/\1 no/" -i.$(date -u +%Y%m%d%H%M%S) /etc/ssh/sshd_config; else echo "UseDNS no" >> /etc/ssh/sshd_config; fi
 runcmd:

@@ -1,0 +1,43 @@
+---
+
+config:
+  user.network-config: |
+    version: 1
+    config:
+{% if net_interfaces %}
+{% for intf in net_interfaces %}
+{% set intf_nb = loop.index0 %}
+      - type: physical
+        name: eth{{ intf_nb }}
+        subnets:
+{% if intf.mode == 'dhcp' %}
+  - type: dhcp
+{% elif intf.mode == 'static' %}
+  - type: static
+    address: {{ intf.address }}
+    dns_nameservers:
+      - {{ host_ip }}
+    dns-search:
+      - {{ dns_domain }}
+{% endif %}
+{% endfor %}
+description: cluster-ansible-aio LXD profile
+devices:
+{% if net_interfaces %}
+{% for intf in net_interfaces %}
+{% set intf_nb = loop.index0 %}
+  eth{{ intf_nb }}:
+    name: eth{{ intf_nb }}
+    nictype: bridged
+    parent: {{ intf.bridge }}
+    type: nic
+{% endfor %}
+{% endif %}
+  root:
+    path: /
+    pool: default
+    type: disk
+name: cluster-ansible-aio-profile
+url: {{ lxd_url }}
+
+...

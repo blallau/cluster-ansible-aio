@@ -52,11 +52,12 @@
     msg: "{{ cluster_nodes | to_nice_yaml(indent=2) }}"
   tags: network
 
-- import_tasks: libvirt/setup_libvirt_networks.yml
+- import_tasks: libvirt/setup_networks.yml
+  when: net_interfaces | length > 0
   tags: network
 
-- include_tasks: libvirt/setup_libvirt_storages.yml
-  when: vm_volumes|length > 0
+- include_tasks: libvirt/setup_storages.yml
+  when: vm_volumes | length > 0
 
 - import_tasks: docker/enable_apt_proxy.yml
   when: apt_cache_enabled | bool
@@ -113,7 +114,7 @@
                   {{ tmp_dir }}/{{ item.name }}/user-data \
                   {{ tmp_dir }}/{{ item.name }}/meta-data"
       with_items: "{{ cluster_nodes }}"
-  when: vm_os_distro == "debian" or vm_os_distro == "centos"
+  when: guest_os_distro == "debian" or guest_os_distro == "centos"
 
 - name: Prepare FCOS VMs config
   block:
@@ -133,7 +134,7 @@
         --volume {{ tmp_dir }}/{{ item.name }}:/work --workdir /work \
         quay.io/coreos/fcct:release --pretty --strict config-ign.yaml --output config.ign'
       with_items: "{{ cluster_nodes }}"
-  when: vm_os_distro == "fcos"
+  when: guest_os_distro == "fcos"
 
 - name: Define VMs
   virt:
@@ -161,7 +162,7 @@
 - name: Detach vdb config drive disk
   command: virsh detach-disk {{ item.name }} --target vdb --persistent --live
   with_items: "{{ cluster_nodes }}"
-  when: vm_os_distro == "debian"
+  when: guest_os_distro == "debian"
   ignore_errors: True
 
 - name: Insert nodes into ssh_config
@@ -175,8 +176,8 @@
   add_host:
     name: "{{ item.1.address }}"
     instance_name: "{{ item.0.name }}.{{ dns_domain }}"
-    ansible_distribution: "{{ vm_os_distro }}"
-    ansible_user: "{{ vm_os_distro }}"
+    ansible_distribution: "{{ guest_os_distro }}"
+    ansible_user: "{{ guest_os_distro }}"
     groups: created_nodes
   with_subelements:
     - "{{ cluster_nodes }}"

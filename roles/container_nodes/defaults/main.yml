@@ -1,0 +1,31 @@
+---
+
+############
+# Packages #
+############
+# ImportError: No module named ssl_match_hostname'
+#  - remove python-configparser
+apt_dependencies:
+  - snap
+
+#############
+# OS images #
+#############
+os_images:
+  ubuntu: "ubuntu-16.04-server-cloudimg-amd64-disk1.img"
+  debian: "debian-10-openstack-amd64.qcow2"
+  fcos: "fedora-coreos-32.qcow2"
+  centos: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
+
+os_image: "{{ os_images[os_distro] }}"
+
+destroy_images: False
+
+#######
+# LXD #
+#######
+lxd_socket_path: /var/snap/lxd/common/lxd/unix.socket
+lxd_url: "unix:{{ lxd_socket_path }}"
+lxd_snap_url: "{{ lxd_url }}"
+lxd_image_alias: "debian/10/cloud"
+lxd_image_url: "https://images.linuxcontainers.org"

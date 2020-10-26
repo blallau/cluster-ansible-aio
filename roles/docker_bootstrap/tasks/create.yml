@@ -51,13 +51,13 @@
 
 - import_tasks: enable_docker.yml
 
-- name: Create '{{ config_owner_group }}' group
-  group:
-    name: "{{ config_owner_group }}"
-  tags: user
+# - name: Create '{{ config_owner_group }}' group
+#   group:
+#     name: "{{ config_owner_group }}"
+#   tags: user
 
-- name: Create '{{ config_owner_user }}' user
-  user:
-    name: "{{ config_owner_user }}"
-    group: "{{ config_owner_group }}"
-  tags: user
+# - name: Create '{{ config_owner_user }}' user
+#   user:
+#     name: "{{ config_owner_user }}"
+#     group: "{{ config_owner_group }}"
+#   tags: user

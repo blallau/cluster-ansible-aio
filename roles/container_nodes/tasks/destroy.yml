@@ -1,59 +1,30 @@
 ---
-- import_tasks: docker/disable_registry.yml
-  when: destroy_docker_registry | bool
-
-- import_tasks: docker/disable_pip_proxy.yml
-  when: pip_cache_enabled | bool and destroy_pip_cache | bool
-
-- import_tasks: docker/disable_apt_proxy.yml
-  when: apt_cache_enabled | bool and destroy_apt_cache | bool
-  tags: apt_cache
-
-- import_tasks: docker/disable_dns_server.yml
-  when: dns_server_enabled | bool and destroy_dns_server | bool
-  tags: dns_server
-
 - name: Load cluster_nodes variables
   set_fact:
     cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
 
 # TODO(bl) destroy snapshots if present
-- name: Steps to destroy VM using Libvirt
+- name: Steps to destroy containers
   block:
-    - name: Destroy VMs
-      virt:
-        command: destroy
+    - name: Delete containers
+      lxd_container:
         name: "{{ item.name }}"
-      with_items: "{{ cluster_nodes }}"
-      ignore_errors: True
-
-    - name: Undefine VMs
-      virt:
-        command: undefine
-        name: "{{ item.name }}"
-      with_items: "{{ cluster_nodes }}"
-      ignore_errors: True
-
-    - name: Remove OS images from libvirt directory
-      become: True
-      file:
-        path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
         state: absent
+        snap_url: "{{ lxd_snap_url }}"
       with_items: "{{ cluster_nodes }}"
 
-    - name: Delete qcow2 images
-      file:
-        path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
+    - name: Delete profile
+      lxd_profile:
+        name: "{{ item.name }}_profile"
         state: absent
+        snap_url: "{{ lxd_snap_url }}"
       with_items: "{{ cluster_nodes }}"
-      when: destroy_images | bool
 
-- import_tasks: libvirt/destroy_networks.yml
+# - import_tasks: lxd/destroy_networks.yml
+
+- import_tasks: ../../virtual_nodes/tasks/libvirt/destroy_networks.yml
   when: net_interfaces | length > 0
   tags: network
-
-- include_tasks: libvirt/destroy_storages.yml
-  when: vm_volumes|length > 0
 
 - name: "Clean nodes config in {{ tmp_dir }}"
   file:

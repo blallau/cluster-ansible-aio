@@ -17,28 +17,242 @@ systemd:
             ExecStart=
             # Add new Execstart with `-` prefix to ignore failure
             ExecStart=-/usr/sbin/agetty --autologin core --noclear %I $TERM
-              TTYVTDisallocate=no
+            TTYVTDisallocate=no
+    # Mask Docker service
+    - name: docker.service
+      mask: true
+
+    - name: kubelet.service
+      enabled: false
+      contents: |
+        [Unit]
+        Description=kubelet: The Kubernetes Node Agent
+        Documentation=https://kubernetes.io/docs/home/
+        Wants=network-online.target
+        After=network-online.target
+
+        [Service]
+        ExecStart={{ kube_binaries_path }}/kubelet
+        Restart=always
+        StartLimitInterval=0
+        RestartSec=10
+
+        [Install]
+        WantedBy=multi-user.target
+      dropins:
+        - name: 10-kubeadm.conf
+          contents: |
+            # Note: This dropin only works with kubeadm and kubelet v1.11+
+            [Service]
+            Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"
+            Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
+            # This is a file that "kubeadm init" and "kubeadm join" generates at runtime, populating the KUBELET_KUBEADM_ARGS variable dynamically
+            EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
+            # This is a file that the user can use for overrides of the kubelet args as a last resort. Preferably, the user should use
+            # the .NodeRegistration.KubeletExtraArgs object in the configuration files instead. KUBELET_EXTRA_ARGS should be sourced from this file.
+            EnvironmentFile=-/etc/default/kubelet
+            ExecStart=
+            ExecStart={{ kube_binaries_path }}/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_ARGS
+
+    - name: install-k8s.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Install Kubernetes
+        After=network-online.target
+        Wants=network-online.target
+        Before=systemd-user-sessions.service
+        ConditionPathExists=!/var/log/k8s-installed
+        [Service]
+        Type=oneshot
+        RemainAfterExit=true
+        ExecStart=/bin/bash /usr/local/bin/install-k8s.sh
+        StandardOutput=kmsg+console
+        StandardError=kmsg+console
+        [Install]
+        WantedBy=multi-user.target
+
 storage:
   files:
+    - path: /etc/kubernetes/kubeadm-custom-config.yaml
+      mode: 0644
+      contents:
+        inline: |
+          ---
+          # https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2
+          apiVersion: kubeadm.k8s.io/v1beta2
+          kind: InitConfiguration
+          localAPIEndpoint:
+            advertiseAddress: "{{ item.interfaces[1].address }}"
+            bindPort: 6443
+          nodeRegistration:
+            criSocket: unix:///run/containerd/containerd.sock
+            kubeletExtraArgs:
+              cgroup-driver: "systemd"
+
+          ---
+
+          apiVersion: kubeadm.k8s.io/v1beta2
+          kind: ClusterConfiguration
+          kubernetesVersion: {{ kubernetes_version}}
+          apiServer:
+            extraArgs:
+              profiling: 'false'
+              advertise-address: "{{ item.interfaces[1].address }}"
+              # validate ServiceAccount tokens exist in etcd as part of authentication.
+              service-account-lookup: 'false'
+              enable-admission-plugins: NodeRestriction
+              tls-cipher-suites: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+            timeoutForControlPlane: 4m0s
+          clusterName: kastcluster
+          controllerManager:
+            extraArgs:
+              profiling: 'false'
+              node-cidr-mask-size: "24"
+              node-monitor-grace-period: "40s"
+              node-monitor-period: "3s"
+              pod-eviction-timeout: "50s"
+              terminated-pod-gc-threshold: "12500"
+              # to avoid following error :
+              # kubelet[6822]: W0915 12:41:39.137139    6822 probe.go:268] Flexvolume plugin directory at /usr/libexec/kubernetes/kubelet-plugins/volume/exec/ does not exist. Recreating.
+              # kubelet[6822]: E0915 12:41:39.137260    6822 plugins.go:598] Error initializing dynamic plugin prober: Error (re-)creating driver directory: mkdir /usr/libexec/kubernetes: read-only file system
+              # as the default value (/usr/libexec/kubernetes/kubelet-plugins/volume/exec/) points to a read-only directory on Fedora CoreOS
+              flex-volume-plugin-dir: /var/lib/kubelet/kubelet-plugins/volume/exec
+          scheduler:
+            extraArgs:
+              profiling: 'false'
+              address: "127.0.0.1"
+          etcd:
+            local:
+              dataDir: /var/lib/etcd
+          networking:
+            dnsDomain: cluster.local
+            podSubnet: {{ pod_subnet }}
+
+          ---
+
+          apiVersion: kubeproxy.config.k8s.io/v1alpha1
+          kind: KubeProxyConfiguration
+          mode: "ipvs"
+          ipvs:
+            strictARP: true
+
+          ---
+
+          apiVersion: kubelet.config.k8s.io/v1beta1
+          kind: KubeletConfiguration
+          readOnlyPort: 0
+          eventRecordQPS: 0
+          # Not yet activated due to memory_overcommit
+          protectKernelDefaults: false
+          cgroupDriver: systemd
+          TLSCipherSuites: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
+          ...
+
+    - path: /usr/local/bin/install-k8s.sh
+      mode: 0755
+      contents:
+        inline: |
+          #!/usr/bin/env bash
+          # barely copied from https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+          set -e
+          # echo "Setting hostname to {{ item.name }}"
+          # hostnamectl set-hostname {{ item.name }}
+
+          echo "Installing packages"
+          command -v ethtool >/dev/null || rpm-ostree install conntrack ethtool --reboot
+
+          # echo "disabling selinux"
+          # setenforce 0
+          # sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+          echo "Installing cni plugins {{ cni_version }}"
+          mkdir -p /opt/cni/bin
+          curl -fsL https://github.com/containernetworking/plugins/releases/download/{{ cni_version }}/cni-plugins-linux-amd64-{{ cni_version }}.tgz | tar -C /opt/cni/bin/ -xz
+
+          echo "Installing kubernetes {{ kubernetes_version }}"
+          for f in kubeadm kubelet kubectl; do
+              curl -sfL --remote-name-all https://storage.googleapis.com/kubernetes-release/release/{{ kubernetes_version }}/bin/linux/amd64/$f --output {{ kube_binaries_path }}/$f
+              chmod 755 {{ kube_binaries_path }}/$f;
+          done
+
+          echo "Installing crictl {{ crictl_version }}"
+          curl -sfL https://github.com/kubernetes-sigs/cri-tools/releases/download/{{ crictl_version }}/crictl-{{ crictl_version }}-linux-amd64.tar.gz | tar -C {{ kube_binaries_path }} -xz
+
+          for s in containerd kubelet; do
+              systemctl enable --now $s
+          done
+          sleep 5
+
+          # %{~ if advertise_ip != null ~}
+          # echo "${advertise_ip} ${domain_name}" >> /etc/hosts
+          # %{~ endif ~}
+
+          echo "Setting up kubernetes with {{ setup_command }}"
+          {{ setup_command }} | tee /var/log/setup-k8s.log
+
+          # echo "Installing Calico network"
+          # export KUBECONFIG=/etc/kubernetes/admin.conf
+          # kubectl apply -f /etc/kubernetes/calico.yaml
+
+          # echo "Installing Flannel network"
+          # kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+          mkdir -p $HOME/.kube
+          cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+          chown $(id -u):$(id -g) $HOME/.kube/config
+
+          touch /var/log/k8s-installed
+
+    - path: /etc/selinux/config
+      mode: 0664
+      overwrite: true
+      contents:
+        source: data:text/plain;charset=iso-8859-7,SELINUX%3Ddisabled%0ASELINUXTYPE%3Dtargeted%0A
+
+    - path: /etc/modules-load.d/80-k8s.conf
+      mode: 0644
+      contents:
+        inline: |
+          br_netfilter
+
+    - path: /etc/sysctl.d/99-kubernetes-cri.conf
+      mode: 0644
+      contents:
+        inline: |
+          net.bridge.bridge-nf-call-iptables = 1
+          net.ipv4.ip_forward = 1
+          net.bridge.bridge-nf-call-ip6tables = 1
+
+    - path: /etc/sysctl.d/98-kubernetes-cis.conf
+      mode: 0644
+      contents:
+        inline: |
+          kernel.panic = 10
+          kernel.panic_on_oops = 1
+
     - path: /etc/hostname
       mode: 0644
       contents:
         inline: |
           {{ item.name }}
+
     - path: /etc/profile.d/systemd-pager.sh
       mode: 0644
       contents:
         inline: |
           # Tell systemd to not use a pager when printing information
           export SYSTEMD_PAGER=cat
+
     - path: /etc/sysctl.d/20-silence-audit.conf
       mode: 0644
       contents:
         inline: |
           # Raise console message logging level from DEBUG (7) to WARNING (4)
           # to hide audit messages from the interactive console
-          kernel.printk=4
+          kernel.printk = 4
 {% for intf in item.interfaces %}
+
     - path: /etc/NetworkManager/system-connections/{{ intf.name }}.nmconnection
       mode: 0600
       overwrite: true
@@ -46,15 +260,22 @@ storage:
         inline: |
           [connection]
           type=ethernet
-          id='Custom interface{{ loop.index }}'
+          id={{ intf.name }}
           interface-name={{ intf.name }}
 
           [ethernet]
           mac-address={{ intf.mac }}
 
           [ipv4]
+          may-fail=false
+{% if intf.mode == 'dhcp' %}
+          method=auto
+{% elif intf.mode == 'static' %}
           method=manual
           addresses={{ intf.address }}/{{ intf.cidr.split("/")[1] }}
+{% if intf.external is defined and intf.external %}
           dns={{ host_ip }}
           dns-search={{ dns_domain }}
+{% endif %}
+{% endif %}
 {% endfor %}

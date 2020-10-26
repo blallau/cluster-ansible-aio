@@ -1,9 +1,42 @@
 ---
-vm_os_distro: "{{ ansible_distribution | lower }}"
-os_default_user: "{{ vm_os_distro }}"
 
-config_owner_group: "kolla"
-config_owner_user: "kolla"
+#####################
+# guest description #
+#####################
+node_prefix: ""
+
+# Cluster sizing info
+#####################
+master_nb: 1
+master_ram: 4
+master_cpu: 2
+
+worker_nb: 2
+worker_ram: "{{ master_ram }}"
+worker_cpu: "{{ master_cpu }}"
+
+# Networking
+############
+net_interfaces:
+  - name: overlay-br
+    mode: dhcp
+    cidr: 10.150.150.0/24
+    bridge: overlay-br
+  - name: ext-br
+    forward: nat
+    mode: dhcp
+    cidr: 10.100.100.0/24
+    bridge: ext-br
+    pxe: True
+
+guest_os_distro: "{{ ansible_distribution | lower }}"
+os_default_user: "{{ guest_os_distro }}"
+
+###########
+# Globals #
+###########
+home_dir: "{{ ansible_user_dir }}"
+tmp_dir: "{{ home_dir}}/tmp"
 
 ############################
 # Docker registry defaults #
@@ -32,7 +65,7 @@ apt_cache_proxy_port: 3142
 ############################
 #   DNS server defaults    #
 ############################
-libvirt_dns_enabled: "True"
+local_dns_enabled: "True"
 dns_server_enabled: "False"
 destroy_dns_server: "False"
 
