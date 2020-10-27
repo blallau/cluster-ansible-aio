@@ -51,6 +51,7 @@
 {% endfor %}
 {% endif %}
 {% endfor %}
+{% if worker_nb > 0 %}
 {% for worker in range(1, worker_nb+1) %}
 - name: "{{ node_prefix }}worker{{ worker }}"
   ram: {{ worker_ram }}
@@ -97,4 +98,6 @@
 {% endfor %}
 {% endif %}
 {% endfor %}
+{% endif %}
+
 ...

@@ -1,30 +1,4 @@
 ---
-node_prefix: ""
-
-# Cluster sizing info
-#####################
-master_nb: 1
-master_ram: 4
-master_cpu: 2
-
-worker_nb: 1
-worker_ram: "{{ master_ram }}"
-worker_cpu: "{{ master_cpu }}"
-
-# Networking
-############
-net_interfaces:
-  - name: overlay-br
-    mode: dhcp
-    cidr: 10.150.150.0/24
-    bridge: overlay-br
-  - name: ext-br
-    forward: nat
-    mode: dhcp
-    cidr: 10.100.100.0/24
-    bridge: ext-br
-    pxe: True
-
 
 host_ip: "{{ net_interfaces | selectattr('forward', 'defined') | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address') | first }}"
 dns_domain: "mydomain.org"
