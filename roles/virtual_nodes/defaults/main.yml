@@ -27,25 +27,24 @@ yum_dependencies:
   - libvirt-devel
   - bridge-utils
   - genisoimage
-  - python-requests
   - qemu-kvm
 
 # ImportError: No module named ssl_match_hostname'
 #  - remove python-configparser
 apt_dependencies:
   - openssh-server
-  - libvirt-daemon
+  - libvirt-daemon-system
   - bridge-utils
   - genisoimage
-  - python3-requests
   - qemu-kvm
 
 pip_dependencies:
-  - netaddr
   - docker
-  # - libvirt-python
-  - lxml
   - pip
+  - requests
+  - libvirt
+  - netaddr
+  - lxml
 
 #############
 # OS images #

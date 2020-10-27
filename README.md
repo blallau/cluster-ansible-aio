@@ -30,30 +30,30 @@ Make sure the PIP package manager is installed and upgraded to the latest versio
 ```
 #CentOS
 sudo yum install epel-release
-sudo yum install python-pip
-sudo pip install -U pip
+sudo yum install snapd python3-pip
+sudo pip3 install -U pip
 
-#Ubuntu
+#Ubuntu or Debian
 sudo apt-get update
-sudo apt-get install python3-pip python-libvirt
-sudo pip install -U pip
+sudo apt-get install snapd python3-pip
+sudo pip3 install -U pip
 ```
 
-Install dependencies needed to build the code with PIP package manager:
+<!-- Install dependencies needed to build the code with PIP package manager: -->
+
+<!-- ``` -->
+<!-- #CentOS -->
+<!-- sudo yum install python-devel libffi-devel gcc openssl-devel libselinux-python -->
+
+<!-- #Ubuntu -->
+<!-- sudo apt-get install python-dev libffi-dev gcc libssl-dev python-selinux -->
+<!-- ``` -->
+
+Install Ansible (>= 2.9.13):
 
 ```
-#CentOS
-sudo yum install python-devel libffi-devel gcc openssl-devel libselinux-python
-
-#Ubuntu
-sudo apt-get install python-dev libffi-dev gcc libssl-dev python-selinux
-```
-
-Install Ansible (>= 2.6) using PIP:
-
-```
-#CentOS & Ubuntu
-sudo pip install -U ansible
+#CentOS & Ubuntu & Debian
+sudo pip3 install -U ansible==2.9.13
 ```
 
 #### Using virtual machines

@@ -15,18 +15,22 @@
   when: install_snap.changed
 
 - name: Install lxd snap
+  become: True
   snap:
     name:
+      - core
       - lxd
 
 - name: Add user to the lxd secondary group
+  become: True
   user:
     name: "{{ lookup('env', 'USER') }}"
     append: yes
     groups: lxd
 
-# - name: Reset ssh connection to allow user changes to affect current user
-#   meta: reset_connection
+- import_role:
+    name: common
+    tasks_from: ssh_key
 
 - name: Load cluster_nodes variables
   set_fact:
