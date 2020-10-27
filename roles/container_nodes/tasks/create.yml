@@ -57,33 +57,6 @@
 # - include_tasks: lxd/setup_storages.yml
 #   when: vm_volumes|length > 0
 
-# - import_tasks: lxd/setup_profiles.yml
-#   tags: network
-
-- name: Create a profile
-  lxd_profile:
-    name: "{{ item.name }}_profile"
-    state: "present"
-    config:
-      boot.autostart: "false"
-      limits.cpu: "{{ item.vcpu }}"
-      limits.memory: "{{ item.ram }}GB"
-      linux.kernel_modules: ip_vs,ip_vs_rr,ip_vs_wrr,ip_vs_sh,ip_tables,ip6_tables,netlink_diag,nf_nat,overlay,br_netfilter
-      raw.lxc: |
-        lxc.apparmor.profile=unconfined
-        lxc.mount.auto=proc:rw sys:rw cgroup:rw
-        lxc.cgroup.devices.allow=a
-        lxc.cap.drop=
-      security.nesting: "true"
-      security.privileged: "true"
-      user.user-data: "{{ lookup('template', './user-data.j2') }}"
-      user.meta-data: "{{ lookup('template', './meta-data.j2') }}"
-      user.network-config: "{{ lookup('template', './network-config.j2') }}"
-    snap_url: "{{ lxd_snap_url }}"
-    description: "description"
-    devices: "{{ lookup('template', './lxd_profile_devices.j2') }}"
-  with_items: "{{ cluster_nodes }}"
-
 - name: "Copy cluster config for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
   blockinfile:
     path: "{{ tmp_dir }}/{{ item.name }}/cluster_config"
@@ -100,14 +73,28 @@
   lxd_container:
     name: "{{ item.name }}"
     state: "started"
+    config:
+      boot.autostart: "false"
+      limits.cpu: "{{ item.vcpu }}"
+      limits.memory: "{{ item.ram }}GB"
+      linux.kernel_modules: ip_vs,ip_vs_rr,ip_vs_wrr,ip_vs_sh,ip_tables,ip6_tables,netlink_diag,nf_nat,overlay,br_netfilter
+      raw.lxc: |
+        lxc.apparmor.profile=unconfined
+        lxc.mount.auto=proc:rw sys:rw cgroup:rw
+        lxc.cgroup.devices.allow=a
+        lxc.cap.drop=
+      security.nesting: "true"
+      security.privileged: "true"
+      user.user-data: "{{ lookup('template', './user-data.j2') }}"
+      user.meta-data: "{{ lookup('template', './meta-data.j2') }}"
+      user.network-config: "{{ lookup('template', './network-config.j2') }}"
     source:
       type: "image"
       mode: "pull"
       server: "{{ lxd_image_url }}"
       protocol: "simplestreams"
       alias: "{{ container_os_image }}"
-    profiles: "{{ item.name }}_profile"
-    devices: {}
+    devices: "{{ lookup('template', './lxd_profile_devices.j2') }}"
     wait_for_ipv4_addresses: true
     snap_url: "{{ lxd_snap_url }}"
     timeout: 600
