@@ -9,7 +9,7 @@
   become: True
   apt:
     pkg: "{{ apt_dependencies }}"
-  when: ansible_distribution|lower == "ubuntu"
+  when: ansible_distribution|lower == "ubuntu" or ansible_distribution|lower == "debian"
 
 - import_tasks: docker/enable_docker.yml
   become: True
@@ -33,6 +33,10 @@
     state: started
     enabled: True
   tags: network
+
+- import_role:
+    name: common
+    tasks_from: ssh_key
 
 - name: Load cluster_nodes variables
   set_fact:

@@ -28,6 +28,7 @@ yum_dependencies:
   - bridge-utils
   - genisoimage
   - qemu-kvm
+  - rsync
 
 # ImportError: No module named ssl_match_hostname'
 #  - remove python-configparser
@@ -37,12 +38,13 @@ apt_dependencies:
   - bridge-utils
   - genisoimage
   - qemu-kvm
+  - rsync
 
 pip_dependencies:
   - docker
   - pip
   - requests
-  - libvirt
+  - libvirt-python
   - netaddr
   - lxml
 

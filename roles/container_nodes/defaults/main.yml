@@ -2,8 +2,23 @@
 ############
 # Packages #
 ############
+yum_dependencies:
+  - snap
+  - pkgconfig
+  - libvirt-dev
+
 apt_dependencies:
   - snap
+  - pkg-config
+  - libvirt-dev
+  - libvirt-daemon-system
+  - libvirt-clients
+
+pip_dependencies:
+  - requests
+  - libvirt-python
+  - netaddr
+  - lxml
 
 #############
 # OS images #
