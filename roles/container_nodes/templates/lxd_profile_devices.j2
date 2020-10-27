@@ -1,9 +1,9 @@
 {"root": {"path": "/", "pool": "default", "type": "disk"}
-{%- if net_interfaces | length > 0 -%},{%- endif -%}
-{%- for intf in net_interfaces -%}
+{%- if item.interfaces | length > 0 -%},{%- endif -%}
+{%- for intf in item.interfaces -%}
   {%- set intf_nb = loop.index0 -%}
   {# "eth{{- intf_nb -}}": {"network": "{{- intf.name -}}", "type": "nic"} #}
-  "eth{{- intf_nb -}}": {"name": "eth{{- intf_nb -}}", "parent": "{{- intf.bridge -}}", "nictype": "bridged", "type": "nic"}
+  "eth{{- intf_nb -}}": {"name": "eth{{- intf_nb -}}", "parent": "{{- intf.bridge -}}", "hwaddr": "{{- intf.mac -}}", "nictype": "bridged", "type": "nic"}
   {%- if not loop.last -%},{%- endif -%}
   {%- endfor -%}
   }
