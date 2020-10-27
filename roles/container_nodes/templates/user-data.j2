@@ -10,6 +10,12 @@ chpasswd:
 ssh_pwauth: True
 packages:
   - openssh-server
+  - kmod
+  - net-tools
+  - conntrack
+  - socat
+  - ethtool
+  - linux-image-4.19.0-10-amd64
 runcmd:
   - if grep -Gq "^\s*UseDNS" /etc/ssh/sshd_config; then sed -re "s/^\s*(UseDNS)\s+(yes|no)/\1 no/" -i.$(date -u +%Y%m%d%H%M%S) /etc/ssh/sshd_config; else echo "UseDNS no" >> /etc/ssh/sshd_config; fi
   - systemctl restart sshd &

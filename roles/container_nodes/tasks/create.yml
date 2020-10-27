@@ -28,6 +28,12 @@
     append: yes
     groups: lxd
 
+- name: /snap/bin/lxd init --auto
+  command: /snap/bin/lxd init --auto
+  args:
+    creates: /var/snap/lxd/common/lxd/storage-pools/default
+  become: yes
+
 - import_role:
     name: common
     tasks_from: ssh_key
@@ -71,8 +77,6 @@
   tags: network
 
 # https://github.com/Nani-o/ansible-role-lxd/blob/master/tasks/containers.yml
-# https://github.com/hispanico/ansible-lxd/blob/master/tasks/main.yml
-# https://github.com/andreasscherbaum/ansible-lxd-container/blob/master/tasks/main.yml
 - name: Create containers
   lxd_container:
     name: "{{ item.name }}"

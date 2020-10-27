@@ -176,15 +176,6 @@ EOF
         ACTION="Cleanup host and remove container nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e method=destroy"
         PLAYBOOK="${BASEDIR}/container-nodes.yml"
-        if [[ "${DANGER_CONFIRM}" != "--yes-i-really-really-mean-it" ]]; then
-            cat << EOF
-WARNING:
-    This will PERMANENTLY DESTROY all virtual nodes: so all deployed volumes and host configuration.
-    There is no way to recover from this action. To confirm, please add the following option:
-    --yes-i-really-really-mean-it
-EOF
-            exit 1
-        fi
         ;;
 (nodes-bootstrap)
         ACTION="Bootstrap all virtual nodes"
