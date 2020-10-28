@@ -71,8 +71,8 @@
 
 - name: Load cluster_nodes variables
   set_fact:
-    cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
-  tags: network
+    cluster_nodes: "{{ lookup('template', 'nodes.j2') | from_yaml }}"
+  tags: postconf
 
 - name: "Copy cluster_nodes in {{ tmp_dir }}"
   blockinfile:
@@ -80,12 +80,10 @@
     create: True
     block: |
         {{ cluster_nodes | to_nice_json(indent=2) }}
-  tags: network
 
 - name: Display cluster_nodes
   debug:
     msg: "{{ cluster_nodes | to_nice_yaml(indent=2) }}"
-  tags: network
 
 # - import_tasks: lxd/setup_networks.yml
 #   when: net_interfaces | length > 0
@@ -93,7 +91,6 @@
 
 - import_tasks: ../../virtual_nodes/tasks/libvirt/setup_networks.yml
   when: net_interfaces | length > 0
-  tags: network
 
 # - include_tasks: lxd/setup_storages.yml
 #   when: vm_volumes|length > 0
@@ -105,7 +102,6 @@
     block: |
         {{ item | to_nice_json(indent=2) }}
   with_items: "{{ cluster_nodes }}"
-  tags: network
 
 # https://github.com/Nani-o/ansible-role-lxd/blob/master/tasks/containers.yml
 - name: Create containers
@@ -156,7 +152,8 @@
   blockinfile:
     create: True
     block: "{{ lookup('template', 'ssh_config.j2') }}"
-    path: "{{ ansible_env.HOME }}/.ssh/config"
+    path: "{{ lookup('env', 'HOME') }}/.ssh/config"
+  tags: postconf
 
 - name: Add new nodes to created_nodes Ansible group
   add_host:
@@ -169,6 +166,7 @@
     - "{{ cluster_nodes }}"
     - interfaces
   when: item.1.address is defined and item.1.external is defined and item.1.external
+  tags: postconf
 
 - name: Populate /etc/hosts file
   become: True
@@ -181,3 +179,4 @@
     - "{{ cluster_nodes }}"
     - interfaces
   when: item.1.address is defined and item.1.external is defined and item.1.external
+  tags: postconf
