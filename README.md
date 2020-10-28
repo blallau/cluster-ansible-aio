@@ -2,7 +2,7 @@
 
 ## Overview
 
-Multi-node deployment of cluster apps on a single physical host, using heavily Libvirt or LXD and Ansible.
+Multi-node deployment of cluster apps on a single physical host, using heavily Ansible and Libvirt or LXD.
 
 ![cluster-ansible-aio](https://user-images.githubusercontent.com/9655027/31175714-6e453b1e-a910-11e7-8a60-f7c6d2114b1a.png)
 
@@ -120,4 +120,4 @@ and **roles/container_nodes/vars/main.yml**.
 
 1. Clean-up hypervisor and remove container nodes.
 
-    ./cluster-ansible-aio remove-container-nodes --yes-i-really-really-mean-it
+    ./cluster-ansible-aio remove-container-nodes

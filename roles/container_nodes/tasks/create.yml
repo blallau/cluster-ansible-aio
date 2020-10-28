@@ -40,11 +40,16 @@
     state: restarted
   when: install_snap.changed
 
-- name: Install lxd snap
+- name: Install core snap
   become: True
   snap:
     name:
       - core
+
+- name: Install lxd snap
+  become: True
+  snap:
+    name:
       - lxd
 
 - name: Add user to the lxd secondary group
@@ -135,7 +140,7 @@
   with_items: "{{ cluster_nodes }}"
   when: "cluster_nodes is defined"
 
-- name: Wait for VMs to be ready
+- name: Wait for containers to be ready
   wait_for:
     host: "{{ item.1.address }}"
     port: 22

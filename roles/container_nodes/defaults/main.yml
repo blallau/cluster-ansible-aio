@@ -3,12 +3,12 @@
 # Packages #
 ############
 yum_dependencies:
-  - snap
+  - snapd
   - pkgconfig
   - libvirt-dev
 
 apt_dependencies:
-  - snap
+  - snapd
   - pkg-config
   - libvirt-dev
   - libvirt-daemon-system
