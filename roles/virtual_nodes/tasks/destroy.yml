@@ -62,11 +62,19 @@
   with_items: "{{ cluster_nodes }}"
 
 - name: Clean nodes from ssh_config
-  become: True
   blockinfile:
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ ansible_env.HOME }}/.ssh/config"
     state: absent
+
+- name: Clean nodes from SSH known_hosts
+  command:
+    cmd: ssh-keygen -f "{{ ansible_env.HOME }}/.ssh/known_hosts" -R "{{ item.1.address }}"
+  with_subelements:
+    - "{{ cluster_nodes }}"
+    - interfaces
+  when: item.1.address is defined and item.1.external is defined and item.1.external
+  ignore_errors: True
 
 - name: Clean /etc/hosts file
   become: True
