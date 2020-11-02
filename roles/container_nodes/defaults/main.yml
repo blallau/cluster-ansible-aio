@@ -6,6 +6,7 @@ yum_dependencies:
   - snapd
   - pkgconfig
   - libvirt-dev
+  - bridge-utils
 
 apt_dependencies:
   - snapd
@@ -13,6 +14,7 @@ apt_dependencies:
   - libvirt-dev
   - libvirt-daemon-system
   - libvirt-clients
+  - bridge-utils
 
 pip_dependencies:
   - requests

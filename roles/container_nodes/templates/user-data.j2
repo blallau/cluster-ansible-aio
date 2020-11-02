@@ -17,6 +17,7 @@ packages:
   - socat
   - ethtool
   - linux-image-4.19.0-10-cloud-amd64
+  - sshpass
 runcmd:
   - if grep -Gq "^\s*UseDNS" /etc/ssh/sshd_config; then sed -re "s/^\s*(UseDNS)\s+(yes|no)/\1 no/" -i.$(date -u +%Y%m%d%H%M%S) /etc/ssh/sshd_config; else echo "UseDNS no" >> /etc/ssh/sshd_config; fi
   - systemctl restart sshd &

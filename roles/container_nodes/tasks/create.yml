@@ -12,10 +12,10 @@
   when: ansible_distribution|lower == "ubuntu" or ansible_distribution|lower == "debian"
   register: install_snap
 
-- name: "Add {{ lookup('env', 'USER') }} to group libvirt"
+- name: "Add {{ ansible_user }} to libvirt group"
   become: True
   user:
-    name: "{{ lookup('env', 'USER') }}"
+    name: "{{ ansible_user }}"
     groups: libvirt
     append: yes
 
@@ -52,18 +52,47 @@
     name:
       - lxd
 
-- name: Add user to the lxd secondary group
+- name: Add {{ ansible_user }} user to lxd secondary group
   become: True
   user:
-    name: "{{ lookup('env', 'USER') }}"
+    name: "{{ ansible_user }}"
     append: yes
     groups: lxd
+
+- name: Create /etc/tmpfiles.d/kmsg.conf file
+  become: True
+  file:
+    path: /etc/tmpfiles.d/kmsg.conf
+    state: touch
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: "Create /dev/kmsg symlink to /dev/console"
+  become: True
+  lineinfile:
+    path: "/etc/tmpfiles.d/kmsg.conf"
+    line: 'L /dev/kmsg - - - - /dev/console'
+    state: present
+
+- name: "Set subuid and subgid for LXD"
+  become: True
+  lineinfile:
+    path: "{{ item }}"
+    line: 'root:1000000:65536'
+    state: present
+  loop:
+    - "/etc/subuid"
+    - "/etc/subgid"
+
+- name: reset ssh connection to allow user changes to affect 'current login user'
+  meta: reset_connection
 
 - name: /snap/bin/lxd init --auto
   command: /snap/bin/lxd init --auto
   args:
     creates: /var/snap/lxd/common/lxd/storage-pools/default
-  become: yes
+  become: True
 
 - import_role:
     name: common
@@ -112,7 +141,7 @@
       boot.autostart: "false"
       limits.cpu: "{{ item.vcpu }}"
       limits.memory: "{{ item.ram }}GB"
-      linux.kernel_modules: ip_vs,ip_vs_rr,ip_vs_wrr,ip_vs_sh,ip_tables,ip6_tables,netlink_diag,nf_nat,overlay,br_netfilter
+      linux.kernel_modules: ip_vs,ip_vs_rr,ip_vs_wrr,ip_vs_sh,ip_tables,ip6_tables,netlink_diag,nf_nat,overlay,br_netfilter,xt_conntrack
       raw.lxc: |
         lxc.apparmor.profile=unconfined
         lxc.mount.auto=proc:rw sys:rw cgroup:rw

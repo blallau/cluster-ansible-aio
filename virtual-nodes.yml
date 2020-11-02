@@ -16,16 +16,6 @@
     - name: 'Wait using cloud-init status --wait'
       command: 'cloud-init status --wait'
       failed_when: false
-      register: wait_ci
-
-    - name: 'Fallback to pgrep for cloud-init waiting'
-      command: 'pgrep cloud-init'
-      register: res_pgrep_ci
-      ignore_errors: true
-      until: res_pgrep_ci.rc != 0
-      retries: 12
-      delay: 5
-      when: wait_ci.rc != 0
 
 # Python not present on Ubuntu and used by Ansible
 - name: Wait for Python 2 to be installed
