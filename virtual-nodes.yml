@@ -1,5 +1,5 @@
 ---
-- name: Create VMs
+- name: VMs
   hosts: hypervisors
   gather_facts: false
   pre_tasks:
@@ -15,6 +15,7 @@
   tasks:
     - name: 'Wait using cloud-init status --wait'
       command: 'cloud-init status --wait'
+      when: method == "create"
       failed_when: false
 
 # Python not present on Ubuntu and used by Ansible
