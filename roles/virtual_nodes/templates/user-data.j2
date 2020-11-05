@@ -12,15 +12,19 @@ ssh_pwauth: True
 packages:
   - rsync
   - openssh-server
+{% if allow_virt %}
   - python3-pip
   - pkg-config
   - libvirt-dev
   - libvirt-daemon-system
+{% endif %}
 bootcmd:
   - if grep -Gq "^\s*UseDNS" /etc/ssh/sshd_config; then sed -re "s/^\s*(UseDNS)\s+(yes|no)/\1 no/" -i.$(date -u +%Y%m%d%H%M%S) /etc/ssh/sshd_config; else echo "UseDNS no" >> /etc/ssh/sshd_config; fi
 runcmd:
   - systemctl restart sshd &
+{% if allow_virt %}
   - pip3 install ansible==2.9.13 libvirt-python netaddr
+{% endif %}
 {% if guest_os_distro == 'debian' or guest_os_distro == 'ubuntu' %}
   - DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration console-setup
 {% endif %}

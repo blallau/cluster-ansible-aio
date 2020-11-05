@@ -16,6 +16,9 @@ vm_volumes:
     size: 50
     format: raw
 
+# to install libvirt stuff in guest vm set to True
+allow_virt: False
+
 # # kubernetes
 # ############
 # cni_version: v0.8.6
