@@ -134,6 +134,7 @@ class LibvirtInventory(object):
                                           .DHCPLeases(mac_elem.get('address'))
                         if len(dhcp_leases) > 0:
                             ip_address = dhcp_leases[0]['ipaddr']
+                            hostvars['ansible_python_interpreter'] = "/usr/bin/python3"
                             hostvars['ansible_user'] = distro
                             hostvars['ansible_host'] = ip_address
                             hostvars['libvirt_ip_address'] = ip_address
