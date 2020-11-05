@@ -1,0 +1,64 @@
+---
+- name: Prepare nodes
+  hosts: nodes
+  become: True
+  tasks:
+    - name: Add linbit repository from PPA
+      apt_repository:
+        repo: 'ppa:linbit/linbit-drbd9-stack'
+        update_cache: False
+      when: ansible_distribution|lower == "ubuntu"
+
+    - name: Install Ubuntu packages
+      apt:
+        pkg:
+          - drbd-utils
+          - drbd-dkms
+          - lvm2
+      when: ansible_distribution|lower == "ubuntu"
+
+    - name: Load drbd kernel module
+      modprobe:
+        name: drbd
+        state: absent
+
+    - name: Enable drbd module
+      lineinfile:
+        path: /etc/modules-load.d/drbd.conf
+        line: 'drbd'
+        create: True
+
+- name: Deploy linstor controller
+  hosts: master
+  become: True
+  tasks:
+    - name: Install Ubuntu packages
+      apt:
+        pkg:
+          - linstor-controller
+          - linstor-satellite
+          - linstor-client
+      when: ansible_distribution|lower == "ubuntu"
+
+    - name: Start linstor-controller controller
+      systemd:
+        name: "linstor-controller"
+        enabled: yes
+        state: restarted
+
+- name: Deploy linstor controller
+  hosts: nodes
+  become: True
+  tasks:
+    - name: Install Ubuntu packages
+      apt:
+        pkg:
+          - linstor-satellite
+          - linstor-client
+      when: ansible_distribution|lower == "ubuntu"
+
+    - name: Start linstor-controller controller
+      systemd:
+        name: "linstor-satellite"
+        enabled: yes
+        state: restarted
