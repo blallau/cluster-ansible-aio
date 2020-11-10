@@ -16,8 +16,9 @@ Cluster-ansible-aio is an open source tool for automating deployment of cluster 
 -   Libvirt(KVM) or LXD support
 -   Multi OS (CentOS, Ubuntu)
 -   Multi guest OS (CentOS, Ubuntu, Debian)
--   Multi networks using DHCP or static IPs
--   Multi block storage (LVM disks)
+-   Multi networks type using DHCP or static IPs
+-   Multi block storage (using LV disks or QCOW2 disks)
+-   Heavily using cloudinit
 -   Heavily automated using Ansible
 -   Quick deployment: using PIP cache proxy (Devpi) and APT cache proxy (apt-cacher-ng)
 
