@@ -4,35 +4,41 @@
 # guest description #
 #####################
 node_prefix: ""
+guest_os_distro: "{{ ansible_distribution | lower }}"
+os_default_user: "{{ guest_os_distro }}"
 
-# Cluster sizing info
-#####################
+# Cluster sizing
+################
 master_nb: 1
-master_ram: 4
+master_ram: 2
 master_cpu: 2
 
-worker_nb: 2
-worker_ram: "{{ master_ram }}"
+worker_nb: 3
+worker_ram: 4
 worker_cpu: "{{ master_cpu }}"
 
 # Networking
 ############
+# First interface MUST be external one
 net_interfaces:
-  - name: overlay-br
-    mode: dhcp
-    cidr: 10.150.150.0/24
-    bridge: overlay-br
   - name: ext-br
     forward: nat
     mode: dhcp
     cidr: 10.100.100.0/24
     bridge: ext-br
     pxe: False
+  - name: overlay-br
+    mode: dhcp
+    cidr: 10.150.150.0/24
+    bridge: overlay-br
 
-guest_os_distro: "{{ ansible_distribution | lower }}"
-os_default_user: "{{ guest_os_distro }}"
+# Storage
+#########
+vm_volumes:
+  - name: vol-osd
+    size: 50
+    format: qcow2
 
-###########
 # Globals #
 ###########
 home_dir: "{{ ansible_user_dir }}"

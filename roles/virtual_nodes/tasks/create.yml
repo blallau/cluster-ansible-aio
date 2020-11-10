@@ -56,13 +56,6 @@
     msg: "{{ cluster_nodes | to_nice_yaml(indent=2) }}"
   tags: network
 
-- import_tasks: libvirt/setup_networks.yml
-  when: net_interfaces | length > 0
-  tags: network
-
-- include_tasks: libvirt/setup_storages.yml
-  when: vm_volumes | length > 0
-
 - import_tasks: docker/enable_apt_proxy.yml
   when: apt_cache_enabled | bool
   tags: apt_cache
@@ -139,6 +132,13 @@
         quay.io/coreos/fcct:release --pretty --strict config-ign.yaml --output config.ign'
       with_items: "{{ cluster_nodes }}"
   when: guest_os_distro == "fcos"
+
+- import_tasks: libvirt/setup_networks.yml
+  when: net_interfaces | length > 0
+  tags: network
+
+- include_tasks: libvirt/setup_storages.yml
+  when: vm_volumes | length > 0
 
 - name: Define VMs
   virt:

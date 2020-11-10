@@ -57,13 +57,21 @@
       <readonly/>
     </disk>
     {% if vm_volumes|length > 0 %}
-      {% for disk in item.disks %}
-        <disk type='block' device='disk'>
-          <driver name='qemu' type='raw' cache='none' io='native'/>
-          <source dev='/dev/{{ virt_volume_group }}/{{ disk.name }}'/>
-          <target dev='{{ disk.device }}' bus='virtio'/>
-        </disk>
-      {% endfor %}
+    {% for disk in item.disks %}
+    {% if disk.format == 'raw' %}
+    <disk type='block' device='disk'>
+      <driver name='qemu' type='raw' cache='none' io='native'/>
+      <source dev='/dev/{{ virt_volume_group }}/{{ disk.name }}'/>
+      <target dev='{{ disk.device }}' bus='virtio'/>
+    </disk>
+    {% elif disk.format == 'qcow2' %}
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='{{ tmp_dir }}/{{ item.name }}/{{ disk.name }}.qcow2'/>
+      <target dev='{{ disk.device }}' bus='virtio'/>
+    </disk>
+    {% endif %}
+    {% endfor %}
     {% endif %}
     <controller type='virtio-serial' index='0'>
       <alias name='virtio-serial0'/>

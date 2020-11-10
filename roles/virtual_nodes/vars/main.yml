@@ -5,16 +5,12 @@ dns_domain: "mydomain.org"
 
 # Storage
 #########
-root_disk_size: "50"
+root_disk_size: "100"
+
 # Additional disks (LVM)
 physical_disks:
   - /dev/nvme0n1p6
 virt_volume_group: "virtvg"
-
-vm_volumes:
-  - name: vol-osd
-    size: 50
-    format: raw
 
 # to install libvirt stuff in guest vm set to True
 allow_virt: False
