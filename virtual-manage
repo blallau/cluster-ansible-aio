@@ -94,6 +94,12 @@ function snap-delete {
 }
 
 function snap-revert {
+    if [[ -z $SNAPSHOT_NAME ]]; then
+        echo -en "error: expected syntax: virtual-manage --snap-revert <string>\n\n"
+        echo -en "snapshots:\n"
+        snap-list
+        exit 0
+    fi
     gracefully_shutdown
 	list_inactive_domains | while read DOMAIN; do
         for service in $SERVICES; do
