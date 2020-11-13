@@ -163,8 +163,8 @@
     - interfaces
   when: item.1.address is defined and item.1.external is defined and item.1.external
 
-- name: Detach vdb config drive disk
-  command: virsh detach-disk {{ item.name }} --target vdb --persistent --live
+- name: "Detach {{ cloud_init_disk }} config drive disk"
+  command: virsh detach-disk {{ item.name }} --target {{ cloud_init_disk }} --persistent --live
   with_items: "{{ cluster_nodes }}"
   when: guest_os_distro == "debian" or guest_os_distro == "centos"
   ignore_errors: True

@@ -52,7 +52,7 @@
       <driver name='qemu' type='raw'/>
       <source file='{{ tmp_dir }}/{{ item.name }}/seed.img'/>
       <backingStore/>
-      <target dev='vdb' bus='virtio'/>
+      <target dev='{{ cloud_init_disk }}' bus='virtio'/>
       <boot order='2'/>
       <readonly/>
     </disk>
