@@ -1,15 +1,15 @@
 #!/bin/bash
 
 NODE_PREFIX=""
-SERVICES="${NODE_PREFIX}master* ${NODE_PREFIX}worker*"
+NODE_TYPES="${NODE_PREFIX}master* ${NODE_PREFIX}worker*"
 SNAPSHOT_NAME=""
 TIMEOUT=300
 
 function start {
     #    docker start docker-dnsmasq
 	list_inactive_domains | while read DOMAIN; do
-        for service in $SERVICES; do
-            if [[ "$DOMAIN" =~ $service ]]; then
+        for node in $NODE_TYPES; do
+            if [[ "$DOMAIN" =~ $node ]]; then
 		        virsh start $DOMAIN
             fi
         done
@@ -18,8 +18,8 @@ function start {
 
 function cleanup {
 	list_all_domains | while read DOMAIN; do
-        for service in $SERVICES; do
-            if [[ "$DOMAIN" =~ $service ]]; then
+        for node in $NODE_TYPES; do
+            if [[ "$DOMAIN" =~ $node ]]; then
                 virsh destroy $DOMAIN
 		        virsh undefine --remove-all-storage $DOMAIN
             fi
@@ -70,8 +70,8 @@ function gracefully_shutdown {
 function snap-create {
     gracefully_shutdown
 	list_inactive_domains | while read DOMAIN; do
-        for service in $SERVICES; do
-            if [[ "$DOMAIN" =~ $service ]]; then
+        for node in $NODE_TYPES; do
+            if [[ "$DOMAIN" =~ $node ]]; then
                 virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME
                 echo "Snapshot $SNAPSHOT_NAME create for domain $DOMAIN"
             fi
@@ -83,8 +83,8 @@ function snap-create {
 function snap-delete {
     gracefully_shutdown
 	list_inactive_domains | while read DOMAIN; do
-        for service in $SERVICES; do
-            if [[ "$DOMAIN" =~ $service ]]; then
+        for node in $NODE_TYPES; do
+            if [[ "$DOMAIN" =~ $node ]]; then
                 virsh snapshot-delete $DOMAIN --snapshotname $SNAPSHOT_NAME
                 echo "Snapshot $SNAPSHOT_NAME remove for domain $DOMAIN"
             fi
@@ -102,8 +102,8 @@ function snap-revert {
     fi
     gracefully_shutdown
 	list_inactive_domains | while read DOMAIN; do
-        for service in $SERVICES; do
-            if [[ "$DOMAIN" =~ $service ]]; then
+        for node in $NODE_TYPES; do
+            if [[ "$DOMAIN" =~ $node ]]; then
                 virsh snapshot-revert $DOMAIN --snapshotname $SNAPSHOT_NAME
                 echo "Snapshot $SNAPSHOT_NAME revert for domain $DOMAIN"
             fi
@@ -114,8 +114,9 @@ function snap-revert {
 
 function snap-list {
 	list_all_domains | while read DOMAIN; do
-        for service in $SERVICES; do
-            if [[ "$DOMAIN" =~ $service ]]; then
+        for node in $NODE_TYPES; do
+            if [[ "$DOMAIN" =~ $node ]]; then
+                echo -e "$DOMAIN:"
                 virsh -q snapshot-list --domain $DOMAIN
             fi
         done
