@@ -1,0 +1,45 @@
+---
+- name: Kube config
+  hosts: master1
+  tasks:
+    - debug: msg="{{ lookup('env','HOME') }}"
+
+    - name: create directory
+      file:
+        path: "{{ ansible_env.HOME }}/.kube"
+        state: directory
+        mode: '0755'
+
+    - name: copy kube config in .kube/config
+      become: True
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: "{{ ansible_env.HOME }}/.kube/config"
+        owner: "{{ os_default_user }}"
+        group: "{{ os_default_user }}"
+        mode: '0644'
+        remote_src: yes
+
+    - name: copy kube config to localhost
+      become: True
+      fetch:
+        src: /etc/kubernetes/admin.conf
+        dest: "{{ lookup('env','HOME') }}/.kube/config"
+        flat: yes
+
+- name: Kube config
+  hosts: worker*
+  tasks:
+    - name: create directory
+      file:
+        path: "{{ ansible_env.HOME }}/.kube"
+        state: directory
+        mode: '0755'
+
+    - name: copy kube config
+      copy:
+        src: "{{ lookup('env','HOME') }}/.kube/config"
+        dest: "{{ ansible_env.HOME }}/.kube/config"
+        owner: "{{ os_default_user }}"
+        group: "{{ os_default_user }}"
+        mode: '0644'

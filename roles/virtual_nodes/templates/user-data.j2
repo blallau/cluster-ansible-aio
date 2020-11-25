@@ -10,6 +10,10 @@ chpasswd:
   expire: False
 ssh_pwauth: True
 packages:
+  - dnsutils
+  - bridge-utils
+  - tshark
+  - curl
   - rsync
   - openssh-server
 {% if guest_os_distro == 'debian' or guest_os_distro == 'ubuntu' %}
