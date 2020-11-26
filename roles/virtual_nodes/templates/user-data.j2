@@ -26,6 +26,8 @@ packages:
 {% endif %}
 {% elif guest_os_distro == 'centos' %}
   - python3
+  - tc
+  - ebtables
 {% endif %}
 bootcmd:
   - if grep -Gq "^\s*UseDNS" /etc/ssh/sshd_config; then sed -re "s/^\s*(UseDNS)\s+(yes|no)/\1 no/" -i.$(date -u +%Y%m%d%H%M%S) /etc/ssh/sshd_config; else echo "UseDNS no" >> /etc/ssh/sshd_config; fi
