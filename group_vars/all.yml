@@ -20,17 +20,19 @@ worker_cpu: "{{ master_cpu }}"
 # Networking
 ############
 # First interface MUST be external one
+net_prefix: "{{ node_prefix }}"
+
 net_interfaces:
-  - name: ext-br
+  - name: "{{ net_prefix }}ext-br"
     forward: nat
     mode: dhcp
-    cidr: 10.100.100.0/24
-    bridge: ext-br
+    cidr: 10.0.100.0/24
+    bridge: "{{ net_prefix }}ext-br"
     pxe: False
-  - name: overlay-br
+  - name: "{{ net_prefix }}overlay-br"
     mode: dhcp
-    cidr: 10.150.150.0/24
-    bridge: overlay-br
+    cidr: 10.0.150.0/24
+    bridge: "{{ net_prefix }}overlay-br"
 
 # Storage
 #########
