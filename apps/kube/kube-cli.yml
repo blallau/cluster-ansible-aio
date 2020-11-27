@@ -1,6 +1,6 @@
 ---
 - name: Kube config
-  hosts: master1
+  hosts: "*master1"
   tasks:
     - debug: msg="{{ lookup('env','HOME') }}"
 
@@ -28,7 +28,7 @@
         flat: yes
 
 - name: Kube config
-  hosts: worker*
+  hosts: "*worker*"
   tasks:
     - name: create directory
       file:
