@@ -1,5 +1,19 @@
 #!/bin/bash
-NODE_PREFIX="${NODE_PREFIX:-}"
+CONF_FILE=$HOME/.cluster-ansible-aio-env
+
+if [[ -z "${NODE_PREFIX}" && ! -f ${CONF_FILE} ]]; then
+    echo "Error: NODE_PREFIX variable must be set"
+    exit 1
+fi
+
+if [[ -n "${NODE_PREFIX}" ]]; then
+    echo "${NODE_PREFIX}" > ${CONF_FILE}
+else
+    NODE_PREFIX=$(cat ${CONF_FILE})
+fi
+
+echo -e "Environment: $NODE_PREFIX\n"
+
 NODE_TYPES="^${NODE_PREFIX}master* ^${NODE_PREFIX}worker*"
 SNAPSHOT_NAME=""
 TIMEOUT=300
@@ -10,6 +24,16 @@ function start {
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
 		        virsh start $DOMAIN
+            fi
+        done
+	done
+}
+
+function status {
+	list_all_domains | while read DOMAIN; do
+        for node in $NODE_TYPES; do
+            if [[ "$DOMAIN" =~ $node ]]; then
+		        echo "  $DOMAIN   running"
             fi
         done
 	done
@@ -140,6 +164,7 @@ Commands:
     --cleanup                        Cleanup (destroy & undefine) cluster
     --start                          Start cluster
     --shutdown                       Shutdown cluster
+    --status                         Cluster status
     --snap-create <snapshot name>    Create cluster snapshot
     --snap-delete <snapshot name>    Delete cluster snapshot
     --snap-revert <snapshot name>    Revert cluster snapshot
@@ -147,7 +172,7 @@ Commands:
 EOF
 }
 
-LONG_OPTS="cleanup,start,shutdown,snap-delete:,snap-create:,snap-revert:,snap-list,help"
+LONG_OPTS="cleanup,start,shutdown,status,snap-delete:,snap-create:,snap-revert:,snap-list,help"
 ARGS=$(getopt -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }
 
 while [ "$#" -gt 0 ]; do
@@ -162,6 +187,10 @@ while [ "$#" -gt 0 ]; do
             ;;
         (--shutdown)
             gracefully_shutdown
+            exit 0
+            ;;
+        (--status)
+            status
             exit 0
             ;;
         (--snap-delete)
