@@ -16,6 +16,8 @@ echo -e "Environment: $NODE_PREFIX\n"
 
 NODE_TYPES="^${NODE_PREFIX}master* ^${NODE_PREFIX}worker*"
 SNAPSHOT_NAME=""
+DISK_DIRECTORY="${HOME}/tmp"
+DISK_SIZE=10
 TIMEOUT=300
 
 function start {
@@ -100,6 +102,30 @@ function gracefully_shutdown {
     power_shutdown
 }
 
+function add-disk {
+	list_running_domains | while read DOMAIN; do
+        for node in $NODE_TYPES; do
+            if [[ "$DOMAIN" =~ $node ]]; then
+                sudo qemu-img create -f qcow2 ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2 ${DISK_SIZE}G
+                virsh attach-disk --domain $DOMAIN --source ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2 --subdriver qcow2 --target vdd --live --cache none
+                echo "Disk added to $DOMAIN domain"
+            fi
+        done
+    done
+}
+
+function remove-disk {
+	list_running_domains | while read DOMAIN; do
+        for node in $NODE_TYPES; do
+            if [[ "$DOMAIN" =~ $node ]]; then
+                virsh detach-disk --domain $DOMAIN --target vdd --live
+                sudo rm ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2
+                echo "Disk removed from $DOMAIN domain"
+            fi
+        done
+    done
+}
+
 function snap-create {
     gracefully_shutdown
 	list_inactive_domains | while read DOMAIN; do
@@ -169,10 +195,13 @@ Commands:
     --snap-delete <snapshot name>    Delete cluster snapshot
     --snap-revert <snapshot name>    Revert cluster snapshot
     --snap-list                      List cluster snapshots
+
+    --add-disk <disk size>           Add disk to VMs
+    --remove-disk <disk size>        Remove disk from VMs
 EOF
 }
 
-LONG_OPTS="cleanup,start,shutdown,status,snap-delete:,snap-create:,snap-revert:,snap-list,help"
+LONG_OPTS="cleanup,start,shutdown,status,snap-delete:,snap-create:,snap-revert:,snap-list,add-disk:,remove-disk:,help"
 ARGS=$(getopt -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }
 
 while [ "$#" -gt 0 ]; do
@@ -197,6 +226,18 @@ while [ "$#" -gt 0 ]; do
             SNAPSHOT_NAME=$2
             shift 2
             snap-delete
+            exit 0
+            ;;
+        (--add-disk)
+            DISK_SIZE=$2
+            shift 2
+            add-disk
+            exit 0
+            ;;
+        (--remove-disk)
+            DISK_SIZE=$2
+            shift 2
+            remove-disk
             exit 0
             ;;
         (--snap-create)
