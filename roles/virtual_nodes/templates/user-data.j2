@@ -19,6 +19,7 @@ packages:
   - ethtool
   - psmisc
   - openssh-server
+  - gnupg2
 {% if guest_os_distro == 'debian' or guest_os_distro == 'ubuntu' %}
   - python3-minimal
 {% if allow_virt %}
@@ -41,6 +42,13 @@ runcmd:
 {% endif %}
 {% if guest_os_distro == 'debian' or guest_os_distro == 'ubuntu' %}
   - DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration console-setup
+  - curl -s https://s3.amazonaws.com/download.draios.com/DRAIOS-GPG-KEY.public | sudo apt-key add -
+  - curl -s -o /etc/apt/sources.list.d/draios.list https://s3.amazonaws.com/download.draios.com/stable/deb/draios.list
+  - DEBIAN_FRONTEND=noninteractive apt-get -y update
+  - DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade
+  - DEBIAN_FRONTEND=noninteractive apt-get -y install linux-headers-$(dpkg -l | egrep "linux-image-[0-9]" | awk '{ print $2 }' | awk -F '-' '{ print substr($0, index($0,$3)) }')
+  - DEBIAN_FRONTEND=noninteractive apt-get -y install sysdig
+  - DEBIAN_FRONTEND=noninteractive apt-get -y autoremove
 {% endif %}
 {% if guest_os_distro == 'debian' or guest_os_distro == 'ubuntu' %}
 write_files:

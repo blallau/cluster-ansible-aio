@@ -12,7 +12,7 @@ else
     NODE_PREFIX=$(cat ${CONF_FILE})
 fi
 
-echo -e "Environment: $NODE_PREFIX\n"
+echo -e "Environment: \e[93m$NODE_PREFIX\e[39m\n"
 
 NODE_TYPES="^${NODE_PREFIX}master* ^${NODE_PREFIX}worker*"
 SNAPSHOT_NAME=""
@@ -35,7 +35,8 @@ function status {
 	list_all_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
-		        echo "  $DOMAIN   running"
+		        echo -e "  $DOMAIN   \e[1m\e[92mrunning\e[39m\e[0m"
+                virsh domblklist $DOMAIN | tail -n +3
             fi
         done
 	done
