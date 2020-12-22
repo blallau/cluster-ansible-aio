@@ -46,7 +46,7 @@ runcmd:
   - curl -s -o /etc/apt/sources.list.d/draios.list https://s3.amazonaws.com/download.draios.com/stable/deb/draios.list
   - DEBIAN_FRONTEND=noninteractive apt-get -y update
   - DEBIAN_FRONTEND=noninteractive apt-get -y dist-upgrade
-  - DEBIAN_FRONTEND=noninteractive apt-get -y install linux-headers-$(dpkg -l | egrep "linux-image-[0-9]" | awk '{ print $2 }' | awk -F '-' '{ print substr($0, index($0,$3)) }')
+  - DEBIAN_FRONTEND=noninteractive apt-get -y install linux-headers-$(dpkg -l | egrep "linux-image-[0-9]" | sort -r | head -n 1 | awk '{ print $2 }' | awk -F '-' '{ print substr($0, index($0,$3)) }')
   - DEBIAN_FRONTEND=noninteractive apt-get -y install sysdig
   - DEBIAN_FRONTEND=noninteractive apt-get -y autoremove
 {% endif %}
