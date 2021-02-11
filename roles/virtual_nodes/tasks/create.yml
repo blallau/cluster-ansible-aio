@@ -25,6 +25,7 @@
 - import_tasks: precheck.yml
 
 - import_tasks: docker/enable_registry.yml
+  when: registry_enabled | bool
 
 - name: Starting Libvirtd service
   become: True

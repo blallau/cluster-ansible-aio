@@ -20,6 +20,8 @@ packages:
   - psmisc
   - openssh-server
   - gnupg2
+  - conntrack
+  - lsof
 {% if guest_os_distro == 'debian' or guest_os_distro == 'ubuntu' %}
   - python3-minimal
 {% if allow_virt %}
@@ -36,11 +38,19 @@ packages:
 bootcmd:
   - if grep -Gq "^\s*UseDNS" /etc/ssh/sshd_config; then sed -re "s/^\s*(UseDNS)\s+(yes|no)/\1 no/" -i.$(date -u +%Y%m%d%H%M%S) /etc/ssh/sshd_config; else echo "UseDNS no" >> /etc/ssh/sshd_config; fi
 runcmd:
+{% if vm_volumes|length > 0 and vm_volumes_mount %}
+{% for disk in item.disks %}
+  - mkdir /opt/data{{ loop.index }}
+{% endfor %}
+{% endif %}
   - systemctl restart sshd &
 {% if allow_virt %}
   - pip3 install ansible==2.9.13 libvirt-python netaddr
 {% endif %}
 {% if guest_os_distro == 'debian' or guest_os_distro == 'ubuntu' %}
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y open-iscsi
+{% endif %}
+{% if guest_os_distro == 'toremove' %}
   - DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration console-setup
   - curl -s https://s3.amazonaws.com/download.draios.com/DRAIOS-GPG-KEY.public | sudo apt-key add -
   - curl -s -o /etc/apt/sources.list.d/draios.list https://s3.amazonaws.com/download.draios.com/stable/deb/draios.list
@@ -52,13 +62,39 @@ runcmd:
 {% endif %}
 {% if guest_os_distro == 'debian' or guest_os_distro == 'ubuntu' %}
 write_files:
-- content: |
-    XKBMODEL="pc105"
-    XKBLAYOUT="fr"
-    XKBVARIANT=""
-    XKBOPTIONS=""
-    BACKSPACE="guess"
-  path: /etc/default/keyboard
-  owner: root:root
-  permissions: '0644'
+ - content: |
+     XKBMODEL="pc105"
+     XKBLAYOUT="fr"
+     XKBVARIANT=""
+     XKBOPTIONS=""
+     BACKSPACE="guess"
+   path: /etc/default/keyboard
+   owner: root:root
+   permissions: '0644'
+{% endif %}
+{% if vm_volumes|length > 0 and vm_volumes_mount %}
+# disk_setup:
+# {% for disk in item.disks %}
+#   /dev/{{ disk.device }}:
+#     table_type: 'mbr'
+#     layout: true
+#     overwrite: true
+# {% endfor %}
+#setup the file system on the device
+fs_setup:
+{% for disk in item.disks %}
+  - label: 'data{{ loop.index }}'
+    filesystem: '{{ vm_volumes_fs_format }}'
+    device: /dev/{{ disk.device }}
+    partition: 'auto'
+    overwrite: true
+{% endfor %}
+mounts:
+{% for disk in item.disks %}
+  - [ "/dev/{{ disk.device }}", "/opt/data{{ loop.index }}" ]
+{% endfor %}
+# mount_default_fields
+# These values are used to fill in any entries in 'mounts' that are not
+# complete.  This must be an array, and must have 6 fields.
+mount_default_fields: [ None, None, "auto", "defaults,nofail", "0", "2" ]
 {% endif %}

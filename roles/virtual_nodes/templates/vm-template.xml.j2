@@ -77,16 +77,16 @@
       <alias name='virtio-serial0'/>
     </controller>
     {% for intf in item.interfaces %}
-      <interface type='bridge'>
-        <source bridge='{{ intf.bridge }}'/>
-        <target dev='vnet{{ loop.index }}'/>
-        {% if intf.mac is defined %}
-          <mac address='{{ intf.mac }}'/>
-        {% endif %}
-        <model type='virtio'/>
-        <driver name='vhost' queues='1'/>
-        <alias name='net{{ loop.index }}'/>
-      </interface>
+    <interface type='bridge'>
+      <source bridge='{{ intf.bridge }}'/>
+      <target dev='vnet{{ loop.index }}'/>
+      {% if intf.mac is defined %}
+        <mac address='{{ intf.mac }}'/>
+      {% endif %}
+      <model type='virtio'/>
+      <driver name='vhost' queues='1'/>
+      <alias name='net{{ loop.index }}'/>
+    </interface>
     {% endfor %}
     <serial type='pty'>
       <source path='/dev/pts/1'/>

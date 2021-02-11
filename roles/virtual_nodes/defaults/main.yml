@@ -5,6 +5,7 @@
 libvirt_dir: "/var/lib/libvirt/images"
 
 cloud_init_disk: "vdb"
+vm_volumes_fs_format: "ext4"
 
 #####################
 # Docker containers #
