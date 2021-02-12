@@ -40,7 +40,7 @@ bootcmd:
 runcmd:
 {% if vm_volumes|length > 0 and vm_volumes_mount %}
 {% for disk in item.disks %}
-  - mkdir /opt/data{{ loop.index }}
+  - mkdir {{ vm_volumes_mount_path }}/data-{{ loop.index }}
 {% endfor %}
 {% endif %}
   - systemctl restart sshd &
@@ -91,7 +91,7 @@ fs_setup:
 {% endfor %}
 mounts:
 {% for disk in item.disks %}
-  - [ "/dev/{{ disk.device }}", "/opt/data{{ loop.index }}" ]
+  - [ "/dev/{{ disk.device }}", "{{ vm_volumes_mount_path }}/data-{{ loop.index }}" ]
 {% endfor %}
 # mount_default_fields
 # These values are used to fill in any entries in 'mounts' that are not
