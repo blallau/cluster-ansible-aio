@@ -83,7 +83,7 @@ write_files:
 #setup the file system on the device
 fs_setup:
 {% for disk in item.disks %}
-  - label: 'data{{ loop.index }}'
+  - label: 'data{{ loop.index0 }}'
     filesystem: '{{ vm_volumes_fs_format }}'
     device: /dev/{{ disk.device }}
     partition: 'auto'
@@ -91,7 +91,7 @@ fs_setup:
 {% endfor %}
 mounts:
 {% for disk in item.disks %}
-  - [ "/dev/{{ disk.device }}", "{{ vm_volumes_mount_path }}/data-{{ loop.index }}" ]
+  - [ "/dev/{{ disk.device }}", "{{ vm_volumes_mount_path }}/data-{{ loop.index0 }}" ]
 {% endfor %}
 # mount_default_fields
 # These values are used to fill in any entries in 'mounts' that are not
