@@ -4,7 +4,7 @@
 ###########
 libvirt_dir: "/var/lib/libvirt/images"
 
-cloud_init_disk: "vdb"
+cloud_init_disk: "vdz"
 vm_volumes_fs_format: "ext4"
 
 #####################
