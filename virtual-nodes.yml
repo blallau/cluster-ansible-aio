@@ -17,6 +17,7 @@
       command: 'cloud-init status --wait'
       when: method == "create"
       failed_when: false
+      when: guest_os_distro == "debian" or guest_os_distro == "centos"
 
 # Python not present
 - name: Wait for Python 3 to be installed

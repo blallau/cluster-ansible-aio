@@ -114,7 +114,7 @@
       with_items: "{{ cluster_nodes }}"
   when: guest_os_distro == "debian" or guest_os_distro == "centos"
 
-- name: Prepare FCOS VMs config
+- name: Prepare FCOS or Flatcar VMs config
   block:
     - name: Instantiate Ignition config file
       template:
@@ -126,13 +126,20 @@
         path: "{{ tmp_dir }}/{{ item.name }}/config.ign"
         state: absent
       with_items: "{{ cluster_nodes }}"
-    - name: Convert Ignition file from YAML format
+    - name: Convert Ignition file from YAML format using FCCT
       command: 'docker run --rm --interactive \
         --security-opt label=disable        \
         --volume {{ tmp_dir }}/{{ item.name }}:/work --workdir /work \
         quay.io/coreos/fcct:release --pretty --strict config-ign.yaml --output config.ign'
       with_items: "{{ cluster_nodes }}"
-  when: guest_os_distro == "fcos"
+      when: guest_os_distro == "fcos"
+    - name: Convert Ignition file from YAML format using CT
+      shell: 'cat {{ tmp_dir}}/{{ item.name }}/config-ign.yaml | docker run --rm \
+        --interactive --security-opt label=disable \
+          quay.io/coreos/ct:latest-dev > {{ tmp_dir}}/{{ item.name }}/config.ign'
+      with_items: "{{ cluster_nodes }}"
+      when: guest_os_distro == "flatcar"
+  when: guest_os_distro == "fcos" or guest_os_distro == 'flatcar'
 
 - import_tasks: libvirt/setup_networks.yml
   when: net_interfaces | length > 0

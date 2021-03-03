@@ -20,7 +20,7 @@
 {% elif guest_os_distro == 'ubuntu' %}
 {% set intf_nb = loop.index + 1 %}
     - name: "ens{{ intf_nb }}"
-{% elif guest_os_distro == 'fcos' %}
+{% elif guest_os_distro == 'fcos' or guest_os_distro == 'flatcar' %}
 {% set intf_nb = loop.index0 %}
     - name: "enp1s{{ intf_nb }}"
 {% endif %}
@@ -67,7 +67,7 @@
 {% elif guest_os_distro == 'ubuntu' %}
 {% set intf_nb = loop.index + 1 %}
     - name: "ens{{ intf_nb }}"
-{% elif guest_os_distro == 'fcos' %}
+{% elif guest_os_distro == 'fcos' or guest_os_distro == 'flatcar' %}
 {% set intf_nb = loop.index0 %}
     - name: "enp1s{{ intf_nb }}"
 {% endif %}
