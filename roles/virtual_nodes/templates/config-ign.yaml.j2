@@ -49,8 +49,8 @@ storage:
       mode: 0644
       contents:
         inline: |
-          net.bridge.bridge-nf-call-iptables = 1
           net.ipv4.ip_forward = 1
+          net.bridge.bridge-nf-call-iptables = 1
           net.bridge.bridge-nf-call-ip6tables = 1
 
     - path: /etc/sysctl.d/98-kubernetes-cis.conf
@@ -73,7 +73,6 @@ storage:
         inline: |
           # Tell systemd to not use a pager when printing information
           export SYSTEMD_PAGER=cat
-
 {% if guest_os_distro == 'flatcar' %}
     - path: /home/core/.toolboxrc
       mode: 0644

@@ -51,8 +51,8 @@
 {% endfor %}
 {% endif %}
 {% endfor %}
-{% if worker_nb > 0 %}
-{% for worker in range(1, worker_nb+1) %}
+{% if worker_nb|int > 0 %}
+{% for worker in range(1, worker_nb|int+1) %}
 - name: "{{ node_prefix }}worker{{ worker }}"
   ram: {{ worker_ram }}
   vcpu: {{ worker_cpu }}
