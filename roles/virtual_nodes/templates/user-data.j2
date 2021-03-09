@@ -10,9 +10,6 @@ chpasswd:
   expire: False
 ssh_pwauth: True
 packages:
-  - dnsutils
-  - bridge-utils
-  - tshark
   - curl
   - rsync
   - socat
@@ -23,6 +20,9 @@ packages:
   - conntrack
   - lsof
 {% if guest_os_distro == 'debian' or guest_os_distro == 'ubuntu' %}
+  - dnsutils
+  - bridge-utils
+  - tshark
   - python3-minimal
 {% if allow_virt %}
   - python3-pip
