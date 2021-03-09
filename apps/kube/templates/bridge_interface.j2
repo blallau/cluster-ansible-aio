@@ -1,0 +1,11 @@
+auto {{ item.br_name }}
+iface {{ item.br_name }} inet dhcp
+    # If the resolvconf package is installed, you should not edit
+    # the resolv.conf configuration file manually. Set name server here
+    #dns-nameservers 192.168.2.254
+    # If you have muliple interfaces such as eth0 and eth1
+    # bridge_ports eth0 eth1
+    bridge_ports {{ item.intf_name }}
+    bridge_stp off       # disable Spanning Tree Protocol
+    bridge_waitport 0    # no delay before a port becomes available
+    bridge_fd 0          # no forwarding delay
