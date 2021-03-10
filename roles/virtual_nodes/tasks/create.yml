@@ -9,7 +9,7 @@
   become: True
   apt:
     pkg: "{{ apt_dependencies }}"
-  when: ansible_distribution|lower == "ubuntu" or ansible_distribution|lower == "debian"
+  when: ansible_distribution|lower in ["ubuntu", "debian"]
 
 - import_tasks: docker/enable_docker.yml
   become: True
@@ -112,7 +112,7 @@
                   {{ tmp_dir }}/{{ item.name }}/user-data \
                   {{ tmp_dir }}/{{ item.name }}/meta-data"
       with_items: "{{ cluster_nodes }}"
-  when: guest_os_distro == "debian" or guest_os_distro == "centos"
+  when: guest_os_distro in ["debian", "centos"]
 
 - name: Prepare FCOS or Flatcar VMs config
   block:
@@ -139,7 +139,7 @@
           quay.io/coreos/ct:latest-dev > {{ tmp_dir}}/{{ item.name }}/config.ign'
       with_items: "{{ cluster_nodes }}"
       when: guest_os_distro == "flatcar"
-  when: guest_os_distro == "fcos" or guest_os_distro == 'flatcar'
+  when: guest_os_distro in ["fcos", "flatcar"]
 
 - import_tasks: libvirt/setup_networks.yml
   when: net_interfaces | length > 0
@@ -174,7 +174,7 @@
 - name: "Detach {{ cloud_init_disk }} config drive disk"
   command: virsh detach-disk {{ item.name }} --target {{ cloud_init_disk }} --persistent --live
   with_items: "{{ cluster_nodes }}"
-  when: guest_os_distro == "debian" or guest_os_distro == "centos"
+  when: guest_os_distro in ["debian", "centos"]
   ignore_errors: True
 
 - name: Insert nodes into ssh_config

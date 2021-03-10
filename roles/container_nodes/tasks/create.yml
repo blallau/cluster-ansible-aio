@@ -9,7 +9,7 @@
   become: True
   apt:
     pkg: "{{ apt_dependencies }}"
-  when: ansible_distribution|lower == "ubuntu" or ansible_distribution|lower == "debian"
+  when: ansible_distribution|lower in ["ubuntu", "debian"]
   register: install_snap
 
 - name: "Add {{ ansible_user }} to libvirt group"
