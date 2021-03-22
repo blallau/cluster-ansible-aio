@@ -128,6 +128,11 @@ function remove-disk {
 }
 
 function snap-create {
+    SNAP_NAME=$1
+    if [[ -z $SNAP_NAME ]]; then
+        echo -en "error: expected syntax: virtual-manage --snap-create <string>\n\n"
+        exit 0
+    fi
     gracefully_shutdown
 	list_inactive_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
@@ -141,11 +146,18 @@ function snap-create {
 }
 
 function snap-delete {
+    SNAP_NAME=$1
+    if [[ -z $SNAP_NAME ]]; then
+        echo -en "error: expected syntax: virtual-manage --snap-delete <string>\n\n"
+        echo -en "snapshots:\n"
+        snap-list
+        exit 0
+    fi
     gracefully_shutdown
 	list_inactive_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
-                virsh snapshot-delete $DOMAIN --snapshotname $SNAPSHOT_NAME
+                virsh snapshot-delete $DOMAIN --snapshotname $SNAP_NAME
                 echo "Snapshot $SNAPSHOT_NAME remove for domain $DOMAIN"
             fi
         done
@@ -154,7 +166,8 @@ function snap-delete {
 }
 
 function snap-revert {
-    if [[ -z $SNAPSHOT_NAME ]]; then
+    SNAP_NAME=$1
+    if [[ -z $SNAP_NAME ]]; then
         echo -en "error: expected syntax: virtual-manage --snap-revert <string>\n\n"
         echo -en "snapshots:\n"
         snap-list
@@ -164,7 +177,7 @@ function snap-revert {
 	list_inactive_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
-                virsh snapshot-revert $DOMAIN --snapshotname $SNAPSHOT_NAME
+                virsh snapshot-revert $DOMAIN --snapshotname $SNAP_NAME
                 echo "Snapshot $SNAPSHOT_NAME revert for domain $DOMAIN"
             fi
         done
@@ -226,7 +239,7 @@ while [ "$#" -gt 0 ]; do
         (--snap-delete)
             SNAPSHOT_NAME=$2
             shift 2
-            snap-delete
+            snap-delete $SNAPSHOT_NAME
             exit 0
             ;;
         (--add-disk)
@@ -244,13 +257,13 @@ while [ "$#" -gt 0 ]; do
         (--snap-create)
             SNAPSHOT_NAME=$2
             shift 2
-            snap-create
+            snap-create $SNAPSHOT_NAME
             exit 0
             ;;
         (--snap-revert)
             SNAPSHOT_NAME=$2
             shift 2
-            snap-revert
+            snap-revert $SNAPSHOT_NAME
             exit 0
             ;;
         (--snap-list)

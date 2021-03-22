@@ -6,8 +6,11 @@ OS=$(cat ${CONF_FILE})
 CAIO_DIR=${HOME}/work/GIT/cluster-ansible-aio
 
 KAST_DIR=${HOME}/work/GIT/Thales/kast
-KAST_BINARIES=/home/T0125936/work/Thales/binaries/
-KAST_INV=/tmp/hosts
+KAST_BINARIES=${HOME}/work/Thales/binaries/
+
+KAST_ENV=${HOME}/work/Thales/kast_env/
+KAST_INV=${KAST_ENV}/hosts
+
 EXEC_ON_MASTER=true
 
 # Virtu
@@ -15,11 +18,17 @@ WORKER_NB=1
 # overlay interface
 KUBE_NIC_NAME="eth1"
 
+KUBE_HA="false"
+
 # DASHBOARD
 DASHBOARD_ENABLED=false
 
 # OFFLINE_MODE
 OFFLINE=true
+
+# AUTH
+######
+IAM_ENABLED=true
 
 # NETWORK
 #########

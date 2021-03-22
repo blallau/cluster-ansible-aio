@@ -6,6 +6,7 @@ set -e
 . ${HOME}/work/GIT/cluster-ansible-aio/apps/kube/kube_lib.sh
 
 OS='flatcar'
+WORKER_NB=4
 
 # INVENTORY
 ###########
