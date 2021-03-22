@@ -18,7 +18,7 @@ WORKER_NB=1
 # overlay interface
 KUBE_NIC_NAME="eth1"
 
-KUBE_HA="false"
+KUBE_HA=false
 
 # DASHBOARD
 DASHBOARD_ENABLED=false
