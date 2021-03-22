@@ -28,7 +28,7 @@
         flat: yes
 
 - name: Kube config
-  hosts: "*worker*"
+  hosts: "*worker*,*lb*"
   tasks:
     - name: create directory
       file:

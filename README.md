@@ -12,7 +12,8 @@ Cluster-ansible-aio is an open source tool for automating deployment of cluster 
 
 ## Features
 
--   Multi-nodes (N master and N worker)
+-   Multi-nodes (N master, N worker, N lb)
+-   Multi-nodes types : master, worker, lb, ...
 -   Libvirt(KVM) or LXD support
 -   Multi Host OS (CentOS, Ubuntu)
 -   Multi guest OS (CentOS, Ubuntu, Debian, Flatcar, Fedora CoreOS)

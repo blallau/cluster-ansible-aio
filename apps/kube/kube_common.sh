@@ -15,6 +15,8 @@ EXEC_ON_MASTER=true
 
 # Virtu
 WORKER_NB=1
+LB_NB=0
+
 # overlay interface
 KUBE_NIC_NAME="eth1"
 

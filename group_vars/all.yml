@@ -17,9 +17,13 @@ master_nb: 1
 master_ram: 2
 master_cpu: 2
 
-worker_nb: 3
+worker_nb: 1
 worker_ram: 4
 worker_cpu: "{{ master_cpu }}"
+
+lb_nb: 2
+lb_ram: 1
+lb_cpu: 1
 
 # Networking
 ############
@@ -28,27 +32,43 @@ net_prefix: "{{ node_prefix }}"
 net_second_octet: "{{ net_second_octet | default(100) }}"
 
 net_interfaces:
-  - name: "{{ net_prefix }}public-br"
+  - name: "{{ net_prefix }}net-br"
     forward: nat
     mode: dhcp
-    cidr: "10.{{ net_second_octet }}.210.0/24"
-    bridge: "{{ net_prefix }}public-br"
+    cidr: "11.{{ net_second_octet }}.100.0/24"
+    bridge: "{{ net_prefix }}net-br"
     pxe: False
-  - name: "{{ net_prefix }}overlay-br"
+  - name: "{{ net_prefix }}over-br"
     mode: dhcp
-    cidr: "10.{{ net_second_octet }}.150.0/24"
-    bridge: "{{ net_prefix }}overlay-br"
-  - name: "{{ net_prefix }}cluster-br"
-    mode: dhcp
-    cidr: "10.{{ net_second_octet }}.200.0/24"
-    bridge: "{{ net_prefix }}cluster-br"
+    cidr: "11.{{ net_second_octet }}.150.0/24"
+    bridge: "{{ net_prefix }}over-br"
+  # - name: "{{ net_prefix }}pub-br"
+  #   mode: static
+  #   cidr: "11.{{ net_second_octet }}.200.0/24"
+  #   bridge: "{{ net_prefix }}pub-br"
+  # - name: "{{ net_prefix }}clust-br"
+  #   mode: static
+  #   cidr: "11.{{ net_second_octet }}.210.0/24"
+  #   bridge: "{{ net_prefix }}clust-br"
 
 # Storage
 #########
-vm_volumes:
-  - name: vol-osd
-    size: 20
-    format: qcow2
+vm_volumes: []
+# vm_volumes:
+#   - name: vol-osd1
+#     size: 10
+#     format: qcow2
+#   - name: vol-osd2
+#     size: 10
+#     format: qcow2
+#   - name: vol-osd3
+#     size: 10
+#     format: qcow2
+#   - name: vol-osd4
+#     size: 10
+#     format: qcow2
+# vm_volumes_mount: True
+# vm_volumes_mount_path: "/data/s3"
 
 # Globals #
 ###########
@@ -62,6 +82,7 @@ docker_enabled: "True"
 docker_registry_ip: "{{ host_ip }}"
 docker_registry_port: 5000
 destroy_docker_registry: "False"
+registry_enabled: "False"
 
 ############################
 # Devpi PIP proxy defaults #

@@ -47,10 +47,10 @@ lb_keepalived:
   shared_password: "{{ lookup('password', '/dev/null length=8 chars=ascii_letters') }}"
   vip:
     interface: ${KUBE_NIC_NAME}
-    address: '10.140.2.31'
+    address: '11.100.150.2'
   vip_admin:
     interface: ${KUBE_NIC_NAME}
-    address: '10.140.2.34'
+    address: '11.100.150.3'
   internal_interface: eth2
   virtual_router_id: 51
   unicast: true
@@ -137,6 +137,13 @@ echo ${OS}worker${node_num} internal_address=11.${net_addr[${OS}]}.150.2${node_n
 done
 )
 
+[lb]
+$(
+for node_num in `seq 1 $LB_NB`; do
+echo ${OS}lb${node_num} internal_address=11.${net_addr[${OS}]}.150.3${node_num}
+done
+)
+
 [kube:children]
 kube_master
 kube_worker
@@ -177,10 +184,6 @@ ${OS}worker1 internal_address=11.${net_addr[${OS}]}.150.21 kube_hostname=${OS}wo
 
 [elastic:children]
 kube_worker
-
-[lb]
-lb0
-lb1
 
 ENDOFFILE
 }
