@@ -51,7 +51,7 @@ lb_keepalived:
   vip_admin:
     interface: ${KUBE_NIC_NAME}
     address: '11.100.150.3'
-  internal_interface: eth2
+  internal_interface: eth1
   virtual_router_id: 51
   unicast: true
 

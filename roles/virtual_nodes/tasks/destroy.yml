@@ -1,18 +1,4 @@
 ---
-- import_tasks: docker/disable_registry.yml
-  when: destroy_docker_registry | bool
-
-- import_tasks: docker/disable_pip_proxy.yml
-  when: pip_cache_enabled | bool and destroy_pip_cache | bool
-
-- import_tasks: docker/disable_apt_proxy.yml
-  when: apt_cache_enabled | bool and destroy_apt_cache | bool
-  tags: apt_cache
-
-- import_tasks: docker/disable_dns_server.yml
-  when: dns_server_enabled | bool and destroy_dns_server | bool
-  tags: dns_server
-
 - name: Load cluster_nodes variables
   set_fact:
     cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"

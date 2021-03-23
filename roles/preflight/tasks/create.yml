@@ -1,0 +1,42 @@
+---
+- name: Install CentOS packages
+  become: True
+  yum:
+    name: "{{ yum_dependencies }}"
+  when: ansible_distribution|lower == "centos"
+
+- name: Install Ubuntu packages
+  become: True
+  apt:
+    pkg: "{{ apt_dependencies }}"
+  when: ansible_distribution|lower in ["ubuntu", "debian"]
+
+- import_tasks: docker/enable_docker.yml
+  become: True
+  when: docker_enabled | bool
+
+- name: Install/Update pip packages
+  become: True
+  pip:
+    name: "{{ pip_dependencies }}"
+    state: latest
+  tags: network
+
+- import_tasks: docker/enable_registry.yml
+  when: registry_enabled | bool
+
+- name: Starting Libvirtd service
+  become: True
+  service:
+    name: "libvirtd"
+    state: started
+    enabled: True
+  tags: network
+
+- import_tasks: docker/enable_apt_proxy.yml
+  when: apt_cache_enabled | bool
+  tags: apt_cache
+
+- import_tasks: docker/enable_pip_proxy.yml
+  when: pip_cache_enabled | bool
+  tags: pip_cache

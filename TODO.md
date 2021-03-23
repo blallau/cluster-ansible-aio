@@ -5,3 +5,7 @@ Bug Fix
 - manage node-prefix in SSH keys and libvirt network, ... in order to not remove env from previous deployment
 - remove shutdown before snapshot
 - remove name or bridge in net_interfaces (redondant)
+- automaticaly retrieve last iso images (debian,centos), to avoid too long package update
+- fix gracefully-shutdown
+- manage QCOW2 with baseimagefile
+- add task to wait for Flatcar VMs ready

@@ -7,50 +7,6 @@ libvirt_dir: "/var/lib/libvirt/images"
 cloud_init_disk: "vdz"
 vm_volumes_fs_format: "ext4"
 
-#####################
-# Docker containers #
-#####################
-docker_registry_name: "registry"
-docker_registry_image: "registry:2"
-
-docker_pip_cache_name: "devpi_proxy"
-docker_pip_cache_image: "127.0.0.1:5000/devpi"
-
-docker_apt_cache_name: "apt-cacher-ng_proxy"
-docker_apt_cache_image: "127.0.0.1:5000/apt-cacher-ng"
-
-docker_dns_server_name: "docker-dnsmasq"
-docker_dns_server_image: "127.0.0.1:5000/docker-dnsmasq"
-
-############
-# Packages #
-############
-yum_dependencies:
-  - libvirt
-  - libvirt-devel
-  - bridge-utils
-  - genisoimage
-  - qemu-kvm
-  - rsync
-
-# ImportError: No module named ssl_match_hostname'
-#  - remove python-configparser
-apt_dependencies:
-  - openssh-server
-  - libvirt-daemon-system
-  - bridge-utils
-  - genisoimage
-  - qemu-kvm
-  - rsync
-
-pip_dependencies:
-  - docker
-  - pip
-  - requests
-  - libvirt-python
-  - netaddr
-  - lxml
-
 #############
 # OS images #
 #############
