@@ -26,25 +26,31 @@ systemd:
             # Add new Execstart with `-` prefix to ignore failure
             ExecStart=-/usr/sbin/agetty --autologin core --noclear %I $TERM
             TTYVTDisallocate=no
+    - name: tmp.mount
+      dropins:
+        - name: options.conf
+          contents: |
+            [Mount]
+            What=tmpfs
+            Where=/tmp
+            Type=tmpfs
+            # Increase tmp size from 50% to 80%
+            Options=mode=1777,strictatime,nosuid,nodev,size=80%,nr_inodes=400k
     # Mask Docker service
     - name: docker.service
       mask: true
-
 storage:
   files:
-
     - path: /etc/selinux/config
       mode: 0664
       overwrite: true
       contents:
-        source: data:text/plain;charset=iso-8859-7,SELINUX%3Ddisabled%0ASELINUXTYPE%3Dtargeted%0A
-
+        inline: data:text/plain;charset=iso-8859-7,SELINUX%3Ddisabled%0ASELINUXTYPE%3Dtargeted%0A
     - path: /etc/modules-load.d/80-k8s.conf
       mode: 0644
       contents:
         inline: |
           br_netfilter
-
     - path: /etc/sysctl.d/99-kubernetes-cri.conf
       mode: 0644
       contents:
@@ -52,21 +58,18 @@ storage:
           net.ipv4.ip_forward = 1
           net.bridge.bridge-nf-call-iptables = 1
           net.bridge.bridge-nf-call-ip6tables = 1
-
     - path: /etc/sysctl.d/98-kubernetes-cis.conf
       mode: 0644
       contents:
         inline: |
           kernel.panic = 10
           kernel.panic_on_oops = 1
-
     - path: /etc/hostname
       filesystem: "root"
       mode: 0644
       contents:
         inline: |
           {{ item.name }}
-
     - path: /etc/profile.d/systemd-pager.sh
       mode: 0644
       contents:
@@ -76,12 +79,11 @@ storage:
 {% if guest_os_distro == 'flatcar' %}
     - path: /home/core/.toolboxrc
       mode: 0644
-      content:
+      contents:
         inline: |
           TOOLBOX_DOCKER_IMAGE=ubuntu
           TOOLBOX_DOCKER_TAG=20.04
 {% endif %}
-
     - path: /etc/sysctl.d/20-silence-audit.conf
       mode: 0644
       contents:
@@ -91,7 +93,6 @@ storage:
           kernel.printk = 4
 {% if guest_os_distro == 'fcos' %}
 {% for intf in item.interfaces %}
-
     - path: /etc/NetworkManager/system-connections/{{ intf.name }}.nmconnection
       mode: 0600
       overwrite: true
@@ -121,20 +122,19 @@ storage:
 {% elif guest_os_distro == 'flatcar' %}
 {% for intf in item.interfaces %}
 networkd:
-units:
-  - name: 10-{{ intf.name }}.network
-    contents: |
-      [Match]
-      Name={{ intf.name }}
+  units:
+    - name: 10-{{ intf.name }}.network
+      contents: |
+        [Match]
+        Name={{ intf.name }}
 
-      [Network]
+        [Network]
 {% if intf.mode == 'dhcp' %}
-      DHCP=yes
+        DHCP=yes
 {% elif intf.mode == 'static' %}
-      Address={{ intf.address }}/{{ intf.cidr.split("/")[1] }}
-      Gateway={{ host_ip }}
-      DNS={{ host_ip }}
-
+        Address={{ intf.address }}/{{ intf.cidr.split("/")[1] }}
+        Gateway={{ host_ip }}
+        DNS={{ host_ip }}
 {% endif %}
 {% endfor %}
 {% endif %}
