@@ -18,12 +18,20 @@ master_ram: 2
 master_cpu: 2
 
 worker_nb: 1
-worker_ram: 4
+worker_ram: 1
 worker_cpu: "{{ master_cpu }}"
 
 lb_nb: 2
 lb_ram: 1
 lb_cpu: 1
+
+node_type_os:
+  - type: "lb"
+    os: "debian"
+  - type: "worker"
+    os: "{{ guest_os_distro }}"
+  - type: "master"
+    os: "{{ guest_os_distro }}"
 
 # Networking
 ############

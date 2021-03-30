@@ -4,14 +4,16 @@
     path: "{{ tmp_dir }}"
     state: directory
 
-- name: "Check qcow2 OS image {{ tmp_dir }}/{{ vm_os_image }} is present"
+- name: "Check qcow2 OS image {{ tmp_dir }}/{{ item.image }} is present"
   stat:
-    path: "{{ tmp_dir }}/{{ vm_os_image }}"
+    path: "{{ tmp_dir }}/{{ item.image }}"
+  with_items: "{{ cluster_nodes }}"
   register: check_os_image
 
 - fail:
     msg: "In order to deploy VMs, you must first copy {{ vm_os_image }} to {{ tmp_dir }}"
-  when: not check_os_image.stat.exists
+  when: not item.stat.exists
+  with_items: "{{ check_os_image.results }}"
 
 - name: Check if OS files are already in libvirt directory
   stat:
@@ -28,7 +30,7 @@
 - name: Copy OS images to libvirt directory
   become: True
   copy:
-    src: "{{ tmp_dir }}/{{ vm_os_image }}"
+    src: "{{ tmp_dir }}/{{ item.image }}"
     dest: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
     remote_src: True
   with_items: "{{ cluster_nodes }}"
@@ -36,5 +38,5 @@
 - name: Increase the image size
   become: True
   command: "qemu-img resize {{ libvirt_dir }}/{{ item.item.name }}.qcow2 +{{ root_disk_size }}G"
-  # when: not item.stat.exists
   with_items: "{{ copied.results }}"
+  when: item.item.name is not match("flatcar.*")

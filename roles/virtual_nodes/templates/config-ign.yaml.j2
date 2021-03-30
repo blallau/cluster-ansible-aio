@@ -1,5 +1,5 @@
 ---
-{% if guest_os_distro == 'fcos' %}
+{% if item.os_type == 'fcos' %}
 variant: fcos
 version: 1.1.0
 {% endif %}
@@ -8,7 +8,7 @@ passwd:
     - name: core
       ssh_authorized_keys:
         - {{ lookup('file', '~/.ssh/id_rsa.pub') }}
-{% if guest_os_distro == 'flatcar' %}
+{% if item.os_type == 'flatcar' %}
 locksmith:
   reboot_strategy: "reboot"
 update:
@@ -76,7 +76,7 @@ storage:
         inline: |
           # Tell systemd to not use a pager when printing information
           export SYSTEMD_PAGER=cat
-{% if guest_os_distro == 'flatcar' %}
+{% if item.os_type == 'flatcar' %}
     - path: /home/core/.toolboxrc
       mode: 0644
       contents:
@@ -91,7 +91,7 @@ storage:
           # Raise console message logging level from DEBUG (7) to WARNING (4)
           # to hide audit messages from the interactive console
           kernel.printk = 4
-{% if guest_os_distro == 'fcos' %}
+{% if item.os_type == 'fcos' %}
 {% for intf in item.interfaces %}
     - path: /etc/NetworkManager/system-connections/{{ intf.name }}.nmconnection
       mode: 0600
@@ -119,7 +119,7 @@ storage:
 {% endif %}
 {% endif %}
 {% endfor %}
-{% elif guest_os_distro == 'flatcar' %}
+{% elif item.os_type == 'flatcar' %}
 {% for intf in item.interfaces %}
 networkd:
   units:

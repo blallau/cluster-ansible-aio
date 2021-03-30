@@ -2,7 +2,7 @@ instance-id: {{ item.name }}
 local-hostname: {{ item.name }}
 public-keys:
   - "{{ lookup('file', '~/.ssh/cluster_rsa.pub') }}"
-{% if guest_os_distro == 'centos' or guest_os_distro == 'ubuntu' %}
+{% if item.os_type in ['centos', 'ubuntu'] %}
 network-interfaces: |
 {% for intf in item.interfaces %}
   auto {{ intf.name }}

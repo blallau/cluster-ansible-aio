@@ -8,6 +8,7 @@ echo debian > ~/.cluster-ansible-aio-env
 . ${HOME}/work/GIT/cluster-ansible-aio/apps/kube/kube_lib.sh
 
 OFFLINE=true
+WORKER_NB=1
 OS='debian'
 LB_NB=2
 KUBE_HA=true
@@ -97,7 +98,7 @@ calicoClient
 
 # IAM
 if [ "$IAM_ENABLED" = true ]; then
-    Install postgres
+    # Install postgres
     cd ${KAST_DIR}
     ansible -i ${KAST_INV} postgresql -b -m file -a "path=/data/postgresql state=directory"
     ansible-playbook -i ${KAST_INV} -u debian playbooks/sql_db.yml

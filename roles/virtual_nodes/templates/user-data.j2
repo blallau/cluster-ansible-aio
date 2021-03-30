@@ -19,7 +19,7 @@ packages:
   - gnupg2
   - conntrack
   - lsof
-{% if guest_os_distro == 'debian' or guest_os_distro == 'ubuntu' %}
+{% if item.os_type in ['debian', 'ubuntu'] %}
   - dnsutils
   - bridge-utils
   - tshark
@@ -30,7 +30,7 @@ packages:
   - libvirt-dev
   - libvirt-daemon-system
 {% endif %}
-{% elif guest_os_distro == 'centos' %}
+{% elif item.os_type == 'centos' %}
   - python3
   - tc
   - ebtables
@@ -47,10 +47,10 @@ runcmd:
 {% if allow_virt %}
   - pip3 install ansible==2.9.13 libvirt-python netaddr
 {% endif %}
-{% if guest_os_distro == 'debian' or guest_os_distro == 'ubuntu' %}
+{% if item.os_type in ['debian', 'ubuntu'] %}
   - DEBIAN_FRONTEND=noninteractive apt-get install -y open-iscsi
 {% endif %}
-{% if guest_os_distro == 'toremove' %}
+{% if item.os_type == 'toremove' %}
   - DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration console-setup
   - curl -s https://s3.amazonaws.com/download.draios.com/DRAIOS-GPG-KEY.public | sudo apt-key add -
   - curl -s -o /etc/apt/sources.list.d/draios.list https://s3.amazonaws.com/download.draios.com/stable/deb/draios.list
@@ -60,7 +60,7 @@ runcmd:
   - DEBIAN_FRONTEND=noninteractive apt-get -y install ncurses-term sysdig
   - DEBIAN_FRONTEND=noninteractive apt-get -y autoremove
 {% endif %}
-{% if guest_os_distro == 'debian' or guest_os_distro == 'ubuntu' %}
+{% if item.os_type in ['debian', 'ubuntu'] %}
 write_files:
  - content: |
      XKBMODEL="pc105"

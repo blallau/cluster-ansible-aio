@@ -9,9 +9,10 @@ echo flatcar > ~/.cluster-ansible-aio-env
 
 # OFFLINE_MODE
 OFFLINE=false
-WORKER_NB=1
-LB_NB=0
+WORKER_NB=2
 OS='flatcar'
+KUBE_HA=true
+LB_NB=0
 
 # INVENTORY
 ###########
