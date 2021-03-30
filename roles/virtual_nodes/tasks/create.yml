@@ -96,7 +96,7 @@
     name: "{{ item.1.address }}"
     instance_name: "{{ item.0.name }}.{{ dns_domain }}"
     ansible_distribution: "{{ guest_os_distro }}"
-    ansible_user: "{{ guest_os_distro }}"
+    ansible_user: "{{ item.0.os_type }}"
     groups: created_nodes
   with_subelements:
     - "{{ cluster_nodes }}"

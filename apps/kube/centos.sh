@@ -7,6 +7,12 @@ echo centos > ~/.cluster-ansible-aio-env
 . ${HOME}/work/GIT/cluster-ansible-aio/apps/kube/kube_common.sh
 . ${HOME}/work/GIT/cluster-ansible-aio/apps/kube/kube_lib.sh
 
+OFFLINE=true
+WORKER_NB=1
+OS='centos'
+LB_NB=2
+KUBE_HA=true
+
 # INVENTORY
 ###########
 generateInventory
@@ -14,7 +20,7 @@ generateInventory
 # VM
 ####
 cd ${CAIO_DIR}
-${CAIO_DIR}/cluster-ansible-aio create-virtual-nodes -e worker_nb=${WORKER_NB} -e docker_enabled=false -e guest_os_distro=${OS} -e node_prefix=${OS} -e net_prefix=${OS::3} -e net_second_octet=${net_addr[${OS}]} -v
+${CAIO_DIR}/cluster-ansible-aio create-virtual-nodes -s preflight -e lb_nb=${LB_NB} -e worker_nb=${WORKER_NB} -e docker_enabled=false -e guest_os_distro=${OS} -e node_prefix=${OS} -e net_prefix=${OS::3} -e net_second_octet=${net_addr[${OS}]} -v
 
 # sleep 10
 # cd ${CAIO_DIR}
@@ -22,17 +28,25 @@ ${CAIO_DIR}/cluster-ansible-aio create-virtual-nodes -e worker_nb=${WORKER_NB} -
 # sleep 60
 # exit 1
 
-if [ "${MULTUS_ENABLED}" == true ] && [ "${MULTUS_TECH}" = "bridge" ]; then
-    cd ${CAIO_DIR}
-    ansible-playbook -i ${KAST_INV} -e os_default_user=${OS} apps/kube/bridge_net.yml
-    # # NODE_PREFIX=${OS} ./virtual-manage --snap-create ${OS}
-    # sleep 30
+# LB
+######
+
+if [ "$LB_NB" -gt "0" ]; then
+    cd ${KAST_DIR}
+    ansible-playbook -i ${KAST_INV} -u debian playbooks/lb.yml
 fi
 
 # # KUBE
 # ######
 
 retrieveArtifacts
+
+if [ "${MULTUS_ENABLED}" == true ] && [ "${MULTUS_TECH}" = "bridge" ]; then
+    cd ${CAIO_DIR}
+    ansible-playbook -i ${KAST_INV} -e os_default_user=${OS} apps/kube/bridge_net.yml
+    # # NODE_PREFIX=${OS} ./virtual-manage --snap-create ${OS}
+    # sleep 30
+fi
 
 cd ${KAST_DIR}
 ansible-playbook -i ${KAST_INV} playbooks/containerd_install.yml
