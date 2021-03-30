@@ -3,19 +3,21 @@
   hosts: nodes
   become: True
   tasks:
-    - name: Add linbit repository from PPA
-      apt_repository:
-        repo: 'ppa:linbit/linbit-drbd9-stack'
-        update_cache: False
-      when: ansible_distribution|lower == "ubuntu"
-
-    - name: Install Ubuntu packages
+    - name: Install packages
       apt:
         pkg:
           - drbd-utils
-          - drbd-dkms
           - lvm2
-      when: ansible_distribution|lower == "ubuntu"
+      when: ansible_distribution|lower in ["ubuntu", "debian"]
+
+    - name: Install packages
+      yum:
+        name:
+          - drbd
+          - kmod-drbd
+          - lvm2
+        update_cache: True
+      when: ansible_distribution|lower == "centos"
 
     - name: Load drbd kernel module
       modprobe:
@@ -38,7 +40,16 @@
           - linstor-controller
           - linstor-satellite
           - linstor-client
-      when: ansible_distribution|lower == "ubuntu"
+      when: ansible_distribution|lower in ["ubuntu", "debian"]
+
+    - name: Install packages
+      yum:
+        name:
+          - linstor-controller
+          - linstor-satellite
+          - linstor-client
+        update_cache: True
+      when: ansible_distribution|lower == "centos"
 
     - name: Start linstor-controller controller
       systemd:
@@ -46,7 +57,7 @@
         enabled: yes
         state: restarted
 
-- name: Deploy linstor controller
+- name: Deploy linstor satellite
   hosts: nodes
   become: True
   tasks:
@@ -55,7 +66,15 @@
         pkg:
           - linstor-satellite
           - linstor-client
-      when: ansible_distribution|lower == "ubuntu"
+      when: ansible_distribution|lower in ["ubuntu", "debian"]
+
+    - name: Install packages
+      yum:
+        name:
+          - linstor-satellite
+          - linstor-client
+        update_cache: True
+      when: ansible_distribution|lower == "centos"
 
     - name: Start linstor-controller controller
       systemd:
