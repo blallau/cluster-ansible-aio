@@ -166,6 +166,6 @@
     - interfaces
   when: item.1.address is defined and item.1.external is defined and item.1.external
 
-- import_tasks: docker/enable_dns_server.yml
-  when: dns_server_enabled | bool
-  tags: dns_server
+# - import_tasks: docker/enable_dns_server.yml
+#   when: dns_server_enabled | bool
+#   tags: dns_server
