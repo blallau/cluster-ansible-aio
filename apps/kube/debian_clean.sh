@@ -6,6 +6,8 @@ set -e
 . ${HOME}/work/GIT/cluster-ansible-aio/apps/kube/kube_lib.sh
 
 OS='debian'
+WORKER_NB=3
+KUBE_HA=false
 LB_NB=2
 
 # INVENTORY

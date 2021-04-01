@@ -195,6 +195,121 @@ retrieveArtifacts() {
     fi
 }
 
+install_kube() {
+    user=$1
+
+    # LB
+    ######
+
+    # if [ "$KUBE_HA" == true ] && [ "${LB_NB}" -gt "0" ]; then
+    #     cd ${KAST_DIR}
+    #     ansible-playbook -i ${KAST_INV} -u ${user} playbooks/lb.yml
+    # fi
+
+    # # KUBE
+    # ######
+    # retrieveArtifacts
+
+    # if [ "${MULTUS_ENABLED}" == true ] && [ "${MULTUS_TECH}" = "bridge" ]; then
+    #     cd ${CAIO_DIR}
+    #     ansible-playbook -i ${KAST_INV} -e os_default_user=${OS} apps/kube/bridge_net.yml
+    #     # # NODE_PREFIX=${OS} ./virtual-manage --snap-create ${OS}
+    #     # sleep 30
+    # fi
+
+    cd ${KAST_DIR}
+    ansible-playbook -i ${KAST_INV} -u ${user} playbooks/containerd_install.yml
+
+    # sleep 60
+    # cd ${CAIO_DIR}
+    # NODE_PREFIX=${OS} ./virtual-manage --snap-create ${OS}-containerd
+    # sleep 60
+    # exit 1
+
+    cd ${KAST_DIR}
+    ansible-playbook -i ${KAST_INV} -u ${user} playbooks/kube.yml
+
+    cd ${CAIO_DIR}
+    ansible-playbook -i ${KAST_INV} -e os_default_user=${OS} apps/kube/kube-cli.yml
+
+    # sleep 60
+    # cd ${CAIO_DIR}
+    # NODE_PREFIX=${OS} ./virtual-manage --snap-create ${OS}-kube
+    # exit 0
+}
+
+
+install_kube_apps() {
+    user=$1
+    if [ "$MINIO_ENABLED" = true ]; then
+        cd ${KAST_DIR}
+        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/s3_storage.yml
+        # wget https://dl.min.io/client/mc/release/linux-amd64/mc
+        # chmod +x mc
+    fi
+
+    if [ "$REGISTRY_ENABLED" = true ]; then
+        cd ${KAST_DIR}
+        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/registry.yml
+    fi
+
+    cd ${KAST_DIR}
+    ansible-playbook -i ${KAST_INV} -u ${user} playbooks/ingress.yml
+
+    if [ "$DASHBOARD_ENABLED" = true ]; then
+        cd ${KAST_DIR}
+        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/dashboard.yml
+    fi
+
+    # deploy calicoctl
+    calicoClient
+
+    # sleep 120
+    # cd ${CAIO_DIR}
+    # NODE_PREFIX=${OS} ./virtual-manage --snap-create ${OS}-${CNI_PLUGIN}
+    # sleep 10
+    # exit 1
+
+    # IAM
+    if [ "$IAM_ENABLED" = true ]; then
+        # Install postgres
+        cd ${KAST_DIR}
+        ansible -i ${KAST_INV} postgresql -b -m file -a "path=/data/postgresql state=directory"
+        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/sql_db.yml
+
+        # Install Keycloak
+        cd ${KAST_DIR}/install/kast-initial
+        ansible-playbook -i ${KAST_INV} -u ${user} tools/playbooks/iam_preinstall.yml
+
+        cd ${KAST_DIR}
+        ansible-playbook -i ${KAST_INV} -u ${user} -e keycloak_debug_enabled=true playbooks/iam.yml
+
+        cd ${KAST_DIR}/install/kast-initial
+        ansible-playbook -K -i ${KAST_INV} tools/playbooks/iam_postinstall.yml
+    fi
+
+    # longhorn
+    Longhorn
+
+    if [ "$OPENEBS_ENABLED" = true ]; then
+        kubectl apply -f https://openebs.github.io/charts/openebs-operator.yaml
+    fi
+
+    # Multus
+    Multus
+
+    if [ "$ROOK_ENABLED" = true ]; then
+        cd ${KAST_DIR}
+        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/rook_ceph.yml
+    fi
+
+    # cd ${CAIO_DIR}
+    # 360 KO
+    # 420 ??
+    # sleep 600
+    # NODE_PREFIX=${OS} ./virtual-manage --snap-create ${OS}-${CNI_PLUGIN}-rook-ceph
+}
+
 iam() {
     # Install postgres
     cd ${KAST_DIR}

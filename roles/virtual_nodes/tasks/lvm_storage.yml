@@ -1,11 +1,27 @@
 ---
-- name: Check storage is available
+- name: Check storage variables
   block:
-    - name: check physical_disks is set
-      fail:
-        msg: "when vm_volumes|length > 0, physical_disks MUST be set"
-      when: physical_disks is not defined
+    - name: Set lvm_storage
+      set_fact:
+        lvm_storage: "{{ vm_volumes is defined and vm_volumes|length > 0 and 'raw' in vm_volumes|map(attribute='format')|list }}"
 
+    - name: Check physical_disks is set
+      fail:
+        msg: "when one vm_volumes is set to 'raw', physical_disks MUST be set"
+      when: lvm_storage and physical_disks is not defined
+
+    - name: Check virt_volume_group is set
+      fail:
+        msg: "when one vm_volumes is set to 'raw', virt_volume_group MUST be set"
+      when: lvm_storage and virt_volume_group is not defined
+
+    - name: Check vm_volumes_mount_path is set
+      fail:
+        msg: "when vm_volumes_mount is set to True, vm_volumes_mount_path MUST be set"
+      when: vm_volumes_mount is defined and vm_volumes_mount and vm_volumes_mount_path is not defined
+
+- name: Check LVM storage is available
+  block:
     - name: List storage pool
       virt_pool:
         command: list_pools
@@ -31,6 +47,7 @@
       virt_pool:
         command: create
         name: "{{ virt_volume_group }}"
+
       when: virt_volume_group not in pool_exists.list_pools
 
     - name: "Autostart {{ virt_volume_group }} storage pool"
@@ -38,5 +55,4 @@
       virt_pool:
         autostart: True
         name: "{{ virt_volume_group }}"
-
-  when: vm_volumes|length > 0
+  when: lvm_storage

@@ -6,6 +6,8 @@ libvirt_dir: "/var/lib/libvirt/images"
 
 cloud_init_disk: "vdz"
 vm_volumes_fs_format: "ext4"
+vm_volumes_mount: False
+vm_volumes: []
 
 #############
 # OS images #

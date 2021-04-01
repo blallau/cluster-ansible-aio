@@ -11,7 +11,7 @@ KAST_BINARIES=${HOME}/work/Thales/binaries/
 KAST_ENV=${HOME}/work/Thales/kast_env/
 KAST_INV=${KAST_ENV}/hosts
 
-EXEC_ON_MASTER=true
+EXEC_ON_MASTER=false
 
 # Virtu
 WORKER_NB=1
@@ -21,6 +21,9 @@ LB_NB=0
 KUBE_NIC_NAME="eth1"
 
 KUBE_HA=false
+if [ "$KUBE_HA" == true ]; then
+    LB_NB=2
+fi
 
 # DASHBOARD
 DASHBOARD_ENABLED=false

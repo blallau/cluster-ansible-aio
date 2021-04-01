@@ -3,15 +3,6 @@
 host_ip: "{{ net_interfaces | selectattr('forward', 'defined') | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address') | first }}"
 dns_domain: "mydomain.org"
 
-# Storage
-#########
-root_disk_size: "100"
-
-# Additional disks (LVM)
-physical_disks:
-  - /dev/nvme0n1p6
-virt_volume_group: "virtvg"
-
 # to install libvirt stuff in guest vm set to True
 allow_virt: False
 

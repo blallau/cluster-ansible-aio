@@ -78,6 +78,15 @@ vm_volumes: []
 # vm_volumes_mount: True
 # vm_volumes_mount_path: "/data/s3"
 
+# Storage
+#########
+root_disk_size: "100"
+
+# Additional disks (LVM)
+physical_disks:
+  - /dev/nvme0n1p6
+virt_volume_group: "virtvg"
+
 # Globals #
 ###########
 home_dir: "{{ ansible_user_dir }}"
