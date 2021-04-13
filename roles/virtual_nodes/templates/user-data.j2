@@ -1,13 +1,20 @@
 #cloud-config
 # https://cloudinit.readthedocs.io/en/latest/topics/format.html #
 disable_root: False
+# Set the default user
+system_info:
+  default_user:
+    name: {{ os_default_user }}
 users:
   - default
+# Unlock the default user
 chpasswd:
   list: |
     root:root
     {{ os_default_user }}:{{ os_default_user }}
   expire: False
+# System settings
+resize_rootfs: True
 ssh_pwauth: True
 packages:
   - curl
@@ -36,8 +43,10 @@ packages:
   - ebtables
 {% endif %}
 bootcmd:
+  - [ sh, -c, echo "=========bootcmd=========" ]
   - if grep -Gq "^\s*UseDNS" /etc/ssh/sshd_config; then sed -re "s/^\s*(UseDNS)\s+(yes|no)/\1 no/" -i.$(date -u +%Y%m%d%H%M%S) /etc/ssh/sshd_config; else echo "UseDNS no" >> /etc/ssh/sshd_config; fi
 runcmd:
+  - [ sh, -c, echo "=========runcmd=========" ]
 {% if vm_volumes|length > 0 and vm_volumes_mount %}
 {% for disk in item.disks %}
   - mkdir {{ vm_volumes_mount_path }}/data-{{ loop.index }}
@@ -98,3 +107,5 @@ mounts:
 # complete.  This must be an array, and must have 6 fields.
 mount_default_fields: [ None, None, "auto", "defaults,nofail", "0", "2" ]
 {% endif %}
+# To know when to log in, if reading console
+final_message: "SYSTEM READY TO LOG IN"
