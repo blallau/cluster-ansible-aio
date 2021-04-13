@@ -6,9 +6,12 @@
 - name: Steps to destroy VM using Libvirt
   block:
     - name: List snapshots
-      shell: "virsh -q snapshot-list --domain {{ item.name }} | cut -d ' ' -f2"
+      shell: "set -o pipefail ;virsh -q snapshot-list --domain {{ item.name }} | cut -d ' ' -f2"
       with_items: "{{ cluster_nodes }}"
       register: with_output
+      args:
+        executable: /bin/bash
+      ignore_errors: True
 
     - name: Delete snapshots
       command: "virsh snapshot-delete --domain {{ item.0.item.name }} {{ item.1 }}"
@@ -33,7 +36,7 @@
     - name: Remove OS images from libvirt directory
       become: True
       file:
-        path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
+        path: "{{ libvirt_dir }}/{{ item.name }}-boot.qcow2"
         state: absent
       with_items: "{{ cluster_nodes }}"
 

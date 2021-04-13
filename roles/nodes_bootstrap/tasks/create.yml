@@ -25,6 +25,8 @@
 
 - name: Wait for automatic Ubuntu system updates
   shell: while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do sleep 1; done;
+  args:
+    executable: /bin/bash
   when: ansible_distribution|lower == "ubuntu"
 
 - import_tasks: enable_apt_proxy.yml
@@ -33,6 +35,8 @@
 
 - name: Wait for automatic Ubuntu system updates
   shell: while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 1; done;
+  args:
+    executable: /bin/bash
   when: ansible_distribution|lower == "ubuntu"
 
 - name: Install CentOS packages

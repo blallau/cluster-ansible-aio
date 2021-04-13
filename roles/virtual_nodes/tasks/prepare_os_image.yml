@@ -17,7 +17,7 @@
 
 - name: Check if OS files are already in libvirt directory
   stat:
-    path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
+    path: "{{ libvirt_dir }}/{{ item.name }}-boot.qcow2"
   with_items: "{{ cluster_nodes }}"
   register: copied
 
@@ -31,12 +31,60 @@
   become: True
   copy:
     src: "{{ tmp_dir }}/{{ item.image }}"
-    dest: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
+    dest: "{{ libvirt_dir }}/{{ item.name }}-boot.qcow2"
     remote_src: True
   with_items: "{{ cluster_nodes }}"
 
 - name: Increase the image size
   become: True
-  command: "qemu-img resize {{ libvirt_dir }}/{{ item.item.name }}.qcow2 +{{ root_disk_size }}G"
+  command: "qemu-img resize {{ libvirt_dir }}/{{ item.item.name }}-boot.qcow2 +{{ root_disk_size }}G"
   with_items: "{{ copied.results }}"
   when: item.item.name is not match("flatcar.*")
+
+- name: Run custom shell commands in OS disk
+  become: True
+  command: >
+    virt-customize
+    -a {{ libvirt_dir }}/{{ item.item.name }}-boot.qcow2
+    {% if virt_customize_cmd is defined and virt_customize_cmd %}
+    {% for cmd in virt_customize_cmd %}
+    --run-command "{{ cmd }}"
+    {% endfor %}
+    {% endif %}
+  register: result_disk_cmd
+  retries: 10
+  delay: 2
+  until: result_disk_cmd is succeeded
+  with_items: "{{ copied.results }}"
+  when:
+    - item.item.name is not match("flatcar.*")
+    - virt_customize_cmd is defined and virt_customize_cmd
+
+- name: Install required packages into OS disk
+  become: True
+  command: >
+    virt-customize
+    -a {{ libvirt_dir }}/{{ item.item.name }}-boot.qcow2
+    --install {{ virt_customize_packages | join(',') }}
+  register: result_disk_deps
+  retries: 10
+  delay: 2
+  until: result_disk_deps is succeeded
+  with_items: "{{ copied.results }}"
+  when:
+    - item.item.name is not match("flatcar.*")
+    - virt_customize_packages is defined and virt_customize_packages
+
+- name: Sysprep guest disk
+  become: True
+  command: >
+    virt-sysprep
+    --selinux-relabel
+    {% if virt_root_password is defined and virt_root_password %}
+    --root-password password:{{ virt_root_password }}
+    {% endif %}
+    --add {{ libvirt_dir }}/{{ item.item.name }}-boot.qcow2
+  register: result_disk_sysprep
+  with_items: "{{ copied.results }}"
+  when:
+    - item.item.name is not match("flatcar.*")

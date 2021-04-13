@@ -33,6 +33,11 @@ node_type_os:
   - type: "master"
     os: "{{ guest_os_distro }}"
 
+# virt-customize
+################
+virt_customize_packages: []
+virt_customize_cmd: []
+
 # Networking
 ############
 # First interface MUST be external one

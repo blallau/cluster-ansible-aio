@@ -6,5 +6,6 @@
   failed_when:
     - "default_storage_add.rc != 0"
     - "'already exists' not in default_storage_add.stderr"
-
+  args:
+    executable: /bin/bash
 ...

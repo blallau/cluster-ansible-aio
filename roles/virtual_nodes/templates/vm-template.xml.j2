@@ -43,7 +43,7 @@
     <emulator>{% if ansible_distribution|lower == 'centos' %}/usr/libexec/qemu-kvm{% elif ansible_distribution|lower == 'ubuntu' %}/usr/bin/qemu-system-x86_64{% endif %}</emulator>
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2' cache='none' io='native'/>
-      <source file='{{ libvirt_dir }}/{{ item.name }}.qcow2'/>
+      <source file='{{ libvirt_dir }}/{{ item.name }}-boot.qcow2'/>
       <backingStore/>
       <target dev='vda' bus='virtio'/>
       <boot order='1'/>

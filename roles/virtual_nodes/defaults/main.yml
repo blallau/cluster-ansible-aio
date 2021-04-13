@@ -3,6 +3,7 @@
 # Globals #
 ###########
 libvirt_dir: "/var/lib/libvirt/images"
+libvirt_url: qemu:///system
 
 cloud_init_disk: "vdz"
 vm_volumes_fs_format: "ext4"

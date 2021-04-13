@@ -20,6 +20,8 @@
         --interactive --security-opt label=disable \
           quay.io/coreos/ct:latest-dev > {{ tmp_dir}}/{{ item.name }}/config.ign'
       when: guest_os_distro == "flatcar"
+      args:
+        executable: /bin/bash
   when: item.os_type in ["fcos", "flatcar"]
 
 - name: Standard OS

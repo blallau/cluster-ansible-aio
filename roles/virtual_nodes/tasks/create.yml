@@ -1,4 +1,5 @@
 ---
+- import_tasks: defaults-get.yml
 - import_tasks: lvm_storage.yml
 
 - import_role:
@@ -65,6 +66,33 @@
       virt:
         name: "{{ item.name }}"
         state: running
+      with_items: "{{ cluster_nodes }}"
+
+      # Wait for network so we can get the IP to log in
+      # Do this for all VMs, in case they already existed and IP has changed
+    - name: Get IP address of VM
+      become: true
+      shell: >
+        set -o pipefail ;
+        virsh
+        --connect {{ libvirt_url }}
+        domifaddr
+        --source arp
+        {{ item.name }}
+        | grep -v 'N/A'
+        | grep -vw lo
+        | grep ipv4
+        | grep -Ei '([0-9a-z]{2}:){5}[0-9a-z]{2}'
+        | head -1
+        | awk '{ print $NF}'
+        | awk -F "/" '{print $1}'
+      register: result_get_ip
+      until: result_get_ip.stdout
+      retries: 30
+      delay: 10
+      changed_when: false
+      args:
+        executable: /bin/bash
       with_items: "{{ cluster_nodes }}"
 
     - name: Wait for VMs to be ready
