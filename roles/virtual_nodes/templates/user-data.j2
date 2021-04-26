@@ -50,7 +50,7 @@ runcmd:
   - [ sh, -c, echo "=========runcmd=========" ]
 {% if vm_volumes|length > 0 and vm_volumes_mount %}
 {% for disk in item.disks %}
-  - mkdir {{ vm_volumes_mount_path }}/data-{{ loop.index }}
+  - mkdir {{ vm_volumes_mount_path }}/data-{{ loop.index0 }}
 {% endfor %}
 {% endif %}
   - systemctl restart sshd &
