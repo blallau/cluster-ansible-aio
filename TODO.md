@@ -9,3 +9,11 @@ Bug Fix/Todo list
 - fix gracefully-shutdown
 - manage QCOW2 with baseimagefile
 - add task to wait for Flatcar VMs ready
+- manage remote libvirtd
+- fix bug when different deployments use the same networks
+  => IPs/macs association cannot be set in the previous DHCP config
+  => IPs are random => hence deployment fails [Waiting on IPs]
+
+Take a look at:
+https://github.com/csmart/ansible-role-virt-infra
+https://github.com/goffinet/ansible-role-virt-infra

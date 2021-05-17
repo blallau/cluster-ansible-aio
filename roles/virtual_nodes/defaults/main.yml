@@ -4,6 +4,19 @@
 ###########
 libvirt_dir: "/var/lib/libvirt/images"
 libvirt_url: qemu:///system
+libvirt_security_driver: none
+
+########
+# VBMC #
+########
+# Virtual BMC is disabled by default
+vbmc: False
+
+# By default we install with pip, but if you prefer to do it manually, set this to false
+vbmc_pip: True
+
+# Default vbmc service, override if something else on your distro
+vbmc_service: vbmcd
 
 cloud_init_disk: "vdz"
 vm_volumes_fs_format: "ext4"
@@ -18,10 +31,10 @@ vm_os_images:
   debian: "debian-10-openstack-amd64.qcow2"
   fcos: "fedora-coreos-32.qcow2"
   flatcar: "flatcar-linux1.qcow2"
-  centos: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
+  # centos: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
   # centos-7: "CentOS-7-x86_64-GenericCloud-2009.qcow2"
   # centos-8.2: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
-  # centos-8.3: "CentOS-8-GenericCloud-8.3.2011-20201204.2.x86_64.qcow2"
+  centos: "CentOS-8-GenericCloud-8.3.2011-20201204.2.x86_64.qcow2"
   # centos: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
 
 vm_os_image: "{{ vm_os_images[guest_os_distro] }}"

@@ -30,6 +30,56 @@
         - method == "create"
         - guest_os_distro == "debian" or guest_os_distro == "centos"
 
+# # Install virtual BMC interfaces
+# - name: Install virtual BMC interfaces
+#   hosts: created_nodes
+#   gather_facts: false
+#   become: True
+#   tasks:
+#     # Create any virtual BMC interfaces
+#     - name: Create virtual BMC
+#       shell: >
+#         {{ hostvars[groups['kvmhost'][0]].result_vbmc_path.stdout }} add {{ hostvars[item]['inventory_hostname'] }}
+#         --libvirt-uri {{ libvirt_url }}
+#         --port {{ vbmc_port }}
+#         --username {{ vbmc_user }}
+#         --password {{ vbmc_password }}
+#       args:
+#         executable: /bin/bash
+#       register: result_vbmc_create
+#       retries: 10
+#       delay: 2
+#       until: result_vbmc_create is succeeded
+#       when:
+#         - vbmc_port is defined and vbmc_port
+#         - vbmc is defined and vbmc
+#       with_items: "{{ play_hosts }}"
+#       run_once: true
+#       notify:
+#         - restart virtual bmc
+
+# - name: Start virtual BMC
+#   shell: "set -o pipefail && {{ hostvars[groups['kvmhost'][0]].result_vbmc_path.stdout }} start {{ hostvars[item]['inventory_hostname'] }}"
+#   args:
+#     executable: /bin/bash
+#   become: true
+#   register: result_vbmc_start
+#   retries: 10
+#   delay: 2
+#   until: result_vbmc_start is succeeded
+#   changed_when: false
+#   when:
+#     - hostvars[item]['inventory_hostname'] not in groups['kvmhost']
+#     - hostvars[item]['virt_infra_state'] | default(virt_infra_state) != "undefined"
+#     - hostvars[item]['virt_infra_vbmc_port'] is defined and hostvars[item]['virt_infra_vbmc_port']
+#     - hostvars[groups["kvmhost"][0]].virt_infra_vbmc is defined and hostvars[groups["kvmhost"][0]].virt_infra_vbmc or virt_infra_vbmc
+#   delegate_to: "{{ groups['kvmhost'][0] }}"
+#   with_items: "{{ play_hosts }}"
+
+# # - meta: flush_handlers
+
+
+
 # Python not present
 - name: Wait for Python 3 to be installed
   hosts: created_nodes

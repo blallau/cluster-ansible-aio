@@ -1,0 +1,236 @@
+- name: Run all the validations
+  block:
+    - name: Libvirt stuff
+      block:
+        # Set security driver on qemu (none/selinux/apparmor)
+        # RHEL/CentOS/Fedora/openSUSE are set to selinux by default
+        # Debian/Ubuntu are set to apparmor by default
+        # Defaults to "none" when not specified, which enables use of NVMe drives successfully on all distros
+        # Else we get permissions denied on NVMe disk images
+        - name: "Set libvirtd security driver"
+          become: true
+          lineinfile:
+            path: /etc/libvirt/qemu.conf
+            insertafter: '^#\s*security_driver\s*='
+            regexp: '^security_driver\s*='
+            line: 'security_driver = "{{ libvirt_security_driver }}"'
+          register: result_qemuconf
+
+        - name: "Restart libvirtd if config changed"
+          become: true
+          service:
+            name: "libvirtd"
+            state: restarted
+            enabled: yes
+          register: result_libvirtd_restart
+          ignore_errors: yes
+          when:
+            - result_qemuconf.changed
+
+        - name: "Ensure libvirtd is running"
+          become: true
+          service:
+            name: "libvirtd"
+            state: started
+            enabled: yes
+          register: result_libvirtd
+          ignore_errors: yes
+
+        - name: "Advise unable to start libvirtd"
+          set_fact:
+            validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to start and enable libvirtd'] }}"
+          when:
+            - result_libvirtd.failed
+          changed_when: true
+
+        # TODO: use this? 'virt-host-validate qemu'
+        - name: "Test that we can talk to libvirtd"
+          become: true
+          virt:
+            command: list_vms
+            uri: "{{ libvirt_url }}"
+          register: result_libvirtd
+          ignore_errors: true
+
+        - name: "Advise libvirtd not contactable"
+          set_fact:
+            validations_failed: "{{ validations_failed|default([]) + ['KVM host: libvirtd connection failed on KVM host'] }}"
+          when:
+            - result_libvirtd.list_vms is not defined
+          changed_when: true
+        # Allow MAC access to NVMe drives when using apparmor
+        # Else we get permissions denied on NVMe disk images
+        - name: "Enable access to NVMe drives in apparmor"
+          become: true
+          lineinfile:
+            path: /etc/apparmor.d/abstractions/libvirt-qemu
+            line: '  /var/lib/libvirt/images/*nvme.qcow2 rwk,'
+          register: result_apparmor_conf
+          when:
+            - libvirt_security_driver is defined and libvirt_security_driver == "apparmor"
+
+        - name: "Restart apparmor if config changed"
+          become: true
+          service:
+            name: "apparmor"
+            state: restarted
+            enabled: yes
+          register: result_apparmor
+          ignore_errors: yes
+          when:
+            - libvirt_security_driver is defined and libvirt_security_driver == "apparmor"
+            - result_apparmor_conf.changed
+      rescue:
+        - debug:
+            msg: "Play aborted, see errors above"
+          changed_when: true
+
+        - meta: end_play
+
+    - name: Virtualbmc stuff
+      block:
+        - name: "Ensure system package of virtualbmc is removed"
+          become: true
+          package:
+            name: "python3-virtualbmc"
+            state: absent
+          register: result_vbmc_remove
+          retries: 30
+          delay: 5
+          until: result_vbmc_remove is succeeded
+          when:
+            - vbmc and vbmc_pip
+          ignore_errors: true
+
+        - name: "Advise unable to remove virtualbmc host package"
+          set_fact:
+            validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to remove vbmc host package'] }}"
+          when:
+            - vbmc and vbmc_pip
+            - result_vbmc_remove.failed
+          changed_when: true
+
+        - name: "Install virtualbmc with pip"
+          become: true
+          pip:
+            name: virtualbmc  {%- if vbmc_pip_version is defined %}=={{ vbmc_pip_version }}{% endif %}
+            extra_args: "--prefix /usr/local"
+          register: result_vbmc_pip
+          ignore_errors: yes
+          retries: 30
+          delay: 5
+          until: result_vbmc_pip is succeeded
+          when:
+            - vbmc and vbmc_pip
+
+        - name: "Find the path for virtualbmc"
+          command: "which vbmc"
+          register: result_vbmc_path
+          when:
+            - vbmc
+          changed_when: false
+          ignore_errors: yes
+
+        - name: "Advise unable to find virtualbmc"
+          set_fact:
+            validations_failed: "{{ validations_failed|default([]) + ['KVM host: Cannot find vbmc binary, is it installed?'] }}"
+          when:
+            - vbmc
+            - result_vbmc_path.failed is defined and result_vbmc_path.failed
+          changed_when: true
+
+        - name: "Advise unable to install virtualbmc"
+          set_fact:
+            validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to install virtualbmc with pip'] }}"
+          when:
+            - vbmc and vbmc_pip
+            - result_vbmc_pip.failed
+          changed_when: true
+
+        - name: "Create virtualbmc service file"
+          become: true
+          template:
+            src: templates/vbmcd.service.j2
+            dest: "/etc/systemd/system/vbmcd.service"
+            mode: '0644'
+          register: result_vbmc_service
+          ignore_errors: yes
+          when:
+            - vbmc and vbmc_pip
+
+        - name: "Advise unable to create virtualbmc service"
+          set_fact:
+            validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to create virtualbmc service'] }}"
+          when:
+            - vbmc and vbmc_pip
+            - result_vbmc_service.failed
+          changed_when: true
+
+        - name: "Create virtualbmc config directory"
+          become: true
+          file:
+            path: /etc/virtualbmc
+            state: directory
+            mode: '0755'
+          become: true
+          ignore_errors: yes
+          when:
+            - vbmc and vbmc_pip
+
+        - name: "Create virtualbmc run directory"
+          become: true
+          file:
+            path: /var/lib/vbmcd
+            state: directory
+            mode: '0755'
+          ignore_errors: yes
+          when:
+            - vbmc and vbmc_pip
+
+        - name: "Create config for virtualbmc"
+          become: true
+          template:
+            src: templates/virtualbmc.conf.j2
+            dest: "/etc/virtualbmc/virtualbmc.conf"
+            mode: '0644'
+          ignore_errors: yes
+          when:
+            - vbmc and vbmc_pip
+
+        - name: "Ensure virtualbmc is running"
+          become: true
+          systemd:
+            name: "{{ vbmc_service }}"
+            state: restarted
+            daemon_reload: yes
+            enabled: yes
+          register: result_virtualbmc
+          ignore_errors: yes
+          changed_when: false
+          when:
+            - vbmc
+
+        - name: "Advise unable to start virtualbmc"
+          set_fact:
+            validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to start and enable virtualbmc'] }}"
+          when:
+            - vbmc
+            - result_virtualbmc.status.ActiveState is defined and result_virtualbmc.status.ActiveState == "failed"
+          changed_when: true
+
+        - name: "Get virtual BMC list"
+          become: true
+          shell: vbmc list -f json --noindent |sed 's/Domain name/Name/g'
+          register: result_vbmc_list
+          args:
+            executable: /bin/bash
+          when:
+            - vbmc
+            - result_virtualbmc.failed is defined and not result_virtualbmc.failed
+          changed_when: false
+      rescue:
+        - debug:
+            msg: "Play aborted, see errors above"
+          changed_when: true
+
+        - meta: end_play
