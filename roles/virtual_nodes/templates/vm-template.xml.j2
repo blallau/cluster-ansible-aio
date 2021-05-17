@@ -75,9 +75,7 @@
     {% endif %}
     {% endfor %}
     {% endif %}
-    <controller type='virtio-serial' index='0'>
-      <alias name='virtio-serial0'/>
-    </controller>
+    <controller type='virtio-serial' index='0'/>
     {% for intf in item.interfaces %}
     <interface type='bridge'>
       <source bridge='{{ intf.bridge }}'/>
@@ -87,22 +85,17 @@
       {% endif %}
       <model type='virtio'/>
       <driver name='vhost' queues='1'/>
-      <alias name='net{{ loop.index }}'/>
     </interface>
     {% endfor %}
     <serial type='pty'>
       <source path='/dev/pts/1'/>
       <target port='0'/>
-      <alias name='serial0'/>
     </serial>
     <console type='pty' tty='/dev/pts/1'>
       <source path='/dev/pts/1'/>
       <target type='serial' port='0'/>
-      <alias name='serial0'/>
     </console>
-    <input type='keyboard' bus='ps2'>
-    <alias name='input1'/>
-    </input>
+    <input type='keyboard' bus='ps2'/>
     <graphics type='vnc' port='5900' autoport='yes' listen='0.0.0.0'>
       <listen type='address' address='0.0.0.0'/>
     </graphics>
