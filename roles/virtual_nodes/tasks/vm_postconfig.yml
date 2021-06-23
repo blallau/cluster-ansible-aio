@@ -1,7 +1,7 @@
 ---
 - name: Immutable OS
   block:
-    - name: Instantiate Ignition config file
+    - name: "[KVM host] Instantiate Ignition config file"
       template:
         src: "config-ign.yaml.j2"
         dest: "{{ tmp_dir}}/{{ item.name }}/config-ign.yaml"
@@ -9,13 +9,13 @@
       file:
         path: "{{ tmp_dir }}/{{ item.name }}/config.ign"
         state: absent
-    - name: Convert Ignition file from YAML format using FCCT
+    - name: "[KVM host] Convert Ignition file from YAML format using FCCT"
       command: 'docker run --rm --interactive \
         --security-opt label=disable        \
         --volume {{ tmp_dir }}/{{ item.name }}:/work --workdir /work \
         quay.io/coreos/fcct:release --pretty --strict config-ign.yaml --output config.ign'
       when: guest_os_distro == "fcos"
-    - name: Convert Ignition file from YAML format using CT
+    - name: "[KVM host] Convert Ignition file from YAML format using CT"
       shell: 'cat {{ tmp_dir}}/{{ item.name }}/config-ign.yaml | docker run --rm \
         --interactive --security-opt label=disable \
           quay.io/coreos/ct:latest-dev > {{ tmp_dir}}/{{ item.name }}/config.ign'
@@ -26,23 +26,23 @@
 
 - name: Standard OS
   block:
-    - name: Instantiate meta-data file
+    - name: "[KVM host] Instantiate meta-data file"
       template:
         src: "meta-data.j2"
         dest: "{{ tmp_dir }}/{{ item.name }}/meta-data"
-    - name: Instantiate user-data file
+    - name: "[KVM host] Instantiate user-data file"
       template:
         src: "user-data.j2"
         dest: "{{ tmp_dir}}/{{ item.name }}/user-data"
-    - name: Instantiate network-config file
+    - name: "[KVM host] Instantiate network-config file"
       template:
         src: "network-config.j2"
         dest: "{{ tmp_dir}}/{{ item.name }}/network-config"
-    - name: Remove config drive files
+    - name: "[KVM host] Remove config drive files"
       file:
         path: "{{ tmp_dir }}/{{ item.name }}/seed.img"
         state: absent
-    - name: Create config drive
+    - name: "[KVM host] Create config drive"
       command: "cloud-localds -v {{ tmp_dir }}/{{ item.name }}/seed.img \
                 --network-config {{ tmp_dir }}/{{ item.name }}/network-config \
                   {{ tmp_dir }}/{{ item.name }}/user-data \

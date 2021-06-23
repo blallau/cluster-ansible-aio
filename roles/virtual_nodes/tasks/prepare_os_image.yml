@@ -1,10 +1,10 @@
 ---
-- name: Make sure temp directory exists
+- name: "[KVM host] Make sure temp directory exists"
   file:
     path: "{{ tmp_dir }}"
     state: directory
 
-- name: "Check qcow2 OS image {{ tmp_dir }}/{{ item.image }} is present"
+- name: "[KVM host] Check qcow2 OS image {{ tmp_dir }}/{{ item.image }} is present"
   stat:
     path: "{{ tmp_dir }}/{{ item.image }}"
   with_items: "{{ cluster_nodes }}"
@@ -15,19 +15,19 @@
   when: not item.stat.exists
   with_items: "{{ check_os_image.results }}"
 
-- name: Check if OS files are already in libvirt directory
+- name: "[KVM host] Check if OS files are already in libvirt directory"
   stat:
     path: "{{ libvirt_dir }}/{{ item.name }}-boot.qcow2"
   with_items: "{{ cluster_nodes }}"
   register: copied
 
-- name: Create VM-specific directories
+- name: "[KVM host] Create VM-specific directories"
   file:
     path: "{{ tmp_dir }}/{{ item.name }}"
     state: directory
   with_items: "{{ cluster_nodes }}"
 
-- name: Copy OS images to libvirt directory
+- name: "[KVM host] Copy OS images to libvirt directory"
   become: True
   copy:
     src: "{{ tmp_dir }}/{{ item.image }}"
@@ -35,13 +35,13 @@
     remote_src: True
   with_items: "{{ cluster_nodes }}"
 
-- name: Increase the image size
+- name: "[KVM host] Increase the image size"
   become: True
   command: "qemu-img resize {{ libvirt_dir }}/{{ item.item.name }}-boot.qcow2 +{{ root_disk_size }}G"
   with_items: "{{ copied.results }}"
   when: item.item.name is not match("flatcar.*")
 
-- name: Run custom shell commands in OS disk
+- name: "[KVM host] Run custom shell commands in OS disk"
   become: True
   command: >
     virt-customize
@@ -60,7 +60,7 @@
     - item.item.name is not match("flatcar.*")
     - virt_customize_cmd is defined and virt_customize_cmd
 
-- name: Install required packages into OS disk
+- name: "[KVM host] Install required packages into OS disk"
   become: True
   command: >
     virt-customize
@@ -75,7 +75,7 @@
     - item.item.name is not match("flatcar.*")
     - virt_customize_packages is defined and virt_customize_packages
 
-- name: Sysprep guest disk
+- name: "[KVM host] Sysprep guest disk"
   become: True
   command: >
     virt-sysprep

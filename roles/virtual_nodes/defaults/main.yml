@@ -10,13 +10,16 @@ libvirt_security_driver: none
 # VBMC #
 ########
 # Virtual BMC is disabled by default
-vbmc: False
+vbmc: True
 
 # By default we install with pip, but if you prefer to do it manually, set this to false
 vbmc_pip: True
 
 # Default vbmc service, override if something else on your distro
 vbmc_service: vbmcd
+
+# Default vbmc starting port 623
+vbmc_port: 623
 
 cloud_init_disk: "vdz"
 vm_volumes_fs_format: "ext4"

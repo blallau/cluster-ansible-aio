@@ -1,33 +1,33 @@
 ---
 - name: Check storage variables
   block:
-    - name: Set lvm_storage
+    - name: "[KVM host] Set lvm_storage"
       set_fact:
         lvm_storage: "{{ vm_volumes is defined and vm_volumes|length > 0 and 'raw' in vm_volumes|map(attribute='format')|list }}"
 
-    - name: Check physical_disks is set
+    - name: "[KVM host] Check physical_disks is set"
       fail:
         msg: "when one vm_volumes is set to 'raw', physical_disks MUST be set"
       when: lvm_storage and physical_disks is not defined
 
-    - name: Check virt_volume_group is set
+    - name: "[KVM host] Check virt_volume_group is set"
       fail:
         msg: "when one vm_volumes is set to 'raw', virt_volume_group MUST be set"
       when: lvm_storage and virt_volume_group is not defined
 
-    - name: Check vm_volumes_mount_path is set
+    - name: "[KVM host] Check vm_volumes_mount_path is set"
       fail:
         msg: "when vm_volumes_mount is set to True, vm_volumes_mount_path MUST be set"
       when: vm_volumes_mount is defined and vm_volumes_mount and vm_volumes_mount_path is not defined
 
 - name: Check LVM storage is available
   block:
-    - name: List storage pool
+    - name: "[KVM host] List storage pool"
       virt_pool:
         command: list_pools
       register: pool_exists
 
-    - name: "Define {{ virt_volume_group }} storage pool"
+    - name: "[KVM host] Define {{ virt_volume_group }} storage pool"
       become: True
       virt_pool:
         command: define
@@ -35,14 +35,14 @@
         xml: "{{ lookup('template', 'pool.xml.j2') }}"
       when: virt_volume_group not in pool_exists.list_pools
 
-    - name: "Copy Libvirt XML pool domain in {{ tmp_dir }}/pool.xml"
+    - name: "[KVM host] Copy Libvirt XML pool domain in {{ tmp_dir }}/pool.xml"
       blockinfile:
         path: "{{ tmp_dir }}/pool.xml"
         create: True
         block: |
             {{ lookup('template', 'pool.xml.j2') }}
 
-    - name: "Start {{ virt_volume_group }} storage pool"
+    - name: "[KVM host] Start {{ virt_volume_group }} storage pool"
       become: True
       virt_pool:
         command: create
@@ -50,7 +50,7 @@
 
       when: virt_volume_group not in pool_exists.list_pools
 
-    - name: "Autostart {{ virt_volume_group }} storage pool"
+    - name: "[KVM host] Autostart {{ virt_volume_group }} storage pool"
       become: True
       virt_pool:
         autostart: True

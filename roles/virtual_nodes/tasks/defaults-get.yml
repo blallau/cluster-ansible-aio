@@ -3,7 +3,7 @@
 # Unfortunately can't use date from "{{ hostvars[].ansible_date_time.tz }}"
 # as it's an achronym which can't be resolved to country/city for cloud-init
 # Due to Ubuntu Bionic, can't use 'timedatectl -p Timezone --value show'
-- name: Get timezone from KVM host for cloud-init
+- name: "[KVM host] Get timezone from KVM host for cloud-init"
   shell: |
     set -o pipefail
       timedatectl |grep 'Time zone:' |awk '{ print $3 }'
@@ -13,6 +13,6 @@
   args:
     executable: /bin/bash
 
-- name: Store timezone from KVM host
+- name: "[KVM host] Store timezone from KVM host"
   set_fact:
     virt_infra_timezone: "{{ result_timezone.stdout }}"

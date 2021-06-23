@@ -20,14 +20,14 @@
         {{ cluster_nodes | to_nice_json(indent=2) }}
   tags: network
 
-- name: Display cluster_nodes
+- name: "Display cluster_nodes"
   debug:
     msg: "{{ cluster_nodes | to_nice_yaml(indent=2) }}"
   tags: network
 
 - import_tasks: prepare_os_image.yml
 
-- name: "Copy cluster config for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
+- name: "[KVM host] Copy cluster config for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
   blockinfile:
     path: "{{ tmp_dir }}/{{ item.name }}/cluster_config"
     create: True
@@ -36,7 +36,7 @@
   with_items: "{{ cluster_nodes }}"
   tags: network
 
-- name: "Copy Libvirt XML domain for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
+- name: "[KVM host] Copy Libvirt XML domain for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
   blockinfile:
     path: "{{ tmp_dir }}/{{ item.name }}/domain.xml"
     create: True
@@ -72,7 +72,7 @@
       # Wait for network so we can get the IP to log in
       # Do this for all VMs, in case they already existed and IP has changed
     - name: Get IP address of VM
-      become: true
+      become: True
       shell: >
         set -o pipefail ;
         virsh
@@ -147,3 +147,39 @@
 # - import_tasks: docker/enable_dns_server.yml
 #   when: dns_server_enabled | bool
 #   tags: dns_server
+
+- name: Create virtual BMC
+  shell: >
+    {{ result_vbmc_path.stdout }} add {{ item.name }}
+    --libvirt-uri {{ libvirt_url }}
+    --port {{ item.vbmc_port }}
+    --username {{ vbmc_user | default('admin') }}
+    --password {{ vbmc_password | default('password') }}
+  args:
+    executable: /bin/bash
+  register: result_vbmc_create
+  retries: 10
+  delay: 2
+  until: result_vbmc_create is succeeded
+  when:
+    - vbmc_port is defined and vbmc_port
+    - vbmc is defined and vbmc
+  with_items: "{{ cluster_nodes }}"
+  notify:
+    - restart virtual bmc
+
+- name: Start virtual BMC
+  shell: "set -o pipefail && {{ result_vbmc_path.stdout }} start {{ item.name }}"
+  args:
+    executable: /bin/bash
+  register: result_vbmc_start
+  retries: 10
+  delay: 2
+  until: result_vbmc_start is succeeded
+  changed_when: false
+  when:
+    - vbmc_port is defined and vbmc_port
+    - vbmc is defined and vbmc
+  with_items: "{{ cluster_nodes }}"
+
+- meta: flush_handlers

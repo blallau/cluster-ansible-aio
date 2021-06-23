@@ -7,7 +7,7 @@
         # Debian/Ubuntu are set to apparmor by default
         # Defaults to "none" when not specified, which enables use of NVMe drives successfully on all distros
         # Else we get permissions denied on NVMe disk images
-        - name: "Set libvirtd security driver"
+        - name: "[KVM host] Set libvirtd security driver"
           become: true
           lineinfile:
             path: /etc/libvirt/qemu.conf
@@ -16,7 +16,7 @@
             line: 'security_driver = "{{ libvirt_security_driver }}"'
           register: result_qemuconf
 
-        - name: "Restart libvirtd if config changed"
+        - name: "[KVM host] Restart libvirtd if config changed"
           become: true
           service:
             name: "libvirtd"
@@ -27,7 +27,7 @@
           when:
             - result_qemuconf.changed
 
-        - name: "Ensure libvirtd is running"
+        - name: "[KVM host] Ensure libvirtd is running"
           become: true
           service:
             name: "libvirtd"
@@ -36,7 +36,7 @@
           register: result_libvirtd
           ignore_errors: yes
 
-        - name: "Advise unable to start libvirtd"
+        - name: "[KVM host] Advise unable to start libvirtd"
           set_fact:
             validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to start and enable libvirtd'] }}"
           when:
@@ -44,7 +44,7 @@
           changed_when: true
 
         # TODO: use this? 'virt-host-validate qemu'
-        - name: "Test that we can talk to libvirtd"
+        - name: "[KVM host] Test that we can talk to libvirtd"
           become: true
           virt:
             command: list_vms
@@ -52,7 +52,7 @@
           register: result_libvirtd
           ignore_errors: true
 
-        - name: "Advise libvirtd not contactable"
+        - name: "[KVM host] Advise libvirtd not contactable"
           set_fact:
             validations_failed: "{{ validations_failed|default([]) + ['KVM host: libvirtd connection failed on KVM host'] }}"
           when:
@@ -60,7 +60,7 @@
           changed_when: true
         # Allow MAC access to NVMe drives when using apparmor
         # Else we get permissions denied on NVMe disk images
-        - name: "Enable access to NVMe drives in apparmor"
+        - name: "[KVM host] Enable access to NVMe drives in apparmor"
           become: true
           lineinfile:
             path: /etc/apparmor.d/abstractions/libvirt-qemu
@@ -69,7 +69,7 @@
           when:
             - libvirt_security_driver is defined and libvirt_security_driver == "apparmor"
 
-        - name: "Restart apparmor if config changed"
+        - name: "[KVM host] Restart apparmor if config changed"
           become: true
           service:
             name: "apparmor"
@@ -89,7 +89,7 @@
 
     - name: Virtualbmc stuff
       block:
-        - name: "Ensure system package of virtualbmc is removed"
+        - name: "[KVM host] Ensure system package of virtualbmc is removed"
           become: true
           package:
             name: "python3-virtualbmc"
@@ -102,7 +102,7 @@
             - vbmc and vbmc_pip
           ignore_errors: true
 
-        - name: "Advise unable to remove virtualbmc host package"
+        - name: "[KVM host] Advise unable to remove virtualbmc host package"
           set_fact:
             validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to remove vbmc host package'] }}"
           when:
@@ -110,7 +110,7 @@
             - result_vbmc_remove.failed
           changed_when: true
 
-        - name: "Install virtualbmc with pip"
+        - name: "[KVM host] Install virtualbmc with pip"
           become: true
           pip:
             name: virtualbmc  {%- if vbmc_pip_version is defined %}=={{ vbmc_pip_version }}{% endif %}
@@ -123,7 +123,7 @@
           when:
             - vbmc and vbmc_pip
 
-        - name: "Find the path for virtualbmc"
+        - name: "[KVM host] Find the path for virtualbmc"
           command: "which vbmc"
           register: result_vbmc_path
           when:
@@ -131,7 +131,7 @@
           changed_when: false
           ignore_errors: yes
 
-        - name: "Advise unable to find virtualbmc"
+        - name: "[KVM host] Advise unable to find virtualbmc"
           set_fact:
             validations_failed: "{{ validations_failed|default([]) + ['KVM host: Cannot find vbmc binary, is it installed?'] }}"
           when:
@@ -139,7 +139,7 @@
             - result_vbmc_path.failed is defined and result_vbmc_path.failed
           changed_when: true
 
-        - name: "Advise unable to install virtualbmc"
+        - name: "[KVM host] Advise unable to install virtualbmc"
           set_fact:
             validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to install virtualbmc with pip'] }}"
           when:
@@ -147,7 +147,7 @@
             - result_vbmc_pip.failed
           changed_when: true
 
-        - name: "Create virtualbmc service file"
+        - name: "[KVM host] Create virtualbmc service file"
           become: true
           template:
             src: templates/vbmcd.service.j2
@@ -158,7 +158,7 @@
           when:
             - vbmc and vbmc_pip
 
-        - name: "Advise unable to create virtualbmc service"
+        - name: "[KVM host] Advise unable to create virtualbmc service"
           set_fact:
             validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to create virtualbmc service'] }}"
           when:
@@ -166,7 +166,7 @@
             - result_vbmc_service.failed
           changed_when: true
 
-        - name: "Create virtualbmc config directory"
+        - name: "[KVM host] Create virtualbmc config directory"
           become: true
           file:
             path: /etc/virtualbmc
@@ -177,7 +177,7 @@
           when:
             - vbmc and vbmc_pip
 
-        - name: "Create virtualbmc run directory"
+        - name: "[KVM host] Create virtualbmc run directory"
           become: true
           file:
             path: /var/lib/vbmcd
@@ -187,7 +187,7 @@
           when:
             - vbmc and vbmc_pip
 
-        - name: "Create config for virtualbmc"
+        - name: "[KVM host] Create config for virtualbmc"
           become: true
           template:
             src: templates/virtualbmc.conf.j2
@@ -197,7 +197,7 @@
           when:
             - vbmc and vbmc_pip
 
-        - name: "Ensure virtualbmc is running"
+        - name: "[KVM host] Ensure virtualbmc is running"
           become: true
           systemd:
             name: "{{ vbmc_service }}"
@@ -210,7 +210,7 @@
           when:
             - vbmc
 
-        - name: "Advise unable to start virtualbmc"
+        - name: "[KVM host] Advise unable to start virtualbmc"
           set_fact:
             validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to start and enable virtualbmc'] }}"
           when:
@@ -218,7 +218,7 @@
             - result_virtualbmc.status.ActiveState is defined and result_virtualbmc.status.ActiveState == "failed"
           changed_when: true
 
-        - name: "Get virtual BMC list"
+        - name: "[KVM host] Get virtual BMC list"
           become: true
           shell: vbmc list -f json --noindent |sed 's/Domain name/Name/g'
           register: result_vbmc_list
