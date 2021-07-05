@@ -6,7 +6,7 @@ Multi-node deployment of cluster apps on a single physical host, using heavily A
 
 ![cluster-ansible-aio](https://user-images.githubusercontent.com/9655027/31175714-6e453b1e-a910-11e7-8a60-f7c6d2114b1a.png)
 
-Cluster-ansible-aio is an open source tool for automating deployment of cluster apps on a single physical machine.
+Cluster-ansible-aio is an open source tool for automating deployment of cluster apps on a single physical machine using Libvirt.
 
 -   Source: <https://github.com/blallau/cluster-ansible-aio>
 
@@ -14,14 +14,15 @@ Cluster-ansible-aio is an open source tool for automating deployment of cluster 
 
 -   Multi-nodes (N master, N worker, N lb)
 -   Multi-nodes types : master, worker, lb, ...
--   Libvirt(KVM) or LXD support
+-   Libvirt(KVM) or LXD support(beta)
 -   Multi Host OS (CentOS, Ubuntu)
 -   Multi guest OS (CentOS, Ubuntu, Debian, Flatcar, Fedora CoreOS)
 -   Multi networks type using DHCP or static IPs
 -   Multi block storage (using LV or QCOW2 files)
--   Heavily using cloudinit or Ignition
+-   Heavily automated using Cloudinit for standard OS or Ignition for immutable OS
 -   Heavily automated using Ansible
 -   Quick deployment: using PIP cache proxy (Devpi) and APT cache proxy (apt-cacher-ng)
+-   IPMI support using VirtualBMC
 
 ## Quickstart guide
 

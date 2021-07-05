@@ -5,6 +5,7 @@
 libvirt_dir: "/var/lib/libvirt/images"
 libvirt_url: qemu:///system
 libvirt_security_driver: none
+libvirt_default_mtu: 9000
 
 ########
 # VBMC #
@@ -43,3 +44,4 @@ vm_os_images:
 vm_os_image: "{{ vm_os_images[guest_os_distro] }}"
 
 destroy_images: False
+rename_net_interface: False

@@ -59,6 +59,10 @@ runcmd:
 {% endif %}
 {% if item.os_type in ['debian', 'ubuntu'] %}
   - DEBIAN_FRONTEND=noninteractive apt-get install -y open-iscsi
+  - DEBIAN_FRONTEND=noninteractive apt-get install -y console-data
+{% endif %}
+{% if item.os_type in ['centos'] %}
+  - localectl set-keymap fr
 {% endif %}
 {% if item.os_type == 'toremove' %}
   - DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration console-setup
@@ -70,8 +74,17 @@ runcmd:
   - DEBIAN_FRONTEND=noninteractive apt-get -y install ncurses-term sysdig
   - DEBIAN_FRONTEND=noninteractive apt-get -y autoremove
 {% endif %}
-{% if item.os_type in ['debian', 'ubuntu'] %}
 write_files:
+{% if rename_net_interface | bool %}
+ - content: |
+{% for intf in item.interfaces %}
+    SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="{{ intf.mac }}", NAME="{{ intf.bridge | regex_replace('(.*)-br$', '\\1') }}"
+{% endfor %}
+   path: /etc/udev/rules.d/70-persistent-net.rules
+   owner: root:root
+   permissions: '0644'
+{% endif %}
+{% if item.os_type in ['debian', 'ubuntu'] %}
  - content: |
      XKBMODEL="pc105"
      XKBLAYOUT="fr"
@@ -101,7 +114,7 @@ fs_setup:
 {% endfor %}
 mounts:
 {% for disk in item.disks %}
-  - [ "/dev/{{ disk.device }}", "{{ vm_volumes_mount_path }}/data-{{ loop.index0 }}" ]
+  - [ "/dev/{{ disk.device }}", "{{ vm_volumes_mount_path }}/data-{{ loop.index0 }}/data-{{ loop.index0 }}" ]
 {% endfor %}
 # mount_default_fields
 # These values are used to fill in any entries in 'mounts' that are not
