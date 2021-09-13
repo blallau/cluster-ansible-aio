@@ -22,6 +22,7 @@
 - name: 'Wait for cloud-init completion'
   hosts: created_nodes
   gather_facts: false
+  become: True
   tasks:
     - name: 'Wait using cloud-init status --wait'
       command: 'cloud-init status --wait'

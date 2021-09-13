@@ -5,6 +5,7 @@
 {% if item.forward is defined and item.forward == 'bridge' %}
   <forward mode='bridge'/>
   <bridge name='{{ item.bridge }}'/>
+  <mtu size='{{ libvirt_default_mtu }}'/>
 {% else %}
 {% if item.forward is defined and item.forward == 'nat' %}
   <forward mode='nat'/>

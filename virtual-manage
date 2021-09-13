@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 CONF_FILE=$HOME/.cluster-ansible-aio-env
 
 if [[ -z "${NODE_PREFIX}" && ! -f ${CONF_FILE} ]]; then
@@ -98,9 +99,11 @@ function gracefully_shutdown {
 		# Break while loop when no domains are left.
 		test -z "$(list_running_domains)" && break
 		# Wait a litte, we don't want to DoS libvirt.
-		sleep 1
+		sleep 3
 	done
     power_shutdown
+    sleep 5
+    # list_inactive_domains
 }
 
 function add-disk {

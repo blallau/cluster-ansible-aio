@@ -163,7 +163,7 @@
   until: result_vbmc_create is succeeded
   when:
     - vbmc_port is defined and vbmc_port
-    - vbmc is defined and vbmc
+    - vbmc is defined and vbmc|bool
   with_items: "{{ cluster_nodes }}"
   notify:
     - restart virtual bmc
@@ -179,7 +179,7 @@
   changed_when: false
   when:
     - vbmc_port is defined and vbmc_port
-    - vbmc is defined and vbmc
+    - vbmc is defined and vbmc|bool
   with_items: "{{ cluster_nodes }}"
 
 - meta: flush_handlers

@@ -32,6 +32,7 @@ packages:
   - bridge-utils
   - tshark
   - python3-minimal
+  - open-iscsi
 {% if allow_virt %}
   - python3-pip
   - pkg-config
@@ -42,6 +43,7 @@ packages:
   - python3
   - tc
   - ebtables
+  - iscsi-initiator-utils
 {% endif %}
 bootcmd:
   - [ sh, -c, echo "=========bootcmd=========" ]
@@ -53,7 +55,7 @@ runcmd:
   - mkdir {{ vm_volumes_mount_path }}/data-{{ loop.index0 }}
 {% endfor %}
 {% endif %}
-  - systemctl restart sshd &
+  - systemctl restart sshd
 {% if allow_virt %}
   - pip3 install ansible==2.9.13 libvirt-python netaddr
 {% endif %}
@@ -64,6 +66,7 @@ runcmd:
 {% if item.os_type in ['centos'] %}
   - localectl set-keymap fr
 {% endif %}
+  - systemctl enable --now iscsid
 {% if item.os_type == 'toremove' %}
   - DEBIAN_FRONTEND=noninteractive apt-get install -y keyboard-configuration console-setup
   - curl -s https://s3.amazonaws.com/download.draios.com/DRAIOS-GPG-KEY.public | sudo apt-key add -
