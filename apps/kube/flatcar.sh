@@ -7,13 +7,6 @@ echo flatcar > ~/.cluster-ansible-aio-env
 . ${HOME}/work/GIT/cluster-ansible-aio/apps/kube/kube_common.sh
 . ${HOME}/work/GIT/cluster-ansible-aio/apps/kube/kube_lib.sh
 
-# OFFLINE_MODE
-OFFLINE=false
-WORKER_NB=2
-OS='flatcar'
-KUBE_HA=true
-LB_NB=0
-
 # INVENTORY
 ###########
 generateInventory
@@ -30,16 +23,11 @@ ansible-playbook -e coreos_locksmithd_disable=false -i ${KAST_INV} -u core playb
 
 retrieveArtifacts
 
+extra_vars="-e ansible_python_interpreter='/opt/bin/python'"
+
 if [ "$LB_NB" -gt "0" ]; then
     cd ${KAST_DIR}
-    ansible-playbook -e ansible_python_interpreter="/opt/bin/python" -i ${KAST_INV} -u core playbooks/lb.yml
+    ansible-playbook  -i ${KAST_INV} -u core playbooks/lb.yml
 fi
 
-cd ${KAST_DIR}
-ansible-playbook -e ansible_python_interpreter="/opt/bin/python" -i ${KAST_INV} -u core playbooks/containerd_install.yml
-
-cd ${KAST_DIR}
-ansible-playbook -e ansible_python_interpreter="/opt/bin/python" -i ${KAST_INV} -u core playbooks/kube.yml -vv
-
-cd ${CAIO_DIR}
-ansible-playbook -e ansible_python_interpreter="/opt/bin/python" -i ${KAST_INV} -e os_default_user=core apps/kube/kube-cli.yml
+install_kube core "\${extra_vars}"

@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 CONF_FILE=$HOME/.cluster-ansible-aio-env
 
 if [[ -z "${NODE_PREFIX}" && ! -f ${CONF_FILE} ]]; then
@@ -20,6 +19,7 @@ SNAPSHOT_NAME=""
 DISK_DIRECTORY="${HOME}/tmp"
 DISK_SIZE=10
 TIMEOUT=300
+GRACEFULLY_SHUTDOWN=false
 
 function start {
     #    docker start docker-dnsmasq
@@ -37,7 +37,9 @@ function status {
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
 		        echo -e "  $DOMAIN   \e[1m\e[92mrunning\e[39m\e[0m"
-                virsh domblklist $DOMAIN | tail -n +3
+                echo -e "  $(virsh dominfo $DOMAIN | grep CPU\(s\))"
+                echo -e "$(virsh domblklist $DOMAIN | tail -n +3)"
+                echo -e "\n"
             fi
         done
 	done
@@ -65,6 +67,7 @@ function acpi_shutdown {
 }
 
 function power_shutdown {
+	echo -e "==> power shutdown all running KVM domains...\n"
 	list_running_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
@@ -74,6 +77,26 @@ function power_shutdown {
             fi
         done
 	done
+}
+
+function shutdown {
+    if [ "$GRACEFULLY_SHUTDOWN" = true ]; then
+	    echo -e "Try to cleanly shutdown all running KVM domains...\n"
+        acpi_shutdown
+
+	    # Wait until all domains are shut down or timeout has reached.
+	    END_TIME=$(date -d "$TIMEOUT seconds" +%s)
+
+	    while [ $(date +%s) -lt $END_TIME ]; do
+		    # Break while loop when no domains are left.
+		    test -z "$(list_running_domains)" && break
+		    # Wait a litte, we don't want to DoS libvirt.
+		    sleep 3
+	    done
+    fi
+    power_shutdown
+    sleep 5
+    # list_inactive_domains
 }
 
 function list_inactive_domains() {
@@ -88,22 +111,9 @@ function list_all_domains() {
     virsh -q list | awk '{ print $2}'
 }
 
-function gracefully_shutdown {
-	echo -e "Try to cleanly shutdown all running KVM domains...\n"
-    acpi_shutdown
-
-	# Wait until all domains are shut down or timeout has reached.
-	END_TIME=$(date -d "$TIMEOUT seconds" +%s)
-
-	while [ $(date +%s) -lt $END_TIME ]; do
-		# Break while loop when no domains are left.
-		test -z "$(list_running_domains)" && break
-		# Wait a litte, we don't want to DoS libvirt.
-		sleep 3
-	done
-    power_shutdown
-    sleep 5
-    # list_inactive_domains
+function list_all_snapshots() {
+    DOMAIN=$1
+    virsh -q snapshot-list --domain $DOMAIN | awk '{ print $1}'
 }
 
 function add-disk {
@@ -131,12 +141,32 @@ function remove-disk {
 }
 
 function snap-create {
+    local snap_exists=0
     SNAP_NAME=$1
+
     if [[ -z $SNAP_NAME ]]; then
         echo -en "error: expected syntax: virtual-manage --snap-create <string>\n\n"
         exit 0
     fi
-    gracefully_shutdown
+    shutdown
+    list_inactive_domains | while read DOMAIN; do
+        list_all_snapshots $DOMAIN | while read SNAP; do
+            if [[ "$SNAP_NAME" =~ $SNAP ]]; then
+                echo "Warning : snapshot $SNAP already exists on $DOMAIN"
+                snap_exists=1
+                break 2
+            fi
+        done
+    done
+    if [[ $snap_exists -eq 1 ]]; then
+        read -p "Snapshot $SNAP_NAME already exists. Recreate them (y/n) ?" -n 1 -r
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            snap-delete $SNAP_NAME
+        else
+            exit 0
+        fi
+    fi
+
 	list_inactive_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
@@ -156,7 +186,7 @@ function snap-delete {
         snap-list
         exit 0
     fi
-    gracefully_shutdown
+    shutdown
 	list_inactive_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
@@ -176,7 +206,7 @@ function snap-revert {
         snap-list
         exit 0
     fi
-    gracefully_shutdown
+    shutdown
 	list_inactive_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
@@ -232,7 +262,7 @@ while [ "$#" -gt 0 ]; do
             exit 0
             ;;
         (--shutdown)
-            gracefully_shutdown
+            shutdown
             exit 0
             ;;
         (--status)

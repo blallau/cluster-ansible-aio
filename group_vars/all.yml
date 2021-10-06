@@ -14,11 +14,11 @@ flatcar_update_server_port: 8000
 # Cluster sizing
 ################
 master_nb: 1
-master_ram: 2
+master_ram: 4
 master_cpu: 2
 
-worker_nb: 1
-worker_ram: 1
+worker_nb: 3
+worker_ram: 6
 worker_cpu: "{{ master_cpu }}"
 
 lb_nb: 2
@@ -27,7 +27,7 @@ lb_cpu: 1
 
 node_type_os:
   - type: "lb"
-    os: "debian"
+    os: "{{ guest_os_distro }}"
   - type: "worker"
     os: "{{ guest_os_distro }}"
   - type: "master"
@@ -64,28 +64,36 @@ net_interfaces:
   #   cidr: "11.{{ net_second_octet }}.210.0/24"
   #   bridge: "{{ net_prefix }}clust-br"
 
-# Storage
-#########
-vm_volumes: []
-# vm_volumes:
-#   - name: vol-osd1
-#     size: 10
-#     format: qcow2
-#   - name: vol-osd2
-#     size: 10
-#     format: qcow2
-#   - name: vol-osd3
-#     size: 10
-#     format: qcow2
-#   - name: vol-osd4
-#     size: 10
-#     format: qcow2
-# vm_volumes_mount: True
-# vm_volumes_mount_path: "/data/s3"
+# ip_offset [ 2-9 ]
+# advanced use case to avoid IP conflict
+#
+# with ip_offset IP is define :
+#   master node : 10 + ip_offset + outer_master_loop.index
+#   woeker nide : 20 + ip_offset + outer_master_loop.index
+
+ip_offset: 8
 
 # Storage
 #########
-root_disk_size: "100"
+# vm_volumes: []
+# # format raw/qcow2
+vm_volumes:
+  - name: vol-osd1
+    size: 25
+    format: qcow2
+  # - name: vol-osd2
+  #   size: 10
+  #   format: qcow2
+  # - name: vol-osd3
+  #   size: 10
+  #   format: qcow2
+vm_volumes_mount: true
+vm_volumes_mount_path: "/data/kubernetes"
+
+# Storage
+#########
+# in Go
+root_disk_size: "50"
 
 # Additional disks (LVM)
 physical_disks:

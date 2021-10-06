@@ -27,19 +27,19 @@
         dest: "{{ lookup('env','HOME') }}/.kube/config"
         flat: yes
 
-- name: Kube config
-  hosts: "*worker*,*lb*"
-  tasks:
-    - name: create directory
-      file:
-        path: "{{ ansible_env.HOME }}/.kube"
-        state: directory
-        mode: '0755'
+# - name: Kube config
+#   hosts: "*worker*,*lb*"
+#   tasks:
+#     - name: create directory
+#       file:
+#         path: "{{ ansible_env.HOME }}/.kube"
+#         state: directory
+#         mode: '0755'
 
-    - name: copy kube config
-      copy:
-        src: "{{ lookup('env','HOME') }}/.kube/config"
-        dest: "{{ ansible_env.HOME }}/.kube/config"
-        owner: "{{ os_default_user }}"
-        group: "{{ os_default_user }}"
-        mode: '0644'
+#     - name: copy kube config
+#       copy:
+#         src: "{{ lookup('env','HOME') }}/.kube/config"
+#         dest: "{{ ansible_env.HOME }}/.kube/config"
+#         owner: "{{ os_default_user }}"
+#         group: "{{ os_default_user }}"
+#         mode: '0644'
