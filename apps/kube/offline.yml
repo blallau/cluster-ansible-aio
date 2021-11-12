@@ -1,0 +1,40 @@
+---
+
+- name: Offline image retriever
+  block:
+    - name: Create image dir app
+      file:
+        path: "{{ app_path }}/images"
+        mode: 0755
+        state: directory
+    - name: offline images retriever
+      block:
+        - name: Copy {{ img_tar }} tar image
+          copy:
+            src: "{{ offline_binaries_folder }}/{{ img_tar }}"
+            dest: "{{ app_path }}/images/{{ img_tar | basename }}"
+        - name: Check {{ img_tar }} tar copied properly
+          block:
+            - stat:
+                path: "{{ app_path }}/images/{{ img_tar | basename }}"
+                get_checksum: false
+              register: result
+            - fail:
+                msg: "The tar has not been copied properly (check your source folders)"
+              when: not result.stat.exists
+        - name: Containerd
+          block:
+            - name: load {{ img_tar }} image using ctr
+              command: ctr -n=k8s.io images import {{ app_path }}/images/{{ img_tar | basename }}
+            - name: push {{ img_tar }} image using ctr
+              command: ctr -n=k8s.io images push {% if unsecure|bool %}--plain-http=true{% endif %} {{ private_registry_endpoint }}/{{ img_name }}
+              vars:
+                unsecure: "{% if private_registry_endpoint.endswith('30005') %}true{% else %}false{% endif %}"
+              when: img_push is not defined or img_push|bool
+              run_once: true
+            - name: Post-push cleanup for {{ img_tar }}
+              command: crictl rmi {{ private_registry_endpoint }}/{{ img_name }}
+              when: img_push is not defined or img_push|bool
+      vars:
+        # Only keep everything after last / (if present) and replace the : by - between name and version and add .tar at the end
+        img_tar: "{{ img_name | replace(':','-') }}.tar"
