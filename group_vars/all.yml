@@ -6,6 +6,7 @@
 node_prefix: ""
 guest_os_distro: "{{ ansible_distribution | lower }}"
 os_default_user: "{{ guest_os_distro }}"
+guest_timezone: "UTC"
 
 # Flatcar stuff
 flatcar_update_server_ip: "11.102.100.1"

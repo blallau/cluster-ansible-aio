@@ -12,7 +12,7 @@ else
     NODE_PREFIX=$(cat ${CONF_FILE})
 fi
 
-echo -e "Environment: \e[93m$NODE_PREFIX\e[39m\n"
+echo -e "\e[93mEnvironment: $NODE_PREFIX\e[39m"
 
 NODE_TYPES="^${NODE_PREFIX}master* ^${NODE_PREFIX}worker* ^${NODE_PREFIX}lb*"
 SNAPSHOT_NAME=""
@@ -23,13 +23,15 @@ GRACEFULLY_SHUTDOWN=false
 
 function start {
     #    docker start docker-dnsmasq
+    echo -e "\e[32m\e[1m==> Start all inactive domains\e[0m"
 	list_inactive_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
-		        virsh start $DOMAIN
+		        virsh start $DOMAIN | grep -v "^$"
             fi
         done
 	done
+    echo -e "\e[32m\e[1m==> All domains started :) \e[0m"
 }
 
 function status {
@@ -67,11 +69,11 @@ function acpi_shutdown {
 }
 
 function power_shutdown {
-	echo -e "==> power shutdown all running KVM domains...\n"
+	echo -e "==> power shutdown all running KVM domains..."
 	list_running_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
-		        virsh destroy $DOMAIN
+		        virsh destroy $DOMAIN | grep -v "^$"
 		        # Give libvirt some time for killing off the domain.
 		        sleep 3
             fi
@@ -80,6 +82,7 @@ function power_shutdown {
 }
 
 function shutdown {
+    echo -e "\e[33m\e[1m==> Shutdown all domains\e[0m"
     if [ "$GRACEFULLY_SHUTDOWN" = true ]; then
 	    echo -e "Try to cleanly shutdown all running KVM domains...\n"
         acpi_shutdown
@@ -96,6 +99,7 @@ function shutdown {
     fi
     power_shutdown
     sleep 5
+    echo -e "\e[33m\e[1m==> All domains shutdown :)\e[0m"
     # list_inactive_domains
 }
 
@@ -148,38 +152,42 @@ function snap-create {
         echo -en "error: expected syntax: virtual-manage --snap-create <string>\n\n"
         exit 0
     fi
+    # shutdown domains
     shutdown
-    list_inactive_domains | while read DOMAIN; do
-        list_all_snapshots $DOMAIN | while read SNAP; do
-            if [[ "$SNAP_NAME" =~ $SNAP ]]; then
-                echo "Warning : snapshot $SNAP already exists on $DOMAIN"
+    while read DOMAIN; do
+        while read SNAP; do
+            if [[ "$SNAP_NAME" = "$SNAP" ]]; then
+                echo "Warning : snapshot $SNAP_NAME already exists on $DOMAIN"
                 snap_exists=1
                 break 2
             fi
-        done
-    done
+        done <<< "$(list_all_snapshots $DOMAIN)"
+    done <<< "$(list_inactive_domains)"
+
     if [[ $snap_exists -eq 1 ]]; then
         read -p "Snapshot $SNAP_NAME already exists. Recreate them (y/n) ?" -n 1 -r
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             snap-delete $SNAP_NAME
         else
-            exit 0
+            return
         fi
     fi
 
 	list_inactive_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
-                virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME
+                virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME | egrep -v "^$"
                 echo "Snapshot $SNAPSHOT_NAME create for domain $DOMAIN"
             fi
         done
     done
+    # start domains
     start
 }
 
 function snap-delete {
     SNAP_NAME=$1
+
     if [[ -z $SNAP_NAME ]]; then
         echo -en "error: expected syntax: virtual-manage --snap-delete <string>\n\n"
         echo -en "snapshots:\n"
@@ -195,11 +203,12 @@ function snap-delete {
             fi
         done
     done
-    start
+    # start
 }
 
 function snap-revert {
     SNAP_NAME=$1
+
     if [[ -z $SNAP_NAME ]]; then
         echo -en "error: expected syntax: virtual-manage --snap-revert <string>\n\n"
         echo -en "snapshots:\n"
@@ -222,8 +231,9 @@ function snap-list {
 	list_all_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
-                echo -e "\e[33m$DOMAIN [$(virsh snapshot-info $DOMAIN --current | grep Name | cut -d ":" -f2 | sed -e 's/^[ ]*//')]\e[0m"
-                virsh -q snapshot-list --tree --domain $DOMAIN
+                #                echo -e "\e[33m$DOMAIN [$(virsh snapshot-info $DOMAIN --current | grep Name | cut -d ":" -f2 | sed -e 's/^[ ]*//')]\e[0m"
+                echo -e "$DOMAIN \e[92m\e[1m[$(virsh snapshot-current --name $DOMAIN)]\e[0m"
+                virsh -q snapshot-list --tree --domain $DOMAIN 2>&1
             fi
         done
     done

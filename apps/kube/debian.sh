@@ -25,24 +25,30 @@ if [ "$CREATE_INSTANCE" == true ]; then
         echo "Intances creation failed" >&2
         exit 1
     fi
-    snap_os ${OS}
 fi
+snap_os ${OS}
 
 # INVENTORY
 ###########
 generateInventory
 
-
-# sleep 10
-# cd ${CAIO_DIR}
-# NODE_PREFIX=${OS} ./virtual-manage --snap-create ${OS}
-# sleep 60
-# exit 1
+if [ "$PROMPT_USER" == true ]; then
+    read -p "Press enter to continue"
+fi
 
 install_kube ${OS}
 snap_kube ${OS}
 
+if [ "$PROMPT_USER" == true ]; then
+    read -p "Press enter to continue"
+fi
+
 install_kube_apps ${OS}
 snap_kube_apps ${OS}
 
+if [ "$PROMPT_USER" == true ]; then
+    read -p "Press enter to continue"
+fi
+
 install_kube_apps_data ${OS}
+install_netpols ${OS}

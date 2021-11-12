@@ -19,5 +19,4 @@ Bug Fix/Todo list
 
 check https://github.com/hicknhack-software/ansible-libvirt
 
-- fix issue on snapshot-create with same name
 - fix SNAP_NAME and SNAPSHOT_NAME redondancy

@@ -15,7 +15,7 @@ chpasswd:
   expire: False
 # System settings
 resize_rootfs: True
-timezone: {{ virt_infra_timezone }}
+timezone: {{ guest_timezone | default(virt_infra_timezone) }}
 ssh_pwauth: True
 packages:
   - curl
@@ -27,6 +27,7 @@ packages:
   - gnupg2
   - conntrack
   - lsof
+  - wireshark
 {% if item.os_type in ['debian', 'ubuntu'] %}
   - dnsutils
   - bridge-utils

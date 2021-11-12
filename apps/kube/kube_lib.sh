@@ -97,6 +97,7 @@ workers_ip:
     - 10.244.105.0
     - 10.244.79.192
     - 10.244.76.128
+    - 10.244.205.64
 
 ENDOFFILE
 
@@ -282,8 +283,24 @@ sso=false
 #ingress_nginx_http_port=80
 #ingress_nginx_https_port=443
 
+chaos_controller_cpu_requests=0.1
+chaos_controller_mem_requests=32Mi
+chaos_daemon_cpu_requests=0.1
+chaos_daemon_mem_requests=256Mi
+
+# DO NOT MOVE !!!!
+kafka_cpu_requests=0.25
+kafka_mem_requests=256Mi
+
+zk_cpu_requests=0.25
+zk_mem_requests=500Mi
+
 [kube_master]
-${OS}master1${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.11
+$(
+for node_num in `seq 1 $MASTER_NB`; do
+echo ${OS}master${node_num}${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.1${node_num}
+done
+)
 
 [kube_worker]
 $(
@@ -311,23 +328,59 @@ kube_worker
 [containerd:children]
 kube
 
-[registry:children]
-kube_worker
-
-[registry:vars]
-registry_cpu_requests=0.1
-registry_storage={'filesystem': {'rootdirectory': '/data/registry'}}
-
 [any]
 ${OS}master1 internal_address=11.${net_addr[${OS}]}.150.11
 
-[elastic]
-${OS}worker3${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.23
+[ingress]
+${OS}worker1${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.21
+
+[ingress_admin]
+${OS}worker2${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.22
+
+[cassandra]
+$(
+for node_num in `seq 1 3`; do
+echo ${OS}worker${node_num}${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.2${node_num}
+done
+)
+
+[cassandra:vars]
+cassandra_cpu_requests=1
+cassandra_mem_requests=500M
+
+[clickhouse]
+$(
+for node_num in `seq 1 2`; do
+echo ${OS}worker${node_num}${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.2${node_num}
+done
+)
+
+[ch_zk]
+$(
+for node_num in `seq 1 3`; do
+echo ${OS}worker${node_num}${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.2${node_num}
+done
+)
+
+[ch_zk:vars]
+zookeeper_cpu_request=0.25
+zookeeper_memory_request=500Mi
+
+[clickhouse:vars]
+ch_cpu_requests=0.1
+ch_mem_requests=500M
+ch_deploy_zookeeper=true
+
+[dataiku:children]
+kube_worker
+
+[elastic:children]
+kube_worker
 
 [elastic:vars]
 es_metric_cpu_requests=0.25
 es_metric_mem_requests=32Mi
-es_cpu_requests=0.5
+es_cpu_requests=0.25
 es_mem_requests=1512Mi
 es_java_opts="-Xms1512m -Xmx1512m"
 
@@ -338,25 +391,37 @@ ${OS}worker1${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.21
 git_cpu_requests=0.1
 git_mem_requests=512Mi
 
-[ingress]
-${OS}worker1${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.21
+[kafka:children]
+kube_worker
 
-[ingress_admin]
+[monitor]
 ${OS}worker2${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.22
 
-[postgresql]
-$(
-if [ $WORKER_NB -ge 4 ]
-then
-NB_MINIO=4
-elif [ $WORKER_NB -ge 2 ]
-then
-NB_MINIO=2
-fi
-for node_num in `seq 1 ${NB_MINIO}`; do
-echo ${OS}worker${node_num}${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.2${node_num}
-done
-)
+[monitor:vars]
+kube_state_metrics_cpu_requests=0.25
+kube_state_metrics_mem_requests=32Mi
+prometheus_server_cpu_requests=0.25
+prometheus_server_mem_requests=256Mi
+prometheus_push_gateway_cpu_requests=0.25
+prometheus_push_gateway_mem_requests=32Mi
+
+[postgresql:children]
+kube_worker
+
+[postgresql:vars]
+postgresql_pgadmin=true
+postgresql_cpu_requests=0.25
+postgresql_mem_requests=0.5G
+postgresql_ns=sql-store
+postgresql_storage_size=10Gi
+postgresql_storage_dir=/data/postgresql
+
+[registry:children]
+kube_worker
+
+[registry:vars]
+registry_cpu_requests=0.1
+registry_storage={'filesystem': {'rootdirectory': '/data/registry'}}
 
 [s3]
 $(
@@ -379,54 +444,31 @@ s3_browser=true
 s3_disk_per_node=2
 s3_storage_dir=/data/s3
 
-[ceph_osd:children]
+[vault:children]
 kube_worker
 
 [zk:children]
 kube_worker
 
-[kafka:children]
-kube_worker
-
-[postgresql:vars]
-postgresql_pgadmin=true
-postgresql_cpu_requests=0.25
-postgresql_mem_requests=0.5G
-postgresql_ns=sql-store
-postgresql_storage_size=10Gi
-postgresql_storage_dir=/data/postgresql
-
-[monitor]
-${OS}worker2${DOMAIN} internal_address=11.${net_addr[${OS}]}.150.22
-
-[monitor:vars]
-kube_state_metrics_cpu_requests=0.25
-kube_state_metrics_mem_requests=32Mi
-prometheus_server_cpu_requests=0.25
-prometheus_server_mem_requests=256Mi
-prometheus_push_gateway_cpu_requests=0.25
-prometheus_push_gateway_mem_requests=32Mi
-
-[dataiku:children]
-kube_worker
-
-[vault:children]
+[ceph_osd:children]
 kube_worker
 
 ENDOFFILE
 }
 
 retrieveArtifacts() {
-    if [ "$OFFLINE" = true ]; then
+    if [ "$OFFLINE" = true ] && [ "$RETRIEVE_ARTIFACTS" = true ]; then
+        echo -e "** Retrieve artifacts **"
         cd ${KAST_DIR}
-        utils/resources-helper.sh download --components="cluster_policy,containerd,csi_ceph,deployment,distributed_storage,document_storage,git,iam,ingress,kube,local_volume_prov,log_collect,mesh,monitor,openebs,registry,s3_storage,sql_db,tooling,vault" --to=${KAST_BINARIES}
+        utils/resources-helper.sh download --components="cassandra,cluster_policy,containerd,csi_ceph,deployment,distributed_storage,document_storage,event_streaming,git,iam,ingress,kube,local_volume_prov,log_collect,mesh,monitor,openebs,registry,s3_storage,sql_db,tooling,vault" --to=${KAST_BINARIES}
     fi
 }
 
 retrieveDataArtifacts() {
-    if [ "$OFFLINE" = true ]; then
+    if [ "$OFFLINE" = true ] && [ "$RETRIEVE_ARTIFACTS" = true ]; then
+        echo -e "** Retrieve data artifacts **"
         cd ${KAST_DATA_DIR}
-        utils/resources-helper.sh download --components="dataiku" --to=${KAST_BINARIES}
+        utils/resources-helper.sh download --components="clickhouse,dataiku,zookeeper" --to=${KAST_BINARIES}
     fi
 }
 
@@ -467,17 +509,17 @@ install_kube() {
     user=${1}
     extra_vars=${2:-}
 
-    echo "install_kube"
-
     if [ "$INSTALL_KUBE" == false ]; then
         return
     fi
+
+    echo "install_kube"
     # LB
     ######
     if [ "$KUBE_HA" == true ] && [ "${LB_NB}" -gt "0" ]; then
         cd ${KAST_DIR}
         ansible lb -m package -i ${KAST_INV} -b -u ${user} -a "name=firewalld state=present"
-        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/lb_generic_beta.yml
+        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/lb.yml
     fi
 
     # # KUBE
@@ -534,60 +576,87 @@ install_kube_apps() {
     if [ "$INSTALL_KUBE_APPS" == false ]; then
         return
     else
-        echo -en "Install summaries :"
+        echo -e "Install summaries:"
+        if [ "$REGISTRY_ENABLED" == true ]; then
+            echo -e "\t- Registry"
+        fi
         if [ "$DASHBOARD_ENABLED" == true ]; then
-            echo -en "\t- Dasboard"
-        fi
-        if [ "$DOCUMENT_STORAGE_ENABLED" == true ]; then
-            echo -en "\t- Document Storage"
-        fi
-        if [ "$GATEKEEPER_ENABLED" == true ]; then
-            echo -en "\t- Gatekeeper"
-        fi
-        if [ "$GITEA_ENABLED" == true ]; then
-            echo -en "\t- Gitea"
+            echo -e "\t- Dasboard"
         fi
         if [ "$IAM_ENABLED" == true ]; then
-            echo -en "\t- Iam"
+            echo -e "\t- Iam"
         fi
-        if [ "$LOCAL_PROV_ENABLED" == true ]; then
-            echo -en "\t- Local provisioner"
+        echo -e "Data storage:"
+        if [ "$CASSANDRA_ENABLED" == true ]; then
+            echo -e "\t- Cassandra"
         fi
-        if [ "$LOG_ENABLED" == true ]; then
-            echo -en "\t- Log collect"
+        if [ "$CLICKHOUSE_ENABLED" == true ]; then
+            echo -e "\t- Clickhouse"
         fi
-        if [ "$LONGHORN_ENABLED" == true ]; then
-            echo -en "\t- Longhorn"
+        if [ "$DOCUMENT_STORAGE_ENABLED" == true ]; then
+            echo -e "\t- Document Storage"
         fi
-        if [ "$LOG_SYSTEM_ENABLED" == true ]; then
-            echo -en "\t- Log system"
+        if [ "$GITEA_ENABLED" == true ]; then
+            echo -e "\t- Gitea"
+        fi
+        if [ "$KAFKA_ENABLED" == true ]; then
+            echo -e "\t- Kafka"
         fi
         if [ "$MINIO_ENABLED" == true ]; then
-            echo -en "\t- Minio"
+            echo -e "\t- Minio"
+        fi
+        if [ "$POSTGRES_ENABLED" == true ]; then
+            echo -e "\t- Postgres"
+        fi
+        echo -e "Monitoring:"
+        if [ "$KIBANA_ENABLED" == true ]; then
+            echo -e "\t- Kibana"
+        fi
+        if [ "$LOG_ENABLED" == true ]; then
+            echo -e "\t- Log collect"
+        fi
+        if [ "$LOG_SYSTEM_ENABLED" == true ]; then
+            echo -e "\t- Log system"
         fi
         if [ "$MONITOR_ENABLED" == true ]; then
-            echo -en "\t- Monitor"
+            echo -e "\t- Monitor"
         fi
-        if [ "$MULTUS_ENABLED" == true ]; then
-            echo -en "\t- Multus"
+        echo -e "Storage (CSI):"
+        if [ "$LOCAL_PROV_ENABLED" == true ]; then
+            echo -e "\t- Local provisioner"
         fi
-        if [ "$NETWORK_POLICIES_ENABLED" == true ]; then
-            echo -en "\t- Network Policies"
-        fi
-        if [ "$NETWORK_MESH_ENABLED" == true ]; then
-            echo -en "\t- Network Mesh"
+        if [ "$LONGHORN_ENABLED" == true ]; then
+            echo -e "\t- Longhorn"
         fi
         if [ "$OPENEBS_ENABLED" == true ]; then
-            echo -en "\t- OpenEbs"
-        fi
-        if [ "$REGISTRY_ENABLED" == true ]; then
-            echo -en "\t- Registry"
+            echo -e "\t- OpenEBS"
         fi
         if [ "$ROOK_ENABLED" == true ]; then
-            echo -en "\t- Rook"
+            echo -e "\t- Rook"
+        fi
+        echo -e "Network (CNI):"
+        if [ "$MULTUS_ENABLED" == true ]; then
+            echo -e "\t- Multus"
+        fi
+        if [ "$NETWORK_MESH_ENABLED" == true ]; then
+            echo -e "\t- Network Mesh"
         fi
         if [ "$WIREGUARD_ENABLED" == true ]; then
-            echo -en "\t- Wireguard"
+            echo -e "\t- Wireguard"
+        fi
+        if [ "$NETPOL_ENABLED" == true ]; then
+            echo -e "\t- Network Policies"
+        fi
+        echo -e "Data :"
+        if [ "$ARGO_ENABLED" == true ]; then
+            echo -e "\t- Argo"
+        fi
+        if [ "$DATAIKU_ENABLED" == true ]; then
+            echo -e "\t- Dataiku"
+        fi
+        echo -e "Secu :"
+        if [ "$GATEKEEPER_ENABLED" == true ]; then
+            echo -e "\t- Gatekeeper"
         fi
     fi
 
@@ -626,6 +695,11 @@ install_kube_apps() {
         ansible-playbook -i ${KAST_INV} -u ${user} playbooks/cluster_policy_install.yml
     fi
 
+    if [ "$CHAOS_ENABLED" = true ]; then
+        cd ${KAST_DIR}
+        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/chaos.yml
+    fi
+
     if [ "$DASHBOARD_ENABLED" = true ]; then
         cd ${KAST_DIR}
         ansible-playbook -i ${KAST_INV} -u ${user} playbooks/dashboard.yml
@@ -634,14 +708,6 @@ install_kube_apps() {
     if [ "$NETWORK_MESH_ENABLED" = true ]; then
         cd ${KAST_DIR}
         ansible-playbook -i ${KAST_INV} -u ${user} playbooks/mesh.yml
-    fi
-
-    if [ "$NETWORK_POLICIES_ENABLED" = true ]; then
-        cd ${KAST_DIR}
-        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/network_policies.yml
-        cd ${KAST_DATA_DIR}
-        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/network_policies.yml
-        cd ${KAST_DIR}
     fi
 
     # # deploy calicoctl
@@ -656,6 +722,17 @@ install_kube_apps() {
     if [ "$DOCUMENT_STORAGE_ENABLED" = true ]; then
         cd ${KAST_DIR}
         ansible-playbook -i ${KAST_INV} -u ${user} playbooks/document_storage.yml
+    fi
+
+    if [ "$CASSANDRA_ENABLED" = true ]; then
+        cd ${KAST_DIR}
+        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/cassandra.yml
+    fi
+
+    if [ "$KAFKA_ENABLED" = true ]; then
+        cd ${KAST_DIR}
+        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/event_streaming_operator.yml
+        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/event_streaming.yml
     fi
 
     if [ "$IAM_ENABLED" = true ]; then
@@ -740,6 +817,11 @@ install_kube_apps() {
         ansible-playbook -i ${KAST_INV} -u ${user} playbooks/vault.yml
     fi
 
+    # note kubectl top
+    # kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+    # Ajouter l'option suivante dans l'args container du Deploiement
+    # --kubelet-insecure-tls
+
     # cd ${CAIO_DIR}
     # 360 KO
     # 420 ??
@@ -752,6 +834,8 @@ install_kube_apps_data() {
 
     # # KUBE
     # ######
+    retrieveArtifacts
+
     retrieveDataArtifacts
 
     if [ "$INSTALL_KUBE_APPS_DATA" == false ]; then
@@ -761,8 +845,27 @@ install_kube_apps_data() {
     cd ${KAST_DATA_DIR}
     if [ "$DATAIKU_ENABLED" = true ]; then
         ansible-playbook -i ${KAST_INV} -u ${user} playbooks/dataiku.yml
-        # wget https://dl.min.io/client/mc/release/linux-amd64/mc
-        # chmod +x mc
+    fi
+
+    cd ${KAST_DATA_DIR}
+    if [ "$CLICKHOUSE_ENABLED" = true ]; then
+        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/clickhouse.yml
+    fi
+}
+
+install_netpols() {
+    user=$1
+
+    if [ "$NETPOL_ENABLED" = true ]; then
+        cd ${KAST_DIR}
+        ansible-playbook -i ${KAST_INV} -u ${user} playbooks/network_policies.yml
+
+        if [ "$INSTALL_KUBE_APPS_DATA" == true ]; then
+            cd ${KAST_DATA_DIR}
+            if [ "$NETPOL_ENABLED" = true ]; then
+                ansible-playbook -i ${KAST_INV} -u ${user} playbooks/network_policies.yml
+            fi
+        fi
     fi
 }
 
