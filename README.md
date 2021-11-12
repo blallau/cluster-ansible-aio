@@ -124,3 +124,8 @@ and **roles/container_nodes/vars/main.yml**.
 1. Clean-up hypervisor and remove container nodes.
 
     ./cluster-ansible-aio remove-container-nodes
+
+## Troubleshooting guide
+
+* deployment fails on "virtual_nodes : Get IP address of VM":
+=> maybe network interfaces naming in VM is different than configured using cloudinit.

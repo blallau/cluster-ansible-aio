@@ -1,6 +1,4 @@
 ---
-
-host_ip: "{{ net_interfaces | selectattr('forward', 'defined') | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address') | first }}"
 dns_domain: "mydomain.org"
 
 # to install libvirt stuff in guest vm set to True

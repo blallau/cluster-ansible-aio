@@ -10,7 +10,8 @@ Bug Fix/Todo list
   => IPs/macs association cannot be set in the previous DHCP config
   => IPs are random => hence deployment fails [Waiting on IPs]
 - manage idempotency when playbook is running twice
-
+- remove specific code (master, worker, lb,) from nodes.j2
+  => code must be generic
 - [manage QCOW2 with a baseimagefile]
 - [Fix DNS issue when using Docker DNS server instead of Libvirt dnsmasq]
 - [automaticaly retrieve last iso images (debian,centos), to avoid too long package update]

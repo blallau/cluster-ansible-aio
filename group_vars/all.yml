@@ -18,11 +18,11 @@ master_nb: 1
 master_ram: 4
 master_cpu: 2
 
-worker_nb: 3
+worker_nb: 2
 worker_ram: 6
 worker_cpu: "{{ master_cpu }}"
 
-lb_nb: 2
+lb_nb: 0
 lb_ram: 1
 lb_cpu: 1
 
@@ -43,27 +43,28 @@ virt_customize_cmd: []
 ############
 # First interface MUST be external one
 net_prefix: "{{ node_prefix }}"
-net_second_octet: "{{ net_second_octet | default(100) }}"
 
 net_interfaces:
   - name: "{{ net_prefix }}net-br"
     forward: nat
     mode: dhcp
-    cidr: "11.{{ net_second_octet }}.100.0/24"
+    cidr: "11.{{ net_second_octet | default(100) }}.100.0/24"
     bridge: "{{ net_prefix }}net-br"
     pxe: False
   - name: "{{ net_prefix }}over-br"
     mode: dhcp
-    cidr: "11.{{ net_second_octet }}.150.0/24"
+    cidr: "11.{{ net_second_octet | default(100) }}.150.0/24"
     bridge: "{{ net_prefix }}over-br"
   # - name: "{{ net_prefix }}pub-br"
   #   mode: static
-  #   cidr: "11.{{ net_second_octet }}.200.0/24"
+  #   cidr: "11.{{ net_second_octet | default(100) }}.200.0/24"
   #   bridge: "{{ net_prefix }}pub-br"
   # - name: "{{ net_prefix }}clust-br"
   #   mode: static
-  #   cidr: "11.{{ net_second_octet }}.210.0/24"
+  #   cidr: "11.{{ net_second_octet | default(100) }}.210.0/24"
   #   bridge: "{{ net_prefix }}clust-br"
+
+host_ip: "{{ net_interfaces | selectattr('forward', 'defined') | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address') | first }}"
 
 # ip_offset [ 2-9 ]
 # advanced use case to avoid IP conflict
@@ -76,12 +77,12 @@ ip_offset: 8
 
 # Storage
 #########
-# vm_volumes: []
+vm_volumes: []
 # # format raw/qcow2
-vm_volumes:
-  - name: vol-osd1
-    size: 25
-    format: qcow2
+# vm_volumes:
+#   - name: vol-osd1
+#     size: 25
+#     format: qcow2
   # - name: vol-osd2
   #   size: 10
   #   format: qcow2

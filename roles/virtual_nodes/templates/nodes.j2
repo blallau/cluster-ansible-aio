@@ -27,10 +27,10 @@
 {% if os_type in ['centos', 'debian'] %}
 {% set intf_nb = loop.index0 %}
     - name: "eth{{ intf_nb }}"
-{% elif os_type == 'ubuntu' %}
+{% elif os_type == 'previous_ubuntu' %}
 {% set intf_nb = loop.index + 1 %}
     - name: "ens{{ intf_nb }}"
-{% elif os_type in ['fcos', 'flatcar'] %}
+{% elif os_type in ['fcos', 'flatcar', 'ubuntu'] %}
 {% set intf_nb = loop.index0 %}
     - name: "enp1s{{ intf_nb }}"
 {% endif %}
@@ -86,10 +86,10 @@
 {% if os_type in ['centos', 'debian'] %}
 {% set intf_nb = loop.index0 %}
     - name: "eth{{ intf_nb }}"
-{% elif os_type == 'ubuntu' %}
+{% elif os_type == 'previous_ubuntu' %}
 {% set intf_nb = loop.index + 1 %}
     - name: "ens{{ intf_nb }}"
-{% elif os_type in ['fcos', 'flatcar'] %}
+{% elif os_type in ['fcos', 'flatcar', 'ubuntu'] %}
 {% set intf_nb = loop.index0 %}
     - name: "enp1s{{ intf_nb }}"
 {% endif %}
@@ -143,10 +143,10 @@
 {% if os_type in ['centos', 'debian'] %}
 {% set intf_nb = loop.index0 %}
     - name: "eth{{ intf_nb }}"
-{% elif os_type == 'ubuntu' %}
+{% elif os_type == 'previous_ubuntu' %}
 {% set intf_nb = loop.index + 1 %}
     - name: "ens{{ intf_nb }}"
-{% elif os_type in ['fcos', 'flatcar'] %}
+{% elif os_type in ['fcos', 'flatcar', 'ubuntu'] %}
 {% set intf_nb = loop.index0 %}
     - name: "enp1s{{ intf_nb }}"
 {% endif %}
