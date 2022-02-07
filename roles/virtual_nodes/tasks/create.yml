@@ -33,11 +33,10 @@
   loop: "{{ cluster_nodes }}"
 
 - import_tasks: libvirt/setup_networks.yml
-  when: net_interfaces | length > 0
+  when: networks | length > 0
   tags: network
 
 - include_tasks: libvirt/create_disks.yml
-  when: vm_volumes | length > 0
 
 - name: Libvirt setup VMs
   block:

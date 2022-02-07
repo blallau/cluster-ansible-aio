@@ -14,7 +14,7 @@ fi
 
 echo -e "\e[93mEnvironment: $NODE_PREFIX\e[39m"
 
-NODE_TYPES="^${NODE_PREFIX}master* ^${NODE_PREFIX}worker* ^${NODE_PREFIX}lb*"
+NODE_TYPES="^${NODE_PREFIX}*"
 SNAPSHOT_NAME=""
 DISK_DIRECTORY="${HOME}/tmp"
 DISK_SIZE=10

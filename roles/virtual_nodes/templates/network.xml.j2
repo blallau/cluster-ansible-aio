@@ -10,7 +10,7 @@
 {% if item.forward is defined and item.forward == 'nat' %}
   <forward mode='nat'/>
 {% endif %}
-  <bridge name='{{ item.bridge }}' stp='on' delay='0'/>
+  <bridge name='{{ item.name }}' stp='on' delay='0'/>
 {% if local_dns_enabled and item.forward is defined and item.forward == 'nat' %}
   <dns enable='yes'/>
   <domain name='{{ dns_domain }}' localOnly='yes'/>

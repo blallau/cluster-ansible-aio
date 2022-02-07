@@ -48,11 +48,10 @@
       when: destroy_images | bool
 
 - import_tasks: libvirt/destroy_networks.yml
-  when: net_interfaces | length > 0
+  when: networks | length > 0
   tags: network
 
 - include_tasks: libvirt/destroy_disks.yml
-  when: vm_volumes|length > 0
 
 - name: "Clean nodes config in {{ tmp_dir }}"
   file:

@@ -42,8 +42,9 @@
       when: method == "create" and ansible_distribution|lower == "ubuntu"
 
     # - raw: echo "nameserver {{ host_ip }}" > /etc/resolv.conf
-    - raw: test -e /usr/bin/python3 || (yum -y update && yum install -y python3)
-      when: method == "create" and ansible_distribution|lower == "centos"
+    # - raw: test -e /usr/bin/python3 || (yum -y update && yum install -y python3)
+    #   when: method == "create" and ansible_distribution|lower == "centos"
+    #   retries: 2
 
 # - name: Populate /etc/resolv.conf file
 #   hosts: created_nodes

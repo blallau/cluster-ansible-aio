@@ -4,85 +4,31 @@
 {{ device }}
 {%- endmacro %}
 ---
-{% for master in range(1, master_nb|int+1) %}
-{% set os_type = node_type_os | selectattr('type', 'equalto', 'master') | map(attribute='os') | first %}
+{% for node in nodes %}
+
+{% set os_type = node.os_type %}
 {% if os_type in ['centos'] %}
 {% set mac_prefix = "52:54:00:32" %}
 {% elif os_type in ['ubuntu', 'debian'] %}
 {% set mac_prefix = "52:54:00:33" %}
 {% endif %}
-- name: "{{ node_prefix }}master{{ master }}"
-  ram: {{ master_ram }}
-  vcpu: {{ master_cpu }}
-  role: master
+
+- name: "{{ node_prefix }}{{ node.name }}"
+  ram: {{ node.ram }}
+  vcpu: {{ node.cpu }}
+  role: {{ node.type }}
   image: {{ vm_os_images[os_type] }}
   os_type: {{ os_type }}
 {% if vbmc | bool %}
   vbmc_port: {{ vbmc_port + loop.index }}
 {% endif %}
-{% if net_interfaces %}
+
+{% if node.net_intfs is defined and node.net_intfs|length > 0 %}
   interfaces:
 {% set outer_master_loop = loop %}
-{% for intf in net_interfaces %}
-{% if os_type in ['centos', 'debian'] %}
-{% set intf_nb = loop.index0 %}
-    - name: "eth{{ intf_nb }}"
-{% elif os_type == 'previous_ubuntu' %}
-{% set intf_nb = loop.index + 1 %}
-    - name: "ens{{ intf_nb }}"
-{% elif os_type in ['fcos', 'flatcar', 'ubuntu'] %}
-{% set intf_nb = loop.index0 %}
-    - name: "enp1s{{ intf_nb }}"
-{% endif %}
-{% if intf.forward is defined and intf.forward == 'nat' %}
-      external: True
-{% endif %}
-      bridge: "{{ intf.bridge }}"
-      mode: "{{ intf.mode }}"
-      cidr: "{{ intf.cidr }}"
-{% set ip = 10 + outer_master_loop.index %}
-      address: "{{ intf.cidr | ipaddr(ip) | ipaddr('address') }}"
-      mac: "{{ mac_prefix }}:1{{ outer_master_loop.index }}:0{{ loop.index }}"
-{% if intf.mode == 'static' %}
-      netmask: "{{ intf.cidr | ipaddr('netmask') }}"
-{% endif %}
-{% endfor %}
-{% else %}
-  interfaces: []
-{% endif %}
-{% if vm_volumes|length > 0 %}
-  disks:
-{% for volume in vm_volumes %}
-{% set device = disk_device(loop.index) %}
-    - name: "vol-{{ node_prefix }}master{{ master }}-{{ loop.index }}"
-      device: "vd{{ device }}"
-      size: {{ volume.size }}
-      format: {{ volume.format }}
-{% endfor %}
-{% endif %}
-{% endfor %}
 
-{% if worker_nb|int > 0 %}
-{% for worker in range(1, worker_nb|int+1) %}
-{% set os_type = node_type_os | selectattr('type', 'equalto', 'worker') | map(attribute='os') | first %}
-{% if os_type in ['centos'] %}
-{% set mac_prefix = "52:54:00:32" %}
-{% elif os_type in ['ubuntu', 'debian'] %}
-{% set mac_prefix = "52:54:00:33" %}
-{% endif %}
-- name: "{{ node_prefix }}worker{{ worker }}"
-  ram: {{ worker_ram }}
-  vcpu: {{ worker_cpu }}
-  role: worker
-  image: {{ vm_os_images[os_type] }}
-  os_type: {{ os_type }}
-{% if vbmc | bool %}
-  vbmc_port: {{ 100 + vbmc_port + loop.index }}
-{% endif %}
-{% if net_interfaces %}
-  interfaces:
-{% set outer_worker_loop = loop %}
-{% for intf in net_interfaces %}
+{% for intf in node.net_intfs %}
+
 {% if os_type in ['centos', 'debian'] %}
 {% set intf_nb = loop.index0 %}
     - name: "eth{{ intf_nb }}"
@@ -92,91 +38,42 @@
 {% elif os_type in ['fcos', 'flatcar', 'ubuntu'] %}
 {% set intf_nb = loop.index0 %}
     - name: "enp1s{{ intf_nb }}"
-{% endif %}
-{% if intf.forward is defined and intf.forward == 'nat' %}
-      external: True
-{% endif %}
-      bridge: "{{ intf.bridge }}"
-      mode: "{{ intf.mode }}"
-      cidr: "{{ intf.cidr }}"
-{% set ip = 20 + outer_worker_loop.index %}
-      address: "{{ intf.cidr | ipaddr(ip) | ipaddr('address') }}"
-      mac: "{{ mac_prefix }}:2{{ outer_worker_loop.index }}:0{{ loop.index }}"
-{% if intf.mode == 'static' %}
-      netmask: "{{ intf.cidr | ipaddr('netmask') }}"
-{% endif %}
-{% endfor %}
-{% else %}
-  interfaces: []
-{% endif %}
-{% if vm_volumes|length > 0 %}
-  disks:
-{% for volume in vm_volumes %}
-{% set device = disk_device(loop.index) %}
-    - name: "vol-{{ node_prefix }}node{{ worker }}-{{ loop.index }}"
-      device: "vd{{ device }}"
-      size: {{ volume.size }}
-      format: {{ volume.format }}
-{% endfor %}
-{% endif %}
-{% endfor %}
 {% endif %}
 
-{% if lb_nb|int > 0 %}
-{% for lb in range(1, lb_nb|int+1) %}
-{% set os_type = node_type_os | selectattr('type', 'equalto', 'lb') | map(attribute='os') | first %}
-{% if os_type in ['centos'] %}
-{% set mac_prefix = "52:54:00:32" %}
-{% elif os_type in ['ubuntu', 'debian'] %}
-{% set mac_prefix = "52:54:00:33" %}
-{% endif %}
-- name: "{{ node_prefix }}lb{{ lb }}"
-  ram: {{ lb_ram }}
-  vcpu: {{ lb_cpu }}
-  role: lb
-  image: {{ vm_os_images[os_type] }}
-  os_type: {{ os_type }}
-{% if net_interfaces %}
-  interfaces:
-{% set outer_lb_loop = loop %}
-{% for intf in net_interfaces %}
-{% if os_type in ['centos', 'debian'] %}
-{% set intf_nb = loop.index0 %}
-    - name: "eth{{ intf_nb }}"
-{% elif os_type == 'previous_ubuntu' %}
-{% set intf_nb = loop.index + 1 %}
-    - name: "ens{{ intf_nb }}"
-{% elif os_type in ['fcos', 'flatcar', 'ubuntu'] %}
-{% set intf_nb = loop.index0 %}
-    - name: "enp1s{{ intf_nb }}"
-{% endif %}
-{% if intf.forward is defined and intf.forward == 'nat' %}
-      external: True
-{% endif %}
-      bridge: "{{ intf.bridge }}"
-      mode: "{{ intf.mode }}"
-      cidr: "{{ intf.cidr }}"
-{% set ip = 30 + outer_lb_loop.index %}
-      address: "{{ intf.cidr | ipaddr(ip) | ipaddr('address') }}"
-      mac: "{{ mac_prefix }}:3{{ outer_lb_loop.index }}:0{{ loop.index }}"
-{% if intf.mode == 'static' %}
-      netmask: "{{ intf.cidr | ipaddr('netmask') }}"
-{% endif %}
+{% for network in networks if network.name == intf.name %}
+{% set net = network %}  
+{% if net.forward is defined and net.forward == 'nat' %}  
+      external: True  
+{% endif %}  
+      bridge: "{{ net.name }}"  
+      mode: "{{ net.mode }}"  
+{% set ip = 10 + outer_master_loop.index %}  
+      address: "{{ net.cidr | ipaddr(ip) | ipaddr('address') }}"  
+      mac: "{{ mac_prefix }}:1{{ outer_master_loop.index }}:0{{ loop.index }}"  
+{% if net.mode == 'static' %}  
+      netmask: "{{ net.cidr | ipaddr('netmask') }}"  
+{% endif %}  
+  
+{% endfor %} 
+
 {% endfor %}
+
 {% else %}
   interfaces: []
 {% endif %}
-{% if vm_volumes|length > 0 %}
+
+{% if node.disks is defined and node.disks|length > 0 %}
   disks:
-{% for volume in vm_volumes %}
+{% for disk in node.disks %}
 {% set device = disk_device(loop.index) %}
-    - name: "vol-{{ node_prefix }}node{{ lb }}-{{ loop.index }}"
+    - name: "vol-{{ node_prefix }}{{ node.name }}-{{ loop.index }}"
       device: "vd{{ device }}"
-      size: {{ volume.size }}
-      format: {{ volume.format }}
+      size: {{ disk.size }}
+      format: {{ disk.format }}
 {% endfor %}
+{% else %}
+  disks: []
 {% endif %}
 {% endfor %}
-{% endif %}
 
 ...

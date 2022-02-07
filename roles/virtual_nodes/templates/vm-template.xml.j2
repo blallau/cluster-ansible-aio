@@ -57,8 +57,6 @@
       <boot order='2'/>
       <readonly/>
     </disk>
-    {% endif %}
-    {% if vm_volumes|length > 0 %}
     {% for disk in item.disks %}
     {% if disk.format == 'raw' %}
     <disk type='block' device='disk'>

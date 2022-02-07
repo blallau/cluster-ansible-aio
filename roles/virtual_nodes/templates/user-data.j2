@@ -84,7 +84,7 @@ write_files:
 {% if rename_net_interface | bool %}
  - content: |
 {% for intf in item.interfaces %}
-    SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="{{ intf.mac }}", NAME="{{ intf.bridge | regex_replace('(.*)-br$', '\\1') }}"
+    SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="{{ intf.mac }}", NAME="{{ intf.name | regex_replace('(.*)-br$', '\\1') }}"
 {% endfor %}
    path: /etc/udev/rules.d/70-persistent-net.rules
    owner: root:root
