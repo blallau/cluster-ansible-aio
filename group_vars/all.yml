@@ -72,7 +72,7 @@ virt_customize_cmd: []
 # Networking
 ############
 # First interface MUST be external one
-net_prefix: "{{ node_prefix }}"
+net_prefix: ""
 
 networks:
   - name: "{{ net_prefix }}prov-br"
