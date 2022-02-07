@@ -40,6 +40,7 @@ function status {
             if [[ "$DOMAIN" =~ $node ]]; then
 		        echo -e "  $DOMAIN   \e[1m\e[92mrunning\e[39m\e[0m"
                 echo -e "  $(virsh dominfo $DOMAIN | grep CPU\(s\))"
+                echo -e "  $(virsh dominfo $DOMAIN | grep 'Max memory')"
                 echo -e "$(virsh domblklist $DOMAIN | tail -n +3)"
                 echo -e "\n"
             fi
@@ -101,6 +102,11 @@ function shutdown {
     sleep 5
     echo -e "\e[33m\e[1m==> All domains shutdown :)\e[0m"
     # list_inactive_domains
+}
+
+function restart {
+    shutdown
+    start
 }
 
 function list_inactive_domains() {
@@ -245,6 +251,7 @@ Usage: $0 COMMAND
 
 Commands:
     --cleanup                        Cleanup (destroy & undefine) cluster
+    --restart                        Restart cluster
     --start                          Start cluster
     --shutdown                       Shutdown cluster
     --status                         Cluster status
@@ -258,13 +265,17 @@ Commands:
 EOF
 }
 
-LONG_OPTS="cleanup,start,shutdown,status,snap-delete:,snap-create:,snap-revert:,snap-list,add-disk:,remove-disk:,help"
+LONG_OPTS="cleanup,restart,start,shutdown,status,snap-delete:,snap-create:,snap-revert:,snap-list,add-disk:,remove-disk:,help"
 ARGS=$(getopt -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
         (--cleanup)
             cleanup
+            exit 0
+            ;;
+        (--restart)
+            restart
             exit 0
             ;;
         (--start)

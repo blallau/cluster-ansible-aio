@@ -1,31 +1,25 @@
 ---
-- name: Load cluster_nodes variables
-  set_fact:
-    cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
-  tags: network
-
-- name: "Display cluster_nodes"
-  debug:
-    msg: "{{ cluster_nodes | to_nice_yaml(indent=2) }}"
-  tags: network
-
 - import_tasks: enable_nested_virt.yml
-  become: True
-  when: nested_virt_enabled | bool
 
 - name: Populate /etc/hosts file
   lineinfile:
     path: /etc/hosts
     insertafter: EOF
-    line: "{{ hostvars[item.name]['ansible_' + item.interfaces | selectattr('external', 'undefined') | map(attribute='name') | first]['ipv4']['address'] }}  {{ hostvars[item.name]['inventory_hostname'] }}"
-  with_items: "{{ cluster_nodes }}"
-  become: True
+    line: "{{ hostvars[item]['ansible_' + kolla_node_internal_intf]['ipv4']['address'] }}  {{ hostvars[item]['inventory_hostname'] }}"
+  with_items: "{{ groups['kolla-nodes'] }}"
 
 - name: Disable SELinux
   selinux:
     state: disabled
   when: ansible_distribution|lower == "centos"
-  become: True
+
+- name: Add Centos repo
+  yum_repository:
+    name: epel
+    description: EPEL YUM repo
+    baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+    gpgcheck: no
+  when: ansible_distribution|lower == "centos"
 
 - name: Add Docker CentOS repo
   yum_repository:
@@ -35,102 +29,90 @@
     gpgcheck: yes
     gpgkey: https://download.docker.com/linux/centos/gpg
   when: ansible_distribution|lower == "centos"
-  become: True
 
 - name: Add Docker Ubuntu repo signing keys
   apt_key:
     url: "https://download.docker.com/linux/ubuntu/gpg"
     state: present
   when: ansible_distribution|lower == "ubuntu"
-  become: True
 
 - name: Wait for automatic Ubuntu system updates
   shell: while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do sleep 1; done;
   when: ansible_distribution|lower == "ubuntu"
-  become: True
 
 - name: Add Docker Ubuntu repo
   apt_repository:
     repo: "deb https://download.docker.com/linux/ubuntu xenial edge"
     state: present
   when: ansible_distribution|lower == "ubuntu"
+
 - name: Add Ubuntu standard xenial repo
   apt_repository:
     repo: "deb http://archive.ubuntu.com/ubuntu/ xenial main restricted"
     state: present
   when: ansible_distribution|lower == "ubuntu"
-  become: True
 
 - name: Add Ubuntu standard xenial-security repo
   apt_repository:
     repo: "deb http://security.ubuntu.com/ubuntu xenial-security main restricted"
     state: present
-    update_cache: True
+    update_cache: "yes"
   when: ansible_distribution|lower == "ubuntu"
-  become: True
 
 - name: Wait for automatic Ubuntu system updates
   shell: while sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do sleep 1; done;
-  args:
-    executable: /bin/bash
   when: ansible_distribution|lower == "ubuntu"
-  become: True
+
+- name: Install CentOS packages
+  yum:
+    name: "{{ item }}"
+    update_cache: yes
+  with_items: "{{ yum_packages }}"
+  when: ansible_distribution|lower == "centos"
 
 - import_tasks: enable_apt_proxy.yml
   when: apt_cache_enabled | bool
-  become: True
   tags: apt_cache
 
 - name: Wait for automatic Ubuntu system updates
   shell: while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 1; done;
-  args:
-    executable: /bin/bash
   when: ansible_distribution|lower == "ubuntu"
-  become: True
 
-- name: Install CentOS packages
-  yum:
-    name: "{{ yum_packages }}"
-    update_cache: True
-  when: ansible_distribution|lower == "centos"
-  become: True
-
-- name: Install Ubuntu or Debian packages
+- name: Install Ubuntu packages
   apt:
-    pkg: "{{ apt_packages }}"
+    name: "{{ item }}"
     state: latest
-    update_cache: True
-  when: ansible_distribution|lower == "ubuntu" or ansible_distribution|lower == "debian"
-  become: True
+    update_cache: "yes"
+  with_items: "{{ apt_packages }}"
+  when: ansible_distribution|lower == "ubuntu"
+
+- import_tasks: enable_pip_proxy.yml
+  when: pip_cache_enabled | bool
 
 - name: Install/Update PIP packages
   pip:
-    name: "{{ pip_packages }}"
-  become: True
-#    state: latest
-#    virtualenv: "{{ pip_venv_path }}"
+    name: "{{ item }}"
+    state: latest
+  with_items: "{{ pip_packages }}"
 
-# - name: "Adding user {{ os_default_user }} to group sudo"
-#   user:
-#     name: "{{ os_default_user }}"
-#     groups: sudo
-#     append: yes
+- import_tasks: enable_docker.yml
 
-# - name: Start NTP service
-#   systemd:
-#     name: "{{ 'ntp' if ansible_distribution|lower == 'ubuntu' or ansible_distribution|lower == 'debian' else 'ntpd' }}"
-#     enabled: True
-#     state: started
+- name: Start NTP
+  systemd:
+    name: "{{ 'ntp' if ansible_distribution|lower == 'ubuntu' else 'ntpd' }}"
+    enabled: yes
+    state: started
+
+- name: Create '{{ config_owner_group }}' group
+  group:
+    name: "{{ config_owner_group }}"
+  tags: user
+
+- name: Create '{{ config_owner_user }}' user
+  user:
+    name: "{{ config_owner_user }}"
+    group: kolla
+  tags: user
 
 - import_tasks: configure_ssh.yml
-  become: True
   tags: ssh
-
-- name: Enable cockpit
-  systemd:
-    name: "cockpit"
-    state: restarted
-    daemon_reload: yes
-    enabled: yes
-  when: ansible_distribution|lower == "centos" and cockpit_enabled|bool
-  become: True

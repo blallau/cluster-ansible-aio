@@ -22,6 +22,7 @@ packages:
   - rsync
   - socat
   - ethtool
+  - net-tools
   - psmisc
   - openssh-server
   - gnupg2
@@ -56,6 +57,7 @@ runcmd:
   - mkdir {{ vm_volumes_mount_path }}/data-{{ loop.index0 }}
 {% endfor %}
 {% endif %}
+#  - systemctl disable NetworkManager --now
   - systemctl restart sshd
 {% if allow_virt %}
   - pip3 install ansible==2.9.13 libvirt-python netaddr

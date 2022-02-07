@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#set -x
+set -x
 set -e
 
-echo centos > ~/.cluster-ansible-aio-env
+echo centos > ${HOME}/.cluster-ansible-aio-env
 
 OS='centos'
 

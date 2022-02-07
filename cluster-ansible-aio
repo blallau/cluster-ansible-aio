@@ -1,6 +1,6 @@
 #!/bin/bash
 #set -e
-#set -x
+set -x
 
 function find_base_dir {
     local real_path=$(python3 -c "import os;print(os.path.realpath('$0'))")
@@ -60,6 +60,11 @@ Commands:
     remove-virtual-nodes      Cleanup hypervisor and remove virtual nodes
     remove-container-nodes    Cleanup host and remove container nodes
 
+    ### KOLLA ###
+    kolla-build               Build Kolla images
+    kolla-ansible-deploy      Deploy Openstack on nodes using Kolla-ansible
+    kolla-ansible-cleanup     Cleanup all deployed Kolla containers and volumes
+
 EOF
 }
 
@@ -77,6 +82,10 @@ create-virtual-nodes
 create-container-nodes
 nodes-bootstrap
 docker-bootstrap
+
+kolla-build
+kolla-ansible-deploy
+kolla-ansible-cleanup
 
 remove-virtual-nodes
 remove-container-nodes
@@ -186,6 +195,21 @@ EOF
         ACTION="Bootstrap Docker on nodes"
         EXTRA_OPTS="$EXTRA_OPTS -e method=create"
         PLAYBOOK="${BASEDIR}/docker-bootstrap.yml"
+        ;;
+(kolla-build)
+        ACTION="Build Kolla images"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
+        PLAYBOOK="${BASEDIR}/kolla-build.yml"
+        ;;
+(kolla-ansible-deploy)
+        ACTION="Deploy Openstack using kolla-ansible"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=create"
+        PLAYBOOK="${BASEDIR}/kolla-ansible-deploy.yml"
+        ;;
+(kolla-ansible-cleanup)
+        ACTION="Cleanup Kolla containers and volumes"
+        EXTRA_OPTS="$EXTRA_OPTS -e method=destroy"
+        PLAYBOOK="${BASEDIR}/kolla-ansible-deploy.yml"
         ;;
 (bash-completion)
         bash_completion

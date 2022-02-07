@@ -1,9 +1,7 @@
 ---
 - import_tasks: host_precheck.yml
 
-- name: Load cluster_nodes variables
-  set_fact:
-    cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
+- import_tasks: define_cluster_nodes.yml
 
 - name: Steps to destroy VM using Libvirt
   block:

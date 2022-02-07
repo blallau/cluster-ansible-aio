@@ -1,0 +1,44 @@
+---
+- name: Verify that Virtualization Technology (VT) is enabled
+  command: grep -c -E 'svm|vmx' /proc/cpuinfo
+  changed_when: False
+  failed_when: False
+  register: result
+
+- name: Fail if Virtualization Technology (VT) is disabled
+  fail:
+    msg: >
+      Virtualization Technology (VT) is currently disabled. Please enable VT
+      before running this role again.
+  when: result.rc != 0
+
+- name: Check if nested virt is loaded
+  stat:
+    path: /sys/module/kvm_intel/parameters/nested
+  register: is_nest_loaded
+
+- name: Check if nested virt is enabled
+  command: "grep -Ei '1|y' /sys/module/kvm_intel/parameters/nested"
+  register: is_nest_enabled
+  when: is_nest_loaded.stat.exists
+  changed_when: False
+  ignore_errors: True
+
+- name: Unload kvm-intel kernel module
+  modprobe:
+    name: kvm-intel
+    state: absent
+  when: (not is_nest_loaded.stat.exists) or (is_nest_enabled|failed)
+
+- name: Enable nested virtualization
+  lineinfile:
+    path: /etc/modprobe.d/kvm.conf
+    line: 'options kvm-intel nested=1'
+    create: yes
+  when: (not is_nest_loaded.stat.exists) or (is_nest_enabled|failed)
+
+- name: Load kvm-intel kernel module
+  modprobe:
+    name: kvm-intel
+    state: present
+  when: (not is_nest_loaded.stat.exists) or (is_nest_enabled|failed)

@@ -1,0 +1,5 @@
+---
+- name: Build Kolla Docker images
+  hosts: kolla-ansible
+  roles:
+    - kolla_build

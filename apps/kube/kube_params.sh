@@ -1,21 +1,22 @@
 #!/bin/bash
 
 # INSTALL PARAMS
-CREATE_INSTANCE=false
-SNAP_OS=false
+CREATE_INSTANCE=true
+SNAP_OS=true
 INSTALL_KUBE=false
 SNAP_KUBE=false
-INSTALL_KUBE_APPS=true
+INSTALL_KUBE_APPS=false
 SNAP_KUBE_APPS=false
 
-INSTALL_KUBE_APPS_DATA=true
+INSTALL_KUBE_APPS_DATA=false
 RETRIEVE_ARTIFACTS=true
 
 PROMPT_USER=false
+ENABLE_DOCKER=true
 
 # GENERAL PARAMS
 OFFLINE=true
-WORKER_NB=3
+WORKER_NB=2
 MASTER_NB=1
 
 LB_NB=0
@@ -27,6 +28,7 @@ EXEC_ON_MASTER=false
 # OTHER PARAMS
 CONF_FILE=${HOME}/.cluster-ansible-aio-env
 OS=$(cat ${CONF_FILE})
+OS=${OS:-centos}
 #DOMAIN=".mydomain.org"
 
 CAIO_DIR=${HOME}/work/GIT/cluster-ansible-aio

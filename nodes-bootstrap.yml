@@ -1,6 +1,5 @@
 ---
 - name: Boostrap VMs
   hosts: nodes
-  become: True
   roles:
     - nodes_bootstrap

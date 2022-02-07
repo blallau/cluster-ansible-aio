@@ -7,23 +7,7 @@
     name: common
     tasks_from: ssh_key
 
-- name: Load cluster_nodes variables
-  set_fact:
-    cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
-  tags: network
-
-- name: "Copy cluster_nodes in {{ tmp_dir }}"
-  blockinfile:
-    path: "{{ tmp_dir }}/cluster_nodes"
-    create: True
-    block: |
-        {{ cluster_nodes | to_nice_json(indent=2) }}
-  tags: network
-
-- name: "Display cluster_nodes"
-  debug:
-    msg: "{{ cluster_nodes | to_nice_yaml(indent=2) }}"
-  tags: network
+- import_tasks: define_cluster_nodes.yml
 
 - import_tasks: prepare_os_image.yml
 
@@ -96,7 +80,7 @@
         executable: /bin/bash
       with_items: "{{ cluster_nodes }}"
 
-    - name: Wait for VMs to be ready
+    - name: Wait for VMs to listen on port 22
       wait_for:
         host: "{{ item.1.address }}"
         port: 22

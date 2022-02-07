@@ -15,12 +15,12 @@ flatcar_update_server_port: 8000
 # Cluster sizing
 ################
 master_nb: 1
-master_ram: 4
-master_cpu: 2
+master_ram: 12
+master_cpu: 4
 
-worker_nb: 2
-worker_ram: 6
-worker_cpu: "{{ master_cpu }}"
+worker_nb: 3
+worker_ram: 8
+worker_cpu: 2
 
 lb_nb: 0
 lb_ram: 1
@@ -45,16 +45,28 @@ virt_customize_cmd: []
 net_prefix: "{{ node_prefix }}"
 
 net_interfaces:
-  - name: "{{ net_prefix }}net-br"
+  - name: "{{ net_prefix }}prov-br"
     forward: nat
     mode: dhcp
     cidr: "11.{{ net_second_octet | default(100) }}.100.0/24"
-    bridge: "{{ net_prefix }}net-br"
+    bridge: "{{ net_prefix }}prov-br"
     pxe: False
   - name: "{{ net_prefix }}over-br"
     mode: dhcp
     cidr: "11.{{ net_second_octet | default(100) }}.150.0/24"
     bridge: "{{ net_prefix }}over-br"
+  - name: "{{ net_prefix }}ext-br"
+    mode: dhcp
+    cidr: "11.{{ net_second_octet | default(100) }}.200.0/24"
+    bridge: "{{ net_prefix }}ext-br"
+  - name: "{{ net_prefix }}prov1-br"
+    mode: dhcp
+    cidr: "11.{{ net_second_octet | default(100) }}.160.0/24"
+    bridge: "{{ net_prefix }}prov1-br"
+  # - name: "{{ net_prefix }}prov2-br"
+  #   mode: dhcp
+  #   cidr: "11.{{ net_second_octet | default(100) }}.170.0/24"
+  #   bridge: "{{ net_prefix }}prov2-br"
   # - name: "{{ net_prefix }}pub-br"
   #   mode: static
   #   cidr: "11.{{ net_second_octet | default(100) }}.200.0/24"
@@ -72,30 +84,29 @@ host_ip: "{{ net_interfaces | selectattr('forward', 'defined') | selectattr('for
 # with ip_offset IP is define :
 #   master node : 10 + ip_offset + outer_master_loop.index
 #   woeker nide : 20 + ip_offset + outer_master_loop.index
-
 ip_offset: 8
 
 # Storage
 #########
-vm_volumes: []
+# vm_volumes: []
 # # format raw/qcow2
-# vm_volumes:
-#   - name: vol-osd1
-#     size: 25
-#     format: qcow2
-  # - name: vol-osd2
-  #   size: 10
-  #   format: qcow2
-  # - name: vol-osd3
-  #   size: 10
-  #   format: qcow2
-vm_volumes_mount: true
-vm_volumes_mount_path: "/data/kubernetes"
+vm_volumes:
+  - name: vol-osd1
+    size: 20
+    format: qcow2
+  - name: vol-osd2
+    size: 20
+    format: qcow2
+  - name: vol-osd3
+    size: 20
+    format: qcow2
+# vm_volumes_mount: true
+# vm_volumes_mount_path: "/data/kubernetes"
 
 # Storage
 #########
 # in Go
-root_disk_size: "50"
+root_disk_size: "80"
 
 # Additional disks (LVM)
 physical_disks:
@@ -110,7 +121,7 @@ tmp_dir: "{{ home_dir}}/tmp"
 ############################
 # Docker registry defaults #
 ############################
-docker_enabled: "True"
+docker_enabled: "False"
 docker_registry_ip: "{{ host_ip }}"
 docker_registry_port: 5000
 destroy_docker_registry: "False"

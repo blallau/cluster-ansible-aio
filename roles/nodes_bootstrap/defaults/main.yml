@@ -4,36 +4,88 @@ home_dir: "{{ ansible_user_dir }}"
 # global dependencies
 ####################
 yum_packages:
+  - device-mapper-persistent-data
+  # - docker-ce
   - gcc
   - git
   - libffi-devel
-  - ntp
+  - lvm2
+  # - ntp
   - openssl-devel
+  # - python-devel
+  # - python-pip
+  # - python-tox
   - redhat-rpm-config
   - yum-utils
-  # RHVM
-  - qemu-guest-agent
-  # Openshift needed
-  - NetworkManager
-  # Openshift metrics
-  - httpd-tools
-  # Openshift logging
-  - java-1.8.0-openjdk-headless
-  - patch
+  - virtualenv
 
 apt_packages:
   - apt-transport-https
   - ca-certificates
   - curl
+  - docker-ce
   - gcc
   - libffi-dev
   - libssl-dev
+  - lvm2
   - ntp
-  # Openshift needed
-  - network-manager
   - openssl
+  - python-dev
+  - python-pip
   - software-properties-common
-  - qemu-guest-agent
+  - thin-provisioning-tools
+  - tox
+
+pip_packages:
+#  - setuptools-rust
+  - pip
+  #  - ansible<5.0
+  - ansible==2.9
+  # - docker
+  # - tox
+  - python-openstackclient
+  - python-neutronclient
+  - python-novaclient
+
+pip_venv_path: "{{ ansible_user_dir }}/venv"
 
 network_manager_enabled: False
 nested_virt_enabled: False
+
+########
+# VBMC #
+########
+# Virtual BMC is enabled by default
+vbmc: True
+
+# By default we install with pip, but if you prefer to do it manually, set this to false
+vbmc_pip: True
+
+# Default vbmc service, override if something else on your distro
+vbmc_service: vbmcd
+
+# Default vbmc starting port 623
+vbmc_port: 623
+
+cockpit_enabled: True
+
+cloud_init_disk: "vdz"
+vm_volumes_fs_format: "ext4"
+vm_volumes_mount: False
+vm_volumes: []
+
+#############
+# OS images #
+#############
+vm_os_images:
+  ubuntu: "ubuntu-16.04-server-cloudimg-amd64-disk1.img"
+  #debian: "debian-10-openstack-amd64.qcow2"
+  debian: "debian-11-generic-amd64.qcow2"
+  fcos: "fedora-coreos-32.qcow2"
+  flatcar: "flatcar-linux1.qcow2"
+  # centos: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
+  # centos-7: "CentOS-7-x86_64-GenericCloud-2009.qcow2"
+  # centos-8.2: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
+  centos: "CentOS-8-GenericCloud-8.3.2011-20201204.2.x86_64.qcow2"
+  # centos: "CentOS-8-GenericCloud-8.4.2105-20210603.0.x86_64.qcow2"
+vm_os_image: "{{ vm_os_images[guest_os_distro] }}"

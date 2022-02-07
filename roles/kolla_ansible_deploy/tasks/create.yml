@@ -1,0 +1,142 @@
+---
+- name: Clone kolla-ansible repository
+  git:
+    repo: https://github.com/openstack/kolla-ansible
+    dest: "{{ tmp_dir }}/kolla-ansible"
+    version: "stable/victoria"
+
+# - name: Install kolla-ansible
+#   become: True
+#   pip:
+#     # name: "file://{{ tmp_dir }}/kolla-ansible"
+#     name: "git+https://opendev.org/openstack/kolla-ansible@stable/victoria"
+#     virtualenv: "{{ kolla_venv_path }}"
+
+# - name: Install ansible
+#   become: True
+#   pip:
+#     name: "ansible==2.9"
+
+- name: Install kolla-ansible
+  become: True
+  pip:
+    name: "file://{{ tmp_dir }}/kolla-ansible"
+
+- name: Ensure the Kolla Ansible configuration directories exist
+  become: True
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0750
+  with_items:
+    - "{{ kolla_config_path }}"
+    - "{{ kolla_config_path }}/inventory"
+
+- name: Copy globals.yml and passwords.yml conf files to Kolla conf dir
+  copy:
+    # src: "{{ kolla_venv_path }}/share/kolla-ansible/etc_examples/kolla/{{ item }}"
+    src: "{{ tmp_dir }}/kolla-ansible/etc/kolla/{{ item }}"
+    remote_src: true
+    dest: "{{ kolla_config_path }}/{{ item }}"
+  with_items:
+    - globals.yml
+    - passwords.yml
+
+- name: Override globals.yml options
+  lineinfile:
+    path: "{{ kolla_config_path }}/globals.yml"
+    regexp: "^{{ item.key }}:.*"
+    line: "{{ item.key }}: \"{{ item.value }}\""
+  with_dict: "{{ globals_override }}"
+
+# - name: Generate random passwords
+#   shell: "source {{ kolla_venv_path }}/bin/activate && kolla-genpwd"
+
+- name: Generate random passwords
+  shell: "kolla-genpwd"
+
+- name: Override passwords
+  lineinfile:
+    path: "{{ kolla_config_path }}/passwords.yml"
+    regexp: "^{{ item.key }}:.*"
+    line: "{{ item.key }}: {{ item.value }}"
+  with_dict: "{{ password_overrides }}"
+  when: password_overrides is defined
+
+#- name: Create config directory for Nova
+#  become: True
+#  file:
+#    path: "{{ kolla_config_path }}/config/nova"
+#    state: directory
+#    owner: "{{ ansible_user }}"
+#    group: "{{ ansible_user }}"
+#    mode: 0750
+
+#- name: Configure nova-compute to use QEMU
+#  become: True
+#  ini_file:
+#    path: "{{ kolla_config_path }}/config/nova/nova-compute.conf"
+#    section: libvirt
+#    option: "{{ item.key }}"
+#    value: "{{ item.value }}"
+#  with_dict: "{{ libvirt_override }}"
+
+# - name: Copy multinode inventory file
+#   copy:
+#     src: "/usr/share/kolla-ansible/ansible/inventory/multinode"
+#     remote_src: true
+#     dest: "{{ kolla_node_home_dir }}/multinode"
+#   when: ansible_distribution|lower == "centos"
+
+- name: Copy multinode inventory file
+  copy:
+    # src: "{{ kolla_venv_path }}/share/kolla-ansible/ansible/inventory/multinode"
+    src: "/usr/local/share/kolla-ansible/ansible/inventory/multinode"
+    remote_src: true
+    dest: "{{ kolla_node_home_dir }}/multinode"
+  # when: ansible_distribution|lower == "ubuntu"
+
+- name: Update inventory file
+  lineinfile:
+    path: "{{ kolla_node_home_dir }}/multinode"
+    regexp: "^{{ item.key }}"
+    line: "{{ item.value }}"
+  with_dict: "{{ inventory_override }}"
+
+- name: Create ansible.cfg file
+  blockinfile:
+    path: "{{ kolla_node_home_dir }}/ansible.cfg"
+    create: True
+    block: |
+      [defaults]
+      force_valid_group_names = ignore
+      host_key_checking=False
+      pipelining=True
+      forks=100
+      remote_user = {{ ansible_user }}
+      retry_files_enabled = False
+      [privilege_escalation]
+      become = True
+
+# - name: Kolla-ansible pull images
+#   shell: "source {{ kolla_venv_path }}/bin/activate && kolla-ansible pull -i {{ kolla_node_home_dir }}/multinode"
+#   tags: deploy
+
+- name: Kolla-ansible bootstrap
+  # shell: "source {{ kolla_venv_path }}/bin/activate && kolla-ansible bootstrap-servers -i {{ kolla_node_home_dir }}/multinode"
+  shell: "kolla-ansible bootstrap-servers -i {{ kolla_node_home_dir }}/multinode"
+  tags: deploy
+
+- name: Kolla-ansible prechecks
+  # shell: "source {{ kolla_venv_path }}/bin/activate && kolla-ansible prechecks -i {{ kolla_node_home_dir }}/multinode"
+  shell: "kolla-ansible prechecks -i {{ kolla_node_home_dir }}/multinode"
+  tags: deploy
+
+- name: Kolla-ansible deploy
+  shell: "kolla-ansible deploy -i {{ kolla_node_home_dir }}/multinode"
+  tags: deploy
+
+- name: Kolla-ansible post-deploy
+  shell: "kolla-ansible post-deploy"

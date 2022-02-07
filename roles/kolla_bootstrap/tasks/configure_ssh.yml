@@ -3,7 +3,7 @@
   become: "{{ ansible_user }}"
   user:
     name: "{{ ansible_user }}"
-    generate_ssh_key: True
+    generate_ssh_key: yes
     ssh_key_bits: 2048
     ssh_key_file: ~/.ssh/id_rsa
 
@@ -15,20 +15,18 @@
 
 - name: Authorize '{{ ansible_user }}' user SSH key on other nodes
   authorized_key:
-    user: "{{ ansible_user }}"
+    user: "{{ hostvars[item]['ansible_user'] }}"
     state: present
-    key: "{{ ssh_key['content'] | b64decode | trim }}"
-    key_options: 'no-X11-forwarding,no-agent-forwarding,no-port-forwarding'
+    key: "{{ ssh_key['content'] | b64decode }}"
   delegate_to: "{{ hostvars[item]['ansible_host'] }}"
-#  remote_user: "{{ hostvars[item]['ansible_user'] }}"
-  with_items: "{{ groups['nodes'] }}"
-#  when: item is defined and item != inventory_hostname
+  remote_user: "{{ hostvars[item]['ansible_user'] }}"
+  with_items: "{{ groups['kolla-nodes'] }}"
 
 - name: Disable SSH host key checking in /etc/ssh/ssh_config
   blockinfile:
-    create: True
+    create: yes
     block: |
       Host *
       StrictHostKeyChecking no
       UserKnownHostsFile=/dev/null
-    path: "/etc/ssh/ssh_config"
+    dest: "/etc/ssh/ssh_config"

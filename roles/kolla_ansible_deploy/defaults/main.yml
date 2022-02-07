@@ -1,0 +1,113 @@
+---
+#############################
+# Kolla passwords overrides #
+#############################
+password_overrides:
+  database_password: admin
+  grafana_admin_password: admin
+  haproxy_password: admin
+  keystone_admin_password: admin
+  kibana_password: admin
+  osprofiler_secret: admin
+  rabbitmq_password: guest
+
+###############################
+# Kolla globals.yml overrides #
+###############################
+globals_override:
+  # api_interface: ""
+
+  # timedatectl sees the system clock as unsynchronized.
+  # Please wait for synchronization.
+  # Alternatively, set 'prechecks_enable_host_ntp_checks' to 'false'
+  # to disable this check if your NTP daemon is not recognised by 'timedatectl status'
+  prechecks_enable_host_ntp_checks: false
+
+  network_interface: "{{ node_internal_intf }}"
+  neutron_bridge_name: "{{ neutron_ext_bridges | default('br-ex') }}"
+  neutron_external_interface: "{{ node_external_intfs }}"
+  kolla_install_type: "{{ kolla_install_type }}"
+  kolla_base_distro: "{{ vm_os_distro }}"
+  kolla_dev_mode: "{{ kolla_dev_mode }}"
+  kolla_config_path: "{{ kolla_config_path }}"
+#  docker_registry: "{{ docker_registry_ip }}:{{ docker_registry_port }}"
+#  docker_namespace: "{{ kolla_image_namespace }}"
+  kolla_internal_vip_address: 11.101.150.11
+
+  # Enable core OpenStack services. This includes:
+  # glance, keystone, neutron, nova, heat, and horizon.
+  enable_openstack_core: "yes"
+
+  enable_glance: "yes"
+  enable_haproxy: "no"
+  enable_keepalived: "no"
+  enable_loadbalancer: "no"
+  enable_keystone: "yes"
+  enable_keystone_federation: "no"
+  enable_mariadb: "yes"
+  enable_memcached: "yes"
+  enable_neutron: "yes"
+  enable_neutron_agent_ha: "yes"
+  enable_neutron_provider_networks: "yes"
+  enable_nova: "yes"
+  enable_rabbitmq: "yes"
+  enable_outward_rabbitmq: "no"
+
+  # NOTE: Most memcached clients handle load-balancing via client side
+  # hashing (consistent or not) logic, so going under the covers and messing
+  # with things that the clients are not aware of is generally wrong
+  enable_haproxy_memcached: "no"
+
+  # Additional optional OpenStack features and services are specified here
+  enable_aodh: "no"
+  enable_barbican: "no"
+  enable_blazar: "no"
+  enable_ceilometer: "no"
+  enable_ceilometer_ipmi: "no"
+  enable_cells: "no"
+  enable_central_logging: "no"
+  enable_elasticsearch_curator: "no"
+  enable_ceph_rgw: "no"
+  enable_ceph_rgw_loadbalancer: "no"
+  enable_cinder: "no"
+  enable_cinder_backup: "no"
+  enable_cinder_backend_hnas_nfs: "no"
+  enable_cinder_backend_iscsi: "no"
+  enable_cinder_backend_lvm: "no"
+  enable_cinder_backend_nfs: "no"
+  enable_cinder_backend_quobyte: "no"
+  enable_cloudkitty: "no"
+  enable_collectd: "no"
+  enable_cyborg: "no"
+  enable_designate: "no"
+  enable_etcd: "no"
+  enable_fluentd: "no"
+  enable_freezer: "no"
+  enable_gnocchi: "no"
+  enable_gnocchi_statsd: "no"
+  enable_grafana: "no"
+  enable_hacluster: "no"
+  enable_heat: "no"
+  enable_horizon: "yes"
+  enable_prometheus: "no"
+  enable_prometheus_openstack_exporter: "no"
+
+#######################
+# Inventory overrides #
+#######################
+inventory_override:
+  control01: centosmaster1
+  control02: ''
+  control03: ''
+  network01: centosworker1
+  network02: centosworker2
+  monitoring01: centosmaster1
+  storage01: ''
+  compute01: centosworker2
+
+#####################
+# Kolla host defaults
+#####################
+tmp_dir: "/tmp"
+kolla_node_home_dir: "{{ ansible_user_dir }}"
+kolla_venv_path: "/home/centos/venv"

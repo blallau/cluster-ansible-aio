@@ -1,0 +1,5 @@
+---
+- name: Deploy Openstack using kolla-ansible
+  hosts: centosmaster1
+  roles:
+    - kolla_ansible_deploy

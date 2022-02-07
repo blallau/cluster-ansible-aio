@@ -1,7 +1,7 @@
 #jinja2: trim_blocks: True
 {% for node in cluster_nodes %}
 
-Host {{ node.name }}
+  Host {{ node.name }} | {{ node.interfaces | selectattr('external', 'defined') | map(attribute='address') | first }}
   Hostname {{ node.interfaces | selectattr('external', 'defined') | map(attribute='address') | first }}
   UserKnownHostsFile /dev/null
   StrictHostKeyChecking no

@@ -12,6 +12,8 @@ Bug Fix/Todo list
 - manage idempotency when playbook is running twice
 - remove specific code (master, worker, lb,) from nodes.j2
   => code must be generic
+
+- configure CPU/Mem, storage and network by node and not globally
 - [manage QCOW2 with a baseimagefile]
 - [Fix DNS issue when using Docker DNS server instead of Libvirt dnsmasq]
 - [automaticaly retrieve last iso images (debian,centos), to avoid too long package update]
