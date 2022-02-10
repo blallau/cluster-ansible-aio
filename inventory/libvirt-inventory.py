@@ -120,7 +120,6 @@ class LibvirtInventory(object):
 
             tag_elem = root.find('./metadata/aio:instance/aio:inventory', aio_ns)
             if tag_elem is not None:
-                group = tag_elem.get('group')
                 distro = tag_elem.get('distro')
                 _push(inventory, 'nodes', domain_name)
                 interfaces = root.findall("./devices/interface[@type='bridge']")
@@ -138,6 +137,8 @@ class LibvirtInventory(object):
                             hostvars['ansible_user'] = distro
                             hostvars['ansible_host'] = ip_address
                             hostvars['libvirt_ip_address'] = ip_address
+                        else:
+                            print("Warning: %s no DHCP lease" % domain_name)
                 inventory['_meta']['hostvars'][domain_name] = hostvars
         return inventory
 

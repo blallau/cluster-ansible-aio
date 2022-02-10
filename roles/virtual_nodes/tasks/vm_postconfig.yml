@@ -38,6 +38,7 @@
       template:
         src: "network-config.j2"
         dest: "{{ tmp_dir}}/{{ item.name }}/network-config"
+      when: guest_os_distro == "debian"
     - name: "[KVM host] Remove config drive files"
       file:
         path: "{{ tmp_dir }}/{{ item.name }}/seed.img"
@@ -47,4 +48,10 @@
                 --network-config {{ tmp_dir }}/{{ item.name }}/network-config \
                   {{ tmp_dir }}/{{ item.name }}/user-data \
                   {{ tmp_dir }}/{{ item.name }}/meta-data"
+      when: guest_os_distro == "debian"
+    - name: "[KVM host] Create config drive"
+      command: "cloud-localds -v {{ tmp_dir }}/{{ item.name }}/seed.img \
+                  {{ tmp_dir }}/{{ item.name }}/user-data \
+                  {{ tmp_dir }}/{{ item.name }}/meta-data"
+      when: guest_os_distro == "centos"
   when: item.os_type not in ["fcos", "flatcar"]

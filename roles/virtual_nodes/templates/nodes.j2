@@ -25,7 +25,7 @@
 
 {% if node.net_intfs is defined and node.net_intfs|length > 0 %}
   interfaces:
-{% set outer_master_loop = loop %}
+{% set node_loop = loop %}
 
 {% for intf in node.net_intfs %}
 
@@ -40,6 +40,8 @@
     - name: "enp1s{{ intf_nb }}"
 {% endif %}
 
+{% set intf_loop = loop %}
+
 {% for network in networks if network.name == intf.name %}
 {% set net = network %}  
 {% if net.forward is defined and net.forward == 'nat' %}  
@@ -47,9 +49,9 @@
 {% endif %}  
       bridge: "{{ net.name }}"  
       mode: "{{ net.mode }}"  
-{% set ip = 10 + outer_master_loop.index %}  
+{% set ip = 10 + node_loop.index %}  
       address: "{{ net.cidr | ipaddr(ip) | ipaddr('address') }}"  
-      mac: "{{ mac_prefix }}:1{{ outer_master_loop.index }}:0{{ loop.index }}"  
+      mac: "{{ mac_prefix }}:1{{ node_loop.index }}:0{{ intf_loop.index }}"  
 {% if net.mode == 'static' %}  
       netmask: "{{ net.cidr | ipaddr('netmask') }}"  
 {% endif %}  
