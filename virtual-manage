@@ -1,20 +1,23 @@
 #!/bin/bash
-CONF_FILE=$HOME/.cluster-ansible-aio-env
+# CONF_FILE=$HOME/.cluster-ansible-aio-env
+# ALL_VMS=0
 
-if [[ -z "${NODE_PREFIX}" && ! -f ${CONF_FILE} ]]; then
-    echo "Error: NODE_PREFIX variable must be set"
-    exit 1
-fi
+# if [[ -z "${NODE_PREFIX}" ]] || [[ ! -f ${CONF_FILE} ]]; then
+#     if [[ ! $ALL_VMS ]]; then
+#         echo "Error: NODE_PREFIX variable must be set"
+#         exit 1
+#     fi
+# fi
+# if [[ -n "${NODE_PREFIX}" ]]; then
+#     echo "${NODE_PREFIX}" > ${CONF_FILE}
+# else
+#     NODE_PREFIX=$(cat ${CONF_FILE})
+# fi
 
-if [[ -n "${NODE_PREFIX}" ]]; then
-    echo "${NODE_PREFIX}" > ${CONF_FILE}
-else
-    NODE_PREFIX=$(cat ${CONF_FILE})
-fi
+# echo -e "\e[93mEnvironment: $NODE_PREFIX\e[39m"
+NODE_PREFIX=""
 
-echo -e "\e[93mEnvironment: $NODE_PREFIX\e[39m"
-
-NODE_TYPES="^${NODE_PREFIX}*"
+NODE_TYPES="^${NODE_PREFIX}.*$"
 SNAPSHOT_NAME=""
 DISK_DIRECTORY="${HOME}/tmp"
 DISK_SIZE=10
@@ -107,6 +110,16 @@ function shutdown {
 function restart {
     shutdown
     start
+}
+
+function renew-dhcp {
+	list_all_domains | while read -e DOMAIN; do
+        for node in $NODE_TYPES; do
+            if [[ "$DOMAIN" =~ $node ]]; then
+                ssh -n root@${DOMAIN} "nmcli con up id 'System eth0'"
+            fi
+        done
+	done
 }
 
 function list_inactive_domains() {
@@ -250,7 +263,9 @@ function usage {
 Usage: $0 COMMAND
 
 Commands:
+    --all                            Start all defined Libvirt VMs
     --cleanup                        Cleanup (destroy & undefine) cluster
+    --renew-dhcp                     Renew DHCP
     --restart                        Restart cluster
     --start                          Start cluster
     --shutdown                       Shutdown cluster
@@ -265,17 +280,25 @@ Commands:
 EOF
 }
 
-LONG_OPTS="cleanup,restart,start,shutdown,status,snap-delete:,snap-create:,snap-revert:,snap-list,add-disk:,remove-disk:,help"
+LONG_OPTS="all,renew-dhcp,cleanup,restart,start,shutdown,status,snap-delete:,snap-create:,snap-revert:,snap-list,add-disk:,remove-disk:,help"
 ARGS=$(getopt -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
+        (--all)
+            ALL_VMS=1
+            shift 1
+            ;;
         (--cleanup)
             cleanup
             exit 0
             ;;
         (--restart)
             restart
+            exit 0
+            ;;
+        (--renew-dhcp)
+            renew-dhcp
             exit 0
             ;;
         (--start)

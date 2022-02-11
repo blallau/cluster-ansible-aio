@@ -1,5 +1,6 @@
 Bug Fix/Todo list
 -----------------
+- check network use in nodes exists in networks
 - 'ansible_user' undefined
 => libvirt_inventory.py can't retrieve dhcp lease (sudo dhclient eth0)_
 - In case of many interfaces add check to have ext interface in first position

@@ -16,52 +16,48 @@ nodes:
   - name: "controller1"
     type: "controller"
     cpu: 2
-    ram: 4
+    ram: 8
     os_type: "centos"
     net_intfs:
-      - name: "{{ net_prefix }}prov-br"
-      - name: "{{ net_prefix }}over-br"
+      - name: "{{ net_prefix }}network-br"
+      - name: "{{ net_prefix }}tunnel-br"
       - name: "{{ net_prefix }}ext-br"
-      - name: "{{ net_prefix }}prov1-br"
   - name: "networknode1"
     type: "network_node"
     cpu: 2
-    ram: 4
+    ram: 8
     os_type: "centos"
     net_intfs:
-      - name: "{{ net_prefix }}prov-br"
-      - name: "{{ net_prefix }}over-br"
+      - name: "{{ net_prefix }}network-br"
+      - name: "{{ net_prefix }}tunnel-br"
       - name: "{{ net_prefix }}ext-br"
-      - name: "{{ net_prefix }}prov1-br"
   - name: "compute1"
     type: "compute"
     cpu: 2
-    ram: 4
+    ram: 8
     os_type: "centos"
     net_intfs:
-      - name: "{{ net_prefix }}prov-br"
-      - name: "{{ net_prefix }}over-br"
+      - name: "{{ net_prefix }}network-br"
+      - name: "{{ net_prefix }}tunnel-br"
       - name: "{{ net_prefix }}ext-br"
-      - name: "{{ net_prefix }}prov1-br"
   - name: "ceph"
     type: "ceph"
     cpu: 2
     ram: 4
     os_type: "centos"
     net_intfs:
-      - name: "{{ net_prefix }}prov-br"
-      - name: "{{ net_prefix }}over-br"
+      - name: "{{ net_prefix }}network-br"
+      - name: "{{ net_prefix }}tunnel-br"
       - name: "{{ net_prefix }}ext-br"
-      - name: "{{ net_prefix }}prov1-br"
     disks:
       - name: vol-osd1
-        size: 20
+        size: 40
         format: qcow2
       - name: vol-osd2
-        size: 20
+        size: 40
         format: qcow2
       - name: vol-osd3
-        size: 20
+        size: 40
         format: qcow2
 
 # virt-customize
@@ -75,20 +71,17 @@ virt_customize_cmd: []
 net_prefix: ""
 
 networks:
-  - name: "{{ net_prefix }}prov-br"
+  - name: "{{ net_prefix }}network-br"
     forward: nat
     mode: dhcp
     cidr: "11.{{ net_second_octet | default(100) }}.100.0/24"
     pxe: False
-  - name: "{{ net_prefix }}over-br"
+  - name: "{{ net_prefix }}tunnel-br"
     mode: dhcp
     cidr: "11.{{ net_second_octet | default(100) }}.150.0/24"
   - name: "{{ net_prefix }}ext-br"
     mode: dhcp
     cidr: "11.{{ net_second_octet | default(100) }}.200.0/24"
-  - name: "{{ net_prefix }}prov1-br"
-    mode: dhcp
-    cidr: "11.{{ net_second_octet | default(100) }}.160.0/24"
 
 host_ip: "{{ networks | selectattr('forward', 'defined') | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address') | first }}"
 
