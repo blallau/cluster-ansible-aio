@@ -27,6 +27,8 @@ nodes:
     disks:
       - name: vol-log
         size: 60
+        format: "ext4"
+        mount_path: "/logs"
   - name: "networknode1"
     type: "network_node"
     cpu: 1
@@ -57,13 +59,17 @@ nodes:
     disks:
       - name: vol-osd1
         size: 40
-        format: qcow2
+        type: qcow2
       - name: vol-osd2
         size: 40
-        format: qcow2
+        type: qcow2
       - name: vol-osd3
         size: 40
-        format: qcow2
+        type: qcow2
+      - name: minio
+        size: 40
+        format: "ext4"
+        mount_path: "/opt/minio/data"
 
 # virt-customize
 ################

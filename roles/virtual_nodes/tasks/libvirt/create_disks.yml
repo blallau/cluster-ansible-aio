@@ -9,7 +9,7 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - disks
-  when: item.1.format == 'raw'
+  when: item.1.type == 'raw'
 
 - name: Create QCOW2 disk
   command: "qemu-img create -f qcow2 {{ tmp_dir }}/{{ item.0.name }}/{{ item.1.name }}.qcow2 {{ item.1.size }}G"
@@ -18,4 +18,4 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - disks
-  when: item.1.format == 'qcow2'
+  when: item.1.type == 'qcow2'

@@ -82,7 +82,9 @@ globals_override:
   enable_ceilometer_ipmi: "no"
   enable_cells: "no"
 
+  enable_fluentd: "yes"
   enable_central_logging: "yes"
+  elasticsearch_datadir_volume: "/logs"
 
   enable_elasticsearch_curator: "no"
   enable_ceph_rgw: "no"
@@ -99,7 +101,6 @@ globals_override:
   enable_cyborg: "no"
   enable_designate: "no"
   enable_etcd: "no"
-  enable_fluentd: "no"
   enable_freezer: "no"
   enable_gnocchi: "no"
   enable_gnocchi_statsd: "no"

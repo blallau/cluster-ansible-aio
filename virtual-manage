@@ -47,6 +47,8 @@ function status {
                 echo -e ""
                 echo -e "$(virsh domblklist $DOMAIN | tail -n +3)"
                 echo -e ""
+                echo -e "$(virsh domfsinfo $DOMAIN | tail -n +3)"
+                echo -e ""
                 echo -e "$(virsh domifaddr $DOMAIN --source agent | grep ipv4 | tail -n +2)"
                 echo -e "\n"
             fi
@@ -119,7 +121,7 @@ function renew-dhcp {
 	list_all_domains | while read -e DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
-                ssh -n root@${DOMAIN} "nmcli con up id 'System eth0'"
+                ssh -n root@${DOMAIN} "nmcli con up id 'System eth0'" 2>&1 > /dev/null
             fi
         done
 	done

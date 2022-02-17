@@ -3,7 +3,7 @@ Bug Fix/Todo list
 - check network use in nodes exists in networks
 - 'ansible_user' undefined
 => libvirt_inventory.py can't retrieve dhcp lease (sudo dhclient eth0)_
-- In case of many interfaces add check to have ext interface in first position
+- In case of many interfaces add check to get external interface first
 - manage node-prefix in SSH keys and libvirt network, ... in order to not remove env from previous deployment
 - remove shutdown before snapshot => use fsfreeze before snapshot ?
 - fix gracefully-shutdown

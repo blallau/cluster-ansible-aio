@@ -8,6 +8,10 @@ libvirt_url: qemu:///system
 libvirt_security_driver: none
 libvirt_default_mtu: 9000
 
+destroy_images: False
+rename_net_interface: False
+cloud_init_disk: "vdz"
+
 ########
 # VBMC #
 ########
@@ -22,11 +26,6 @@ vbmc_service: vbmcd
 
 # Default vbmc starting port 623
 vbmc_port: 623
-
-cloud_init_disk: "vdz"
-vm_volumes_fs_format: "ext4"
-vm_volumes_mount: False
-vm_volumes: []
 
 #############
 # OS images #
@@ -43,6 +42,3 @@ vm_os_images:
   #  centos: "CentOS-8-GenericCloud-8.3.2011-20201204.2.x86_64.qcow2"
   centos: "CentOS-Stream-GenericCloud-8-20220125.1.x86_64.qcow2"
 vm_os_image: "{{ vm_os_images[guest_os_distro] }}"
-
-destroy_images: False
-rename_net_interface: False

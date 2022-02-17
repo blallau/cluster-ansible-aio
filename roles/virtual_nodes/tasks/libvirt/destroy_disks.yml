@@ -7,7 +7,7 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - disks
-  when: item.1.format == 'raw'
+  when: item.1.type == 'raw'
 
 - name: Delete QCOW2 disk
   file:
@@ -16,4 +16,4 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - disks
-  when: item.1.format == 'qcow2'
+  when: item.1.type == 'qcow2'

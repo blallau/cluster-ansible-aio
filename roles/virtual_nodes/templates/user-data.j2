@@ -52,24 +52,26 @@ packages:
   - qemu-guest-agent
 {% endif %}
 {% endif %}
-{% if vm_volumes|length > 0 and vm_volumes_mount %}
- disk_setup:
- {% for disk in item.disks %}
-   /dev/{{ disk.device }}:
-     table_type: 'mbr'
-     layout: true
-     overwrite: true
- {% endfor %}
+{# disk_setup: #}
+{# {% for disk in item.disks %} #}
+{# {% if disk.mount_path is defined %} #}
+{#   /dev/{{ disk.device }}: #}
+{#     table_type: 'mbr' #}
+{#     layout: true #}
+{#     overwrite: true #}
+{# {% endif %} #}
+{# {% endfor %} #}
 #setup the file system on the device
 fs_setup:
 {% for disk in item.disks %}
-  - label: 'data{{ loop.index0 }}'
-    filesystem: '{{ vm_volumes_fs_format }}'
+{% if disk.mount_path is defined %}   
+  - label: '{{ disk.name }}'
+    filesystem: '{{ disk.format }}'
     device: /dev/{{ disk.device }}
     partition: 'auto'
     overwrite: true
-{% endfor %}
 {% endif %}
+{% endfor %}
 bootcmd:
   - [ sh, -c, echo "=========bootcmd=========" ]
   - if grep -Gq "^\s*UseDNS" /etc/ssh/sshd_config; then sed -re "s/^\s*(UseDNS)\s+(yes|no)/\1 no/" -i.$(date -u +%Y%m%d%H%M%S) /etc/ssh/sshd_config; else echo "UseDNS no" >> /etc/ssh/sshd_config; fi
@@ -94,20 +96,20 @@ write_files:
    owner: root:root
    permissions: '0644'
 {% endif %}
-{% if vm_volumes|length > 0 and vm_volumes_mount %}
 mounts:
 {% for disk in item.disks %}
-  - [ "/dev/{{ disk.device }}", "{{ vm_volumes_mount_path }}/data-{{ loop.index0 }}/data-{{ loop.index0 }}" ]
-{% endfor %}
+{% if disk.mount_path is defined %}
+  - [ "/dev/{{ disk.device }}", "{{ disk.mount_path }}" ]
 {% endif %}
+{% endfor %}
 timezone: {{ guest_timezone | default(virt_infra_timezone) }}
 runcmd:
   - [ sh, -c, echo "=========runcmd=========" ]
-{% if vm_volumes|length > 0 and vm_volumes_mount %}
 {% for disk in item.disks %}
-  - mkdir {{ vm_volumes_mount_path }}/data-{{ loop.index0 }}
-{% endfor %}
+{% if disk.mount_path is defined %}
+  - mkdir {{ disk.mount_path }}
 {% endif %}
+{% endfor %}
 #  - systemctl disable NetworkManager --now
   - systemctl restart sshd
 {% if allow_virt %}

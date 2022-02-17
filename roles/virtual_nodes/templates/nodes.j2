@@ -71,7 +71,13 @@
     - name: "vol-{{ node_prefix }}{{ node.name }}-{{ loop.index }}"
       device: "vd{{ device }}"
       size: {{ disk.size }}
-      format: {{ disk.format }}
+      type: {{ disk.type | default('qcow2') }}
+{% if disk.format is defined %}
+      format: {{ disk.type | default('ext4') }}
+{% endif %}
+{% if disk.mount_path is defined %}
+      mount_path: {{ disk.mount_path }}
+{% endif %}
 {% endfor %}
 {% else %}
   disks: []
