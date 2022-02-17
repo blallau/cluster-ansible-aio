@@ -81,12 +81,14 @@ globals_override:
   enable_ceilometer: "no"
   enable_ceilometer_ipmi: "no"
   enable_cells: "no"
-  enable_central_logging: "no"
+
+  enable_central_logging: "yes"
+
   enable_elasticsearch_curator: "no"
   enable_ceph_rgw: "no"
   enable_ceph_rgw_loadbalancer: "no"
   enable_cinder: "yes"
-  enable_cinder_backup: "yes"
+  enable_cinder_backup: "no"
   enable_cinder_backend_hnas_nfs: "no"
   enable_cinder_backend_iscsi: "no"
   enable_cinder_backend_lvm: "no"
@@ -108,10 +110,11 @@ globals_override:
   enable_prometheus: "no"
   enable_prometheus_openstack_exporter: "no"
   # Ceph
-  glance_backend_ceph: "yes"
-  ceph_glance_keyring: "ceph.client.glance.keyring"
-  ceph_glance_user: "glance"
-  ceph_glance_pool_name: "images"
+  glance_backend_ceph: "no"
+  glance_backend_s3: "yes"
+  # ceph_glance_keyring: "ceph.client.glance.keyring"
+  # ceph_glance_user: "glance"
+  # ceph_glance_pool_name: "images"
 
   nova_backend_ceph: "yes"
   ceph_nova_keyring: "ceph.client.cinder.keyring"
@@ -146,3 +149,5 @@ inventory_override:
 tmp_dir: "/tmp"
 kolla_node_home_dir: "{{ ansible_user_dir }}"
 kolla_venv_path: "/home/centos/venv"
+kolla_ansible_repo: "https://github.com/blallau/kolla-ansible"
+kolla_ansible_branch: "stable/victoria"

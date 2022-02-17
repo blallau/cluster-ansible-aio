@@ -48,6 +48,9 @@ packages:
   - tc
   - ebtables
   - iscsi-initiator-utils
+{% if qemu_guest_agent_enabled %}
+  - qemu-guest-agent
+{% endif %}
 {% endif %}
 {% if vm_volumes|length > 0 and vm_volumes_mount %}
  disk_setup:

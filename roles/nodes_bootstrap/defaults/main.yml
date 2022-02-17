@@ -43,6 +43,7 @@ pip_packages:
   - ansible==2.9
   # - docker
   # - tox
+  - crudini
   - python-openstackclient
   - python-neutronclient
   - python-novaclient

@@ -44,7 +44,10 @@ function status {
 		        echo -e "  $DOMAIN   \e[1m\e[92mrunning\e[39m\e[0m"
                 echo -e "  $(virsh dominfo $DOMAIN | grep CPU\(s\))"
                 echo -e "  $(virsh dominfo $DOMAIN | grep 'Max memory')"
+                echo -e ""
                 echo -e "$(virsh domblklist $DOMAIN | tail -n +3)"
+                echo -e ""
+                echo -e "$(virsh domifaddr $DOMAIN --source agent | grep ipv4 | tail -n +2)"
                 echo -e "\n"
             fi
         done

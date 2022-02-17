@@ -41,6 +41,11 @@
   </pm>
   <devices>
     <emulator>{% if ansible_distribution|lower == 'centos' %}/usr/libexec/qemu-kvm{% elif ansible_distribution|lower == 'ubuntu' %}/usr/bin/qemu-system-x86_64{% endif %}</emulator>
+    {% if qemu_guest_agent_enabled %}
+    <channel type='unix'>
+      <target type='virtio' name='org.qemu.guest_agent.0'/>
+    </channel>
+    {% endif %}
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2' cache='none' io='native'/>
       <source file='{{ libvirt_dir }}/{{ item.name }}-boot.qcow2'/>

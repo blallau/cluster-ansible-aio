@@ -1,21 +1,9 @@
 ---
 - name: Clone kolla-ansible repository
   git:
-    repo: https://github.com/openstack/kolla-ansible
+    repo: "{{ kolla_ansible_repo }}"
     dest: "{{ tmp_dir }}/kolla-ansible"
-    version: "stable/victoria"
-
-# - name: Install kolla-ansible
-#   become: True
-#   pip:
-#     # name: "file://{{ tmp_dir }}/kolla-ansible"
-#     name: "git+https://opendev.org/openstack/kolla-ansible@stable/victoria"
-#     virtualenv: "{{ kolla_venv_path }}"
-
-# - name: Install ansible
-#   become: True
-#   pip:
-#     name: "ansible==2.9"
+    version: "{{ kolla_ansible_branch }}"
 
 - name: Install kolla-ansible
   become: True

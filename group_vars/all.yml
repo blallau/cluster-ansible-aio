@@ -7,25 +7,30 @@ node_prefix: ""
 guest_os_distro: "{{ ansible_distribution | lower }}"
 os_default_user: "{{ guest_os_distro }}"
 guest_timezone: "UTC"
+qemu_guest_agent_enabled: True
 
 # Flatcar stuff
 flatcar_update_server_ip: "11.102.100.1"
 flatcar_update_server_port: 8000
 
+# controller RAM=8 (10 si elastic)
 nodes:
   - name: "controller1"
     type: "controller"
-    cpu: 2
-    ram: 8
+    cpu: 3
+    ram: 10
     os_type: "centos"
     net_intfs:
       - name: "{{ net_prefix }}network-br"
       - name: "{{ net_prefix }}tunnel-br"
       - name: "{{ net_prefix }}ext-br"
+    disks:
+      - name: vol-log
+        size: 60
   - name: "networknode1"
     type: "network_node"
-    cpu: 2
-    ram: 8
+    cpu: 1
+    ram: 7
     os_type: "centos"
     net_intfs:
       - name: "{{ net_prefix }}network-br"
@@ -42,8 +47,8 @@ nodes:
       - name: "{{ net_prefix }}ext-br"
   - name: "ceph"
     type: "ceph"
-    cpu: 2
-    ram: 4
+    cpu: 1
+    ram: 5
     os_type: "centos"
     net_intfs:
       - name: "{{ net_prefix }}network-br"
