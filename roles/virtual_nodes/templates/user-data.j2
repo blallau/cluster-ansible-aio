@@ -62,6 +62,8 @@ packages:
 {# {% endif %} #}
 {# {% endfor %} #}
 #setup the file system on the device
+{% if disks is defined and
+      disks | selectattr('mount_path','defined') | list | length > 0 %}
 fs_setup:
 {% for disk in item.disks %}
 {% if disk.mount_path is defined %}   
@@ -72,6 +74,7 @@ fs_setup:
     overwrite: true
 {% endif %}
 {% endfor %}
+{% endif %}
 bootcmd:
   - [ sh, -c, echo "=========bootcmd=========" ]
   - if grep -Gq "^\s*UseDNS" /etc/ssh/sshd_config; then sed -re "s/^\s*(UseDNS)\s+(yes|no)/\1 no/" -i.$(date -u +%Y%m%d%H%M%S) /etc/ssh/sshd_config; else echo "UseDNS no" >> /etc/ssh/sshd_config; fi
@@ -96,12 +99,15 @@ write_files:
    owner: root:root
    permissions: '0644'
 {% endif %}
+{% if disks is defined and
+      disks | selectattr('mount_path','defined') | list | length > 0 %}
 mounts:
 {% for disk in item.disks %}
 {% if disk.mount_path is defined %}
   - [ "/dev/{{ disk.device }}", "{{ disk.mount_path }}" ]
 {% endif %}
 {% endfor %}
+{% endif %}
 timezone: {{ guest_timezone | default(virt_infra_timezone) }}
 runcmd:
   - [ sh, -c, echo "=========runcmd=========" ]
@@ -141,3 +147,4 @@ final_message: "SYSTEM READY TO LOG IN"
 system_info:
   default_user:
     name: {{ os_default_user }}
+

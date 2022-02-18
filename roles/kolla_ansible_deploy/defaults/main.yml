@@ -82,8 +82,8 @@ globals_override:
   enable_ceilometer_ipmi: "no"
   enable_cells: "no"
 
-  enable_fluentd: "yes"
-  enable_central_logging: "yes"
+  enable_fluentd: "no"
+  enable_central_logging: "no"
   elasticsearch_datadir_volume: "/logs"
 
   enable_elasticsearch_curator: "no"
