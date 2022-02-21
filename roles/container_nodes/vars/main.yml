@@ -1,6 +1,6 @@
 ---
 
-host_ip: "{{ net_interfaces | selectattr('forward', 'defined') | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address') | first }}"
+host_ip: "{{ networks | selectattr('forward', 'defined') | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address') | first }}"
 dns_domain: "mydomain.org"
 
 # Storage
@@ -11,7 +11,7 @@ physical_disks:
   - /dev/nvme0n1p6
 virt_volume_group: "virtvg"
 
-vm_volumes:
-  - name: vol-osd
-    size: 50
-    format: raw
+# vm_volumes:
+#   - name: vol-osd
+#     size: 50
+#     format: raw

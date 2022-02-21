@@ -78,7 +78,7 @@ vm_volumes: []
 #############
 # OS images #
 #############
-vm_os_images:
+guest_os_images:
   ubuntu: "ubuntu-16.04-server-cloudimg-amd64-disk1.img"
   #debian: "debian-10-openstack-amd64.qcow2"
   debian: "debian-11-generic-amd64.qcow2"
@@ -89,4 +89,4 @@ vm_os_images:
   # centos-8.2: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
   centos: "CentOS-8-GenericCloud-8.3.2011-20201204.2.x86_64.qcow2"
   # centos: "CentOS-8-GenericCloud-8.4.2105-20210603.0.x86_64.qcow2"
-vm_os_image: "{{ vm_os_images[guest_os_distro] }}"
+guest_os_image: "{{ vm_os_images[guest_os_distro] }}"

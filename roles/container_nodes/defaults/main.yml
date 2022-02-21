@@ -25,12 +25,12 @@ pip_dependencies:
 #############
 # OS images #
 #############
-container_os_images:
+guest_os_images:
   ubuntu: "ubuntu/21.04/cloud"
   debian: "debian/10/cloud"
-  centos: "centos/8/cloud"
+  centos: "centos/8-Stream/cloud"
 
-container_os_image: "{{ container_os_images[guest_os_distro] }}"
+guest_os_image: "{{ guest_os_images[guest_os_distro] }}"
 
 #######
 # LXD #

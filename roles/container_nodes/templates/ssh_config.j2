@@ -1,9 +1,1 @@
-#jinja2: trim_blocks: True
-{% for node in cluster_nodes %}
-
-Host {{ node.name }}
-  Hostname {{ node.interfaces | selectattr('external', 'defined') | map(attribute='address') | first }}
-  UserKnownHostsFile /dev/null
-  StrictHostKeyChecking no
-  User {{ os_default_user }}
-{% endfor %}
+../../virtual_nodes/templates/ssh_config.j2

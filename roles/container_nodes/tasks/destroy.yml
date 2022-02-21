@@ -14,8 +14,8 @@
       with_items: "{{ cluster_nodes }}"
 
 # - import_tasks: lxd/destroy_networks.yml
-- import_tasks: ../../virtual_nodes/tasks/libvirt/destroy_networks.yml
-  when: net_interfaces | length > 0
+- import_tasks: libvirt/destroy_networks.yml
+  when: networks | length > 0
   tags: network
 
 - name: "Clean nodes config in {{ tmp_dir }}"

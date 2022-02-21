@@ -28,8 +28,8 @@
         {{ lookup('template', 'vm-template.xml.j2') }}
   with_items: "{{ cluster_nodes }}"
 
-- name: Prepare VMs CloudInit/Ignition config
-  include_tasks: vm_postconfig.yml
+- name: Prepare CloudInit/Ignition config
+  include_tasks: postconfig.yml
   loop: "{{ cluster_nodes }}"
 
 - import_tasks: libvirt/setup_networks.yml
