@@ -1,5 +1,6 @@
 Bug Fix/Todo list
 -----------------
+- add label to loop in order to resume loop iteration display
 - check network use in nodes exists in networks
 - 'ansible_user' undefined
 => libvirt_inventory.py can't retrieve dhcp lease (sudo dhclient eth0)_
@@ -22,3 +23,23 @@ Bug Fix/Todo list
 check https://github.com/hicknhack-software/ansible-libvirt
 
 - fix SNAP_NAME and SNAPSHOT_NAME redondancy
+
+LXD
+
+https://github.com/hispanico/ansible-lxd
+https://github.com/plumelo/ansible-role-lxd/blob/master/tasks/containers.yml
+https://github.com/Nani-o/ansible-inventory-lxd
+https://github.com/Nani-o/ansible-role-lxd
+
+LXD - storage
+https://discourse.world/h/2020/04/09/Basic-LXD-Features-Linux-Container-Systems
+
+LXD - network
+https://github.com/Nani-o/ansible-role-lxd
+
+OpenStack
+https://github.com/jthadden/OpenStack_Summit_2018_Vancouver/
+https://docs.openstack.org/charm-guide/queens/openstack-on-lxd.html
+
+https://www.digitalocean.com/community/tutorials/how-to-set-up-and-use-lxd-on-ubuntu-18-04
+https://blog.simos.info/how-to-initialize-lxd-again/

@@ -1,7 +1,7 @@
 ---
 dns_domain: "mydomain.org"
 
-# to install libvirt stuff in guest vm set to True
+# to install libvirt stuff in guest set to True
 allow_virt: False
 
 # # kubernetes

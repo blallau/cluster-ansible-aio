@@ -41,7 +41,7 @@ address=/apps.{{ dns_domain }}/10.100.100.101
 # specified interfaces (and the loopback) give the name of the
 # interface (eg eth0) here.
 # Repeat the line for more than one interface.
-# {% for intf in net_interfaces if intf.mode == 'dhcp' %}
+# {% for intf in networks if intf.mode == 'dhcp' %}
 # interface={{ intf.name }}
 # {% endfor %}
 # Or you can specify which interface _not_ to listen on

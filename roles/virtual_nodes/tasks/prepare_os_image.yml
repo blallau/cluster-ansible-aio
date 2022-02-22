@@ -11,7 +11,7 @@
   register: check_os_image
 
 - fail:
-    msg: "In order to deploy VMs, you must first copy {{ vm_os_image }} to {{ tmp_dir }}"
+    msg: "In order to deploy VMs, you must first copy {{ guest_os_image }} to {{ tmp_dir }}"
   when: not item.stat.exists
   with_items: "{{ check_os_image.results }}"
 

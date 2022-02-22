@@ -17,7 +17,7 @@
   ram: {{ node.ram }}
   vcpu: {{ node.cpu }}
   role: {{ node.type }}
-  image: {{ vm_os_images[os_type] }}
+  image: {{ guest_os_images[os_type] }}
   os_type: {{ os_type }}
 {% if vbmc | bool %}
   vbmc_port: {{ vbmc_port + loop.index }}
@@ -71,7 +71,11 @@
     - name: "vol-{{ node_prefix }}{{ node.name }}-{{ loop.index }}"
       device: "vd{{ device }}"
       size: {{ disk.size }}
+{% if runtime == 'vm' %}
       type: {{ disk.type | default('qcow2') }}
+{% else %}
+      type: {{ disk.type | default('raw') }}
+{% endif %}
 {% if disk.format is defined %}
       format: {{ disk.type | default('ext4') }}
 {% endif %}
