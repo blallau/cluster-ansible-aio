@@ -104,9 +104,6 @@
   when: networks | length > 0
   tags: network
 
-# - include_tasks: lxd/setup_storages.yml
-#   when: vm_volumes|length > 0
-
 - name: "Copy cluster config for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
   blockinfile:
     path: "{{ tmp_dir }}/{{ item.name }}/cluster_config"
@@ -123,6 +120,8 @@
 - import_tasks: libvirt/setup_networks.yml
   when: networks | length > 0
   tags: network
+
+- include_tasks: lxd/create_disks.yml
 
 - name: "Generate lxd_profile_devices"
   template:

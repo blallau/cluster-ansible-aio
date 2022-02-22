@@ -18,6 +18,8 @@
   when: networks | length > 0
   tags: network
 
+- include_tasks: lxd/destroy_disks.yml
+
 - name: "Clean nodes config in {{ tmp_dir }}"
   file:
     path: "{{ tmp_dir }}/{{ item.name }}"

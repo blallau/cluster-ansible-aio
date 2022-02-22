@@ -6,4 +6,9 @@
   "eth{{- intf_nb -}}": {"name": "eth{{- intf_nb -}}", "parent": "{{- intf.bridge -}}", "hwaddr": "{{- intf.mac -}}", "nictype": "bridged", "type": "nic"}
   {%- if not loop.last -%},{%- endif -%}
   {%- endfor -%}
-  }
+{%- if item.disks | length > 0 -%},{%- endif -%}  
+{%- for disk in item.disks -%}
+  "{{ disk.name }}": {"path": "{{ disk.mount_path }}", "pool": "{{ disk.name }}", "type": "disk"}
+  {%- if not loop.last -%},{%- endif -%}  
+{%- endfor -%}
+}
