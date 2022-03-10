@@ -6,18 +6,20 @@ Bug Fix/Todo list
 => libvirt_inventory.py can't retrieve dhcp lease (sudo dhclient eth0)_
 - In case of many interfaces add check to get external interface first
 - manage node-prefix in SSH keys and libvirt network, ... in order to not remove env from previous deployment
-- remove shutdown before snapshot => use fsfreeze before snapshot ?
 - fix gracefully-shutdown
 - add task to wait for Flatcar VMs ready
 - fix bug when different deployments use the same networks
   => IPs/macs association cannot be set in the previous DHCP config
   => IPs are random => hence deployment fails [Waiting on IPs]
-- manage idempotency when playbook is running twice
+- fix idempotency when playbook is running twice
 
 - [manage QCOW2 with a baseimagefile]
 - [Fix DNS issue when using Docker DNS server instead of Libvirt dnsmasq]
 - [automaticaly retrieve last iso images (debian,centos), to avoid too long package update]
 - [manage remote libvirtd]
+- [remove shutdown before snapshot]
+=> use qemu-guest-agent (fsfreeze before snapshot)
+=> NO: external snapshot doesn't manage Guest VM
 
 
 check https://github.com/hicknhack-software/ansible-libvirt
@@ -33,6 +35,9 @@ https://github.com/Nani-o/ansible-role-lxd
 
 LXD - storage
 https://discourse.world/h/2020/04/09/Basic-LXD-Features-Linux-Container-Systems
+https://doc.zordhak.fr/d/LXD/LXD_-_Installation_et_configuration.html
+https://linuxcontainers.org/lxd/docs/master/storage/#lvm
+https://linuxcontainers.org/lxd/docs/master/storage/#the-following-commands-can-be-used-to-create-lvm-storage-pools
 
 LXD - network
 https://github.com/Nani-o/ansible-role-lxd
@@ -43,3 +48,7 @@ https://docs.openstack.org/charm-guide/queens/openstack-on-lxd.html
 
 https://www.digitalocean.com/community/tutorials/how-to-set-up-and-use-lxd-on-ubuntu-18-04
 https://blog.simos.info/how-to-initialize-lxd-again/
+
+Snapshot
+https://fedoraproject.org/wiki/Features/Virt_Live_Snapshots
+https://wiki.libvirt.org/page/I_created_an_external_snapshot,_but_libvirt_will_not_let_me_delete_or_revert_to_it

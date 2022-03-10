@@ -45,11 +45,11 @@ function status {
                 echo -e "  $(virsh dominfo $DOMAIN | grep CPU\(s\))"
                 echo -e "  $(virsh dominfo $DOMAIN | grep 'Max memory')"
                 echo -e ""
-                echo -e "$(virsh domblklist $DOMAIN | tail -n +3)"
+                echo -e "$(virsh -q domblklist $DOMAIN --details)"
                 echo -e ""
-                echo -e "$(virsh domfsinfo $DOMAIN | tail -n +3)"
+                echo -e "$(virsh -q domfsinfo $DOMAIN)"
                 echo -e ""
-                echo -e "$(virsh domifaddr $DOMAIN --source agent | grep ipv4 | tail -n +2)"
+                echo -e "$(virsh -q domifaddr $DOMAIN --source agent | grep ipv4)"
                 echo -e "\n"
             fi
         done
@@ -176,6 +176,8 @@ function snap-create {
         echo -en "error: expected syntax: virtual-manage --snap-create <string>\n\n"
         exit 0
     fi
+
+    # BEGIN without qemu-guest-agent
     # shutdown domains
     shutdown
     while read DOMAIN; do
@@ -200,13 +202,44 @@ function snap-create {
 	list_inactive_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ "$DOMAIN" =~ $node ]]; then
-                virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME | egrep -v "^$"
+                virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME --atomic | egrep -v "^$"
                 echo "Snapshot $SNAPSHOT_NAME create for domain $DOMAIN"
             fi
         done
     done
     # start domains
     start
+    # END without qemu-guest-agent
+
+    # # BEGIN with qemu-guest-agent
+    # while read DOMAIN; do
+    #     while read SNAP; do
+    #         if [[ "$SNAP_NAME" = "$SNAP" ]]; then
+    #             echo "Warning : snapshot $SNAP_NAME already exists on $DOMAIN"
+    #             snap_exists=1
+    #             break 2
+    #         fi
+    #     done <<< "$(list_all_snapshots $DOMAIN)"
+    # done <<< "$(list_running_domains)"
+
+    # if [[ $snap_exists -eq 1 ]]; then
+    #     read -p "Snapshot $SNAP_NAME already exists. Recreate them (y/n) ?" -n 1 -r
+    #     if [[ $REPLY =~ ^[Yy]$ ]]; then
+    #         snap-delete $SNAP_NAME
+    #     else
+    #         return
+    #     fi
+    # fi
+
+	# list_running_domains | while read DOMAIN; do
+    #     for node in $NODE_TYPES; do
+    #         if [[ "$DOMAIN" =~ $node ]]; then
+    #             virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME --atomic --quiesce --disk-only | egrep -v "^$"
+    #             echo "Snapshot $SNAPSHOT_NAME create for domain $DOMAIN"
+    #         fi
+    #     done
+    # done
+    # # END with qemu-guest-agent
 }
 
 function snap-delete {

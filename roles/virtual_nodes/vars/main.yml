@@ -4,6 +4,9 @@ dns_domain: "mydomain.org"
 # to install libvirt stuff in guest set to True
 allow_virt: False
 
+# to install debug tools(sysdig) set to True
+debug_tools: True
+
 # # kubernetes
 # ############
 # cni_version: v0.8.6
