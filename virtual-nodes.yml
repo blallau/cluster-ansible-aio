@@ -12,8 +12,6 @@
 - name: VMs
   hosts: hypervisors
   gather_facts: false
-  vars:
-    runtime: vm
   pre_tasks:
    - setup:
        gather_subset: min
