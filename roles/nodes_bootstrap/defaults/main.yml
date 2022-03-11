@@ -68,7 +68,7 @@ vbmc_service: vbmcd
 # Default vbmc starting port 623
 vbmc_port: 623
 
-cockpit_enabled: True
+cockpit_enabled: False
 
 cloud_init_disk: "vdz"
 vm_volumes_fs_format: "ext4"
