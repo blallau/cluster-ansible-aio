@@ -26,6 +26,12 @@ GRACEFULLY_SHUTDOWN=false
 
 function start {
     #    docker start docker-dnsmasq
+    echo -e "\e[32m\e[1m==> Start all inactive networks\e[0m"
+	list_inactive_networks | while read NETWORK; do
+        virsh start $NETWORK | grep -v "^$"
+    done
+    echo -e "\e[32m\e[1m==> All networks started :) \e[0m"
+
     echo -e "\e[32m\e[1m==> Start all inactive domains\e[0m"
 	list_inactive_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
@@ -125,6 +131,10 @@ function renew-dhcp {
             fi
         done
 	done
+}
+
+function list_inactive_networks() {
+    virsh -q net-list --inactive | grep "shut off" | awk '{print $2}'
 }
 
 function list_inactive_domains() {

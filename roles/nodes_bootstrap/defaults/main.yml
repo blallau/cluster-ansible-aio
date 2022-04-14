@@ -40,11 +40,14 @@ pip_packages:
 #  - setuptools-rust
   - pip
   #  - ansible<5.0
-  - ansible==2.9
+#  - ansible==2.9
+  - ansible==2.10
   # - docker
   # - tox
   - crudini
   - python-openstackclient
+  - python-designateclient
+#  - python-heatclient
   - python-neutronclient
   - python-novaclient
 

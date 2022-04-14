@@ -24,6 +24,7 @@
       with_subelements:
         - "{{ with_output.results }}"
         - "stdout_lines"
+      ignore_errors: True
 
     - name: Destroy VMs
       virt:

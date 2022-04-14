@@ -39,7 +39,7 @@ globals_override:
   # This interface is required by Neutron. Neutron will put br-ex on it.
   # It will be used for flat networking as well as tagged vlan networks.
   neutron_external_interface: "{{ external_intfs }}"
-  kolla_install_type: "{{ kolla_install_type }}"
+  kolla_install_type: "source"
   kolla_base_distro: "{{ vm_os_distro }}"
   kolla_dev_mode: "{{ kolla_dev_mode }}"
   kolla_config_path: "{{ kolla_config_path }}"
@@ -99,7 +99,12 @@ globals_override:
   enable_cloudkitty: "no"
   enable_collectd: "no"
   enable_cyborg: "no"
-  enable_designate: "no"
+  enable_designate: "yes"
+  enable_horizon_designate: "yes"
+
+  enable_osprofiler: "yes"
+  enable_elasticsearch: "yes"
+
   enable_etcd: "no"
   enable_freezer: "no"
   enable_gnocchi: "no"
@@ -123,6 +128,8 @@ globals_override:
   ceph_nova_pool_name: "vms"
 
   cinder_backend_ceph: "yes"
+  cinder_backup_driver: "s3"
+
   ceph_cinder_keyring: "ceph.client.cinder.keyring"
   ceph_cinder_user: "cinder"
   ceph_cinder_pool_name: "volumes"
@@ -130,6 +137,12 @@ globals_override:
   ceph_cinder_backup_user: "cinder-backup"
   ceph_cinder_backup_pool_name: "backups"
 
+  dns_interface: "eth0"
+  designate_backend: "bind9"
+  designate_ns_record: "ns1.clovis.thales.org"
+  designate_dns_domain: "default.clovis.thales.org."
+
+  neutron_dnsmasq_dns_servers: "11.101.100.11"
 
 #######################
 # Inventory overrides #
@@ -151,4 +164,4 @@ tmp_dir: "/tmp"
 kolla_node_home_dir: "{{ ansible_user_dir }}"
 kolla_venv_path: "/home/centos/venv"
 kolla_ansible_repo: "https://github.com/blallau/kolla-ansible"
-kolla_ansible_branch: "stable/victoria"
+kolla_ansible_branch: "stable/xena"
