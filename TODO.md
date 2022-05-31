@@ -1,5 +1,6 @@
 Bug Fix/Todo list
 -----------------
+- use Libvirt NSS module instead of using /etc/hosts file https://libvirt.org/nss.html
 - add label to loop in order to resume loop iteration display
 - check network use in nodes exists in networks
 - 'ansible_user' undefined
