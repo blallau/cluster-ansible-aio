@@ -2,11 +2,11 @@
 
 ## Overview
 
-Multi-node deployment of cluster apps on a single physical host, using heavily Ansible and Libvirt or LXD.
+Cluster-ansible-aio is a Vagrant like program, allows to deploy of cluster apps on a single machine, using heavily Ansible and Libvirt (or LXD).
 
 ![cluster-ansible-aio](https://user-images.githubusercontent.com/9655027/31175714-6e453b1e-a910-11e7-8a60-f7c6d2114b1a.png)
 
-Cluster-ansible-aio is an open source tool for automating deployment of cluster apps on a single physical machine using Libvirt.
+Cluster-ansible-aio is an open source tool for automating deployment of cluster apps on a single machine using Libvirt.
 
 -   Source: <https://github.com/blallau/cluster-ansible-aio>
 
@@ -16,11 +16,10 @@ Cluster-ansible-aio is an open source tool for automating deployment of cluster 
 -   Libvirt(KVM) or LXD support(beta)
 -   Multi Host OS (CentOS, Ubuntu)
 -   Multi guest OS (CentOS, Ubuntu, Debian, Flatcar, Fedora CoreOS)
--   Multi networks type using DHCP or static IPs
--   Multi block storage (using LV or QCOW2 files)
--   Heavily automated using Cloudinit for standard OS or Ignition for immutable OS
+-   Multi network types using DHCP or static IPs
+-   Multi block storage (using Logical Volume or QCOW2 files)
+-   Heavily automated using Cloudinit for standard OS (or Ignition for immutable OS)
 -   Heavily automated using Ansible
--   Quick deployment: using PIP cache proxy (Devpi) and APT cache proxy (apt-cacher-ng)
 -   IPMI support using VirtualBMC
 
 ## Quickstart guide
@@ -41,16 +40,6 @@ sudo apt-get install snapd python3-pip
 sudo pip3 install -U pip
 ```
 
-<!-- Install dependencies needed to build the code with PIP package manager: -->
-
-<!-- ``` -->
-<!-- #CentOS -->
-<!-- sudo yum install python-devel libffi-devel gcc openssl-devel libselinux-python -->
-
-<!-- #Ubuntu -->
-<!-- sudo apt-get install python-dev libffi-dev gcc libssl-dev python-selinux -->
-<!-- ``` -->
-
 Install Ansible (>= 2.9.13):
 
 ```
@@ -69,8 +58,7 @@ Command:
     git clone https://github.com/blallau/cluster-ansible-aio
     cd cluster-ansible-aio
 
-2. Bootstrap hypervisor, Docker registry, proxies (PIP and APT), and create
-virtual nodes.
+2. Bootstrap hypervisor, and create virtual nodes.
 
 By default, virtual nodes OS will be same as hypervisor OS.
 
@@ -102,8 +90,7 @@ Command:
     git clone https://github.com/blallau/cluster-ansible-aio
     cd cluster-ansible-aio
 
-2. Bootstrap hypervisor, Docker registry, proxies (PIP and APT), and create
-container nodes.
+2. Bootstrap hypervisor and create container nodes.
 
 By default, container nodes OS will be same as hypervisor OS.
 
@@ -127,4 +114,4 @@ and **roles/container_nodes/vars/main.yml**.
 ## Troubleshooting guide
 
 * deployment fails on "virtual_nodes : Get IP address of VM":
-=> maybe network interfaces naming in VM is different than configured using cloudinit.
+=> maybe network interfaces naming in VM is in conflict with cloudinit config.
