@@ -1,7 +1,0 @@
-- name: Deploy NFS server
-  hosts: hypervisors
-  vars:
-    nfs_exports: ['/opt/ovirt/vms', '/opt/ovirt/export', '/opt/ovirt/iso']
-  become: True
-  roles:
-    - { role: geerlingguy.nfs }
