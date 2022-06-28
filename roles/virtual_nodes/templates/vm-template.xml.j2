@@ -2,8 +2,8 @@
 <domain type='kvm'{% if item.os_type in ['fcos', 'flatcar'] %} xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'{% endif %}>
   <name>{{ item.name }}</name>
   <metadata>
-    <aio:instance xmlns:aio="https://github.com/blallau/ansible-aio">
-      <aio:inventory group="{{ item.role }}" distro="{{ item.os_type }}"/>
+    <aio:instance xmlns:aio='https://github.com/blallau/ansible-aio'>
+      <aio:inventory group='{{ item.role }}' distro='{{ item.os_type }}'/>
     </aio:instance>
   </metadata>
   {% if item.os_type in ['fcos', 'flatcar'] %}
@@ -95,12 +95,12 @@
       <source path='/dev/pts/1'/>
       <target port='0'/>
     </serial>
-    <console type='pty' tty='/dev/pts/1'>
-      <source path='/dev/pts/1'/>
-      <target type='serial' port='0'/>
-    </console>
+    {# <console type='pty' tty='/dev/pts/1'> #}
+    {#   <source path='/dev/pts/1'/> #}
+    {#   <target type='serial' port='0'/> #}
+    {# </console> #}
     <console type='pty'>
-      <log file={{ tmp_dir }}/{{ item.name }}/console.log append='off'/>
+      <log file='{{ tmp_dir }}/{{ item.name }}/console.log' append='off'/>
       <target type='serial' port='0'/>
     </console>
     <input type='keyboard' bus='ps2'/>

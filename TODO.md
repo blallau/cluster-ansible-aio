@@ -1,18 +1,47 @@
-Bug Fix/Todo list
------------------
-- use Libvirt NSS module instead of using /etc/hosts file https://libvirt.org/nss.html
-- add label to loop in order to resume loop iteration display
-- check network use in nodes exists in networks
-- 'ansible_user' undefined
-=> libvirt_inventory.py can't retrieve dhcp lease (sudo dhclient eth0)_
-- In case of many interfaces add check to get external interface first
-- manage node-prefix in SSH keys and libvirt network, ... in order to not remove env from previous deployment
+Bug Fix
+-------
+- Add check on 'nodes' uses defined 'network'
+```
+TASK [virtual_nodes : [KVM host] Copy Libvirt XML domain for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}] ************************************************************************************************************************
+fatal: [localhost]: FAILED! =>
+  msg: |-
+    The task includes an option with an undefined variable. The error was: 'dict object' has no attribute 'bridge'
+
+    The error appears to be in '/home/T0125936/work/GIT/cluster-ansible-aio/roles/virtual_nodes/tasks/create.yml': line 23, column 3, but may
+    be elsewhere in the file depending on the exact syntax problem.
+
+    The offending line appears to be:
+
+
+    - name: "[KVM host] Copy Libvirt XML domain for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
+      ^ here
+    We could be wrong, but this one looks like it might be an issue with
+    missing quotes. Always quote template expression brackets when they
+    start a value. For instance:
+
+        with_items:
+          - {{ foo }}
+
+    Should be written as:
+
+        with_items:
+          - "{{ foo }}"
+```
 - fix gracefully-shutdown
-- add task to wait for Flatcar VMs ready
 - fix bug when different deployments use the same networks
   => IPs/macs association cannot be set in the previous DHCP config
   => IPs are random => hence deployment fails [Waiting on IPs]
 - fix idempotency when playbook is running twice
+
+Todo list
+---------
+- use Libvirt NSS module instead of using /etc/hosts file https://libvirt.org/nss.html
+- add label to loop in order to resume loop iteration display
+- 'ansible_user' undefined
+=> libvirt_inventory.py can't retrieve dhcp lease (sudo dhclient eth0)_
+- In case of many interfaces add check to get external interface first
+- manage node-prefix in SSH keys and libvirt network, ... in order to not remove env from previous deployment
+- add task to wait for Flatcar VMs ready
 
 - [manage QCOW2 with a baseimagefile]
 - [Fix DNS issue when using Docker DNS server instead of Libvirt dnsmasq]
@@ -21,7 +50,9 @@ Bug Fix/Todo list
 - [remove shutdown before snapshot]
 => use qemu-guest-agent (fsfreeze before snapshot)
 => NO: external snapshot doesn't manage Guest VM
+- introduce virtio-fs https://virtio-fs.gitlab.io/
 
+- take a look at https://virt-lightning.org/
 
 check https://github.com/hicknhack-software/ansible-libvirt
 

@@ -124,7 +124,9 @@ class LibvirtInventory(object):
                 _push(inventory, 'nodes', domain_name)
                 interfaces = root.findall("./devices/interface[@type='bridge']")
                 if interfaces is not None:
-                    # interface prov(DHCP)
+                    # interface network(DHCP) interfaces[0]
+                    # interface tunnel (DHCP) interfaces[1]
+                    # interface ext (DHCP) interfaces[2]
                     interface_prov = interfaces[0]
                     source_elem = interface_prov.find('source')
                     mac_elem = interface_prov.find('mac')

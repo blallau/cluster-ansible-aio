@@ -23,9 +23,13 @@ nodes:
     ram: 10
     os_type: "centos"
     net_intfs:
-      - name: "{{ net_prefix }}network-br"
+      - name: "{{ net_prefix }}mgmt-br"
+      - name: "{{ net_prefix }}api-br"
       - name: "{{ net_prefix }}tunnel-br"
-      - name: "{{ net_prefix }}ext-br"
+      - name: "{{ net_prefix }}stor-f-br"
+      - name: "{{ net_prefix }}stor-b-br"
+      - name: "{{ net_prefix }}api-ext-br"
+      - name: "{{ net_prefix }}neutron-ext-br"
     disks:
       - name: vol-log
         size: 60
@@ -37,27 +41,39 @@ nodes:
     ram: 6
     os_type: "centos"
     net_intfs:
-      - name: "{{ net_prefix }}network-br"
+      - name: "{{ net_prefix }}mgmt-br"
+      - name: "{{ net_prefix }}api-br"
       - name: "{{ net_prefix }}tunnel-br"
-      - name: "{{ net_prefix }}ext-br"
+      - name: "{{ net_prefix }}stor-f-br"
+      - name: "{{ net_prefix }}stor-b-br"
+      - name: "{{ net_prefix }}api-ext-br"
+      - name: "{{ net_prefix }}neutron-ext-br"
   - name: "compute1"
     type: "compute"
     cpu: 2
     ram: 8
     os_type: "centos"
     net_intfs:
-      - name: "{{ net_prefix }}network-br"
+      - name: "{{ net_prefix }}mgmt-br"
+      - name: "{{ net_prefix }}api-br"
       - name: "{{ net_prefix }}tunnel-br"
-      - name: "{{ net_prefix }}ext-br"
+      - name: "{{ net_prefix }}stor-f-br"
+      - name: "{{ net_prefix }}stor-b-br"
+      - name: "{{ net_prefix }}api-ext-br"
+      - name: "{{ net_prefix }}neutron-ext-br"
   - name: "ceph"
     type: "ceph"
     cpu: 1
     ram: 5
     os_type: "centos"
     net_intfs:
-      - name: "{{ net_prefix }}network-br"
+      - name: "{{ net_prefix }}mgmt-br"
+      - name: "{{ net_prefix }}api-br"
       - name: "{{ net_prefix }}tunnel-br"
-      - name: "{{ net_prefix }}ext-br"
+      - name: "{{ net_prefix }}stor-f-br"
+      - name: "{{ net_prefix }}stor-b-br"
+      - name: "{{ net_prefix }}api-ext-br"
+      - name: "{{ net_prefix }}neutron-ext-br"
     disks:
       - name: vol-osd1
         size: 40
@@ -83,19 +99,33 @@ virt_customize_cmd: []
 # First interface MUST be external one
 net_prefix: ""
 
+# note(bl) one NAT interface is required
 networks:
-  - name: "{{ net_prefix }}network-br"
+  - name: "{{ net_prefix }}mgmt-br"
     forward: nat
     mode: dhcp
-    cidr: "11.{{ net_second_octet | default(100) }}.100.0/24"
+    cidr: "11.100.100.0/24"
     pxe: False
+  - name: "{{ net_prefix }}api-br"
+    mode: dhcp
+    cidr: "11.100.110.0/24"
   - name: "{{ net_prefix }}tunnel-br"
     mode: dhcp
-    cidr: "11.{{ net_second_octet | default(100) }}.150.0/24"
-  - name: "{{ net_prefix }}ext-br"
+    cidr: "11.100.120.0/24"
+  - name: "{{ net_prefix }}stor-f-br"
     mode: dhcp
-    cidr: "11.{{ net_second_octet | default(100) }}.200.0/24"
+    cidr: "11.100.130.0/24"
+  - name: "{{ net_prefix }}stor-b-br"
+    mode: dhcp
+    cidr: "11.100.140.0/24"
+  - name: "{{ net_prefix }}api-ext-br"
+    mode: dhcp
+    cidr: "11.100.150.0/24"
+  - name: "{{ net_prefix }}neutron-ext-br"
+    mode: dhcp
+    cidr: "11.100.160.0/24"
 
+# note(bl) one NAT interface is required
 host_ip: "{{ networks | selectattr('forward', 'defined') | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address') | first }}"
 
 # ip_offset [ 2-9 ]
