@@ -1,4 +1,5 @@
 ---
+- import_tasks: input_precheck.yml
 - import_tasks: host_precheck.yml
 - import_tasks: defaults-get.yml
 - import_tasks: lvm_storage.yml

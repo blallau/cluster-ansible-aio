@@ -1,0 +1,12 @@
+---
+- set_fact:
+    nodes_interfaces: "{{ nodes | map(attribute='net_intfs') | flatten | json_query('[*].name') }}"
+
+- set_fact:
+    network_names: "{{ networks | map(attribute='name') | list }}"
+
+- name: Check network interfaces naming
+  fail:
+    msg: "Network interface {{ item }} not in {{ network_names }}"
+  when: item not in network_names
+  loop: "{{ nodes_interfaces }}"
