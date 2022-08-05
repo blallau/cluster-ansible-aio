@@ -1,19 +1,23 @@
 Bug Fix
 -------
 - fix gracefully-shutdown
+- manage simultaneous deployments
+  => manage node-prefix in SSH keys
+  => libvirt network conflict (see below)
 - fix bug when different deployments use the same networks
   => IPs/macs association cannot be set in the previous DHCP config
   => IPs are random => hence deployment fails [Waiting on IPs]
 - fix idempotency when playbook is running twice
+- bug 'ansible_user' undefined (resolved)
+=> libvirt_inventory.py can't retrieve dhcp lease (sudo dhclient eth0)
+=> launch ./virtual-manage --renew-dhcp_
+- fix SNAP_NAME and SNAPSHOT_NAME redondancy
 
 Todo list
 ---------
 - use Libvirt NSS module instead of using /etc/hosts file https://libvirt.org/nss.html
-- add label to loop in order to resume loop iteration display
-- 'ansible_user' undefined
-=> libvirt_inventory.py can't retrieve dhcp lease (sudo dhclient eth0)_
-- In case of many interfaces add check to get external interface first
-- manage node-prefix in SSH keys and libvirt network, ... in order to not remove env from previous deployment
+- add label to loop in order to simplify loop iteration display
+- In case of many interfaces add a check to get external interface first
 - add task to wait for Flatcar VMs ready
 
 - [manage QCOW2 with a baseimagefile]
@@ -21,15 +25,14 @@ Todo list
 - [automaticaly retrieve last iso images (debian,centos), to avoid too long package update]
 - [manage remote libvirtd]
 - [remove shutdown before snapshot]
-=> use qemu-guest-agent (fsfreeze before snapshot)
-=> NO: external snapshot doesn't manage Guest VM
+  => use qemu-guest-agent (fsfreeze before snapshot)
+  => NO: external snapshot doesn't manage Guest VM
 - introduce virtio-fs https://virtio-fs.gitlab.io/
 
 - take a look at https://virt-lightning.org/
 
 check https://github.com/hicknhack-software/ansible-libvirt
 
-- fix SNAP_NAME and SNAPSHOT_NAME redondancy
 
 LXD
 
