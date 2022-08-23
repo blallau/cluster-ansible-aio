@@ -1,5 +1,6 @@
 Bug Fix
 -------
+- fix issue when os_image is not present in {{ tmp_dir }}
 - fix gracefully-shutdown
 - manage simultaneous deployments
   => manage node-prefix in SSH keys

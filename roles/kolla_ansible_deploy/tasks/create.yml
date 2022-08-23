@@ -114,7 +114,7 @@
 
 - name: Kolla-ansible bootstrap
   # shell: "source {{ kolla_venv_path }}/bin/activate && kolla-ansible bootstrap-servers -i {{ kolla_node_home_dir }}/multinode"
-  shell: "kolla-ansible bootstrap-servers -i {{ kolla_node_home_dir }}/multinode"
+  shell: "kolla-ansible bootstrap-servers -i {{ kolla_node_home_dir }}/multinode -e customize_etc_hosts=False"
   tags: deploy
 
 - name: Kolla-ansible prechecks
@@ -122,9 +122,9 @@
   shell: "kolla-ansible prechecks -i {{ kolla_node_home_dir }}/multinode"
   tags: deploy
 
-- name: Kolla-ansible deploy
-  shell: "kolla-ansible deploy -i {{ kolla_node_home_dir }}/multinode"
-  tags: deploy
+# - name: Kolla-ansible deploy
+#   shell: "kolla-ansible deploy -i {{ kolla_node_home_dir }}/multinode"
+#   tags: deploy
 
-- name: Kolla-ansible post-deploy
-  shell: "kolla-ansible post-deploy"
+# - name: Kolla-ansible post-deploy
+#   shell: "kolla-ansible post-deploy"

@@ -85,8 +85,9 @@
     enabled: True
   when: unitfile.changed or configfile.changed
 
-- name: "Add {{ os_default_user }} user to Docker group"
-  user:
-    name: "{{ os_default_user }}"
-    groups: docker
-    append: True
+# Note(bl) add hypervisor default user ???
+# - name: "Add {{ os_default_user }} user to Docker group"
+#   user:
+#     name: "{{ os_default_user }}"
+#     groups: docker
+#     append: True

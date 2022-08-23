@@ -11,9 +11,9 @@
     pkg: "{{ apt_dependencies }}"
   when: ansible_distribution|lower in ["ubuntu", "debian"]
 
-- import_tasks: docker/enable_docker.yml
-  become: True
-  when: docker_enabled | bool
+# - import_tasks: docker/enable_docker.yml
+#   become: True
+#   when: docker_enabled | bool
 
 - name: Install/Update pip packages
   become: True

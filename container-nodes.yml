@@ -16,7 +16,9 @@
   tasks:
     # - raw: echo "nameserver {{ host_ip }}" > /etc/resolv.conf
     - raw: test -e /usr/bin/python || (apt -y update && apt install -y python3-minimal)
-      when: method == "create" and ansible_distribution|lower == "ubuntu"
+      when:
+        - method == "create"
+        - ansible_distribution == "ubuntu"
 
 # - name: Populate /etc/resolv.conf file
 #   hosts: created_nodes

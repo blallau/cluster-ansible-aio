@@ -5,5 +5,5 @@
   Hostname {{ node.interfaces | selectattr('external', 'defined') | map(attribute='address') | first }}
   UserKnownHostsFile /dev/null
   StrictHostKeyChecking no
-  User {{ os_default_user }}
+  User {{ node.os_type }}
 {% endfor %}

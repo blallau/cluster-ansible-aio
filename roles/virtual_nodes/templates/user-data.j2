@@ -15,7 +15,7 @@ mount_default_fields: [ None, None, "auto", "defaults,nofail", "0", "2" ]
 chpasswd:
   list: |
     root:root
-    {{ os_default_user }}:{{ os_default_user }}
+    {{ item.os_type }}:{{ item.os_type }}
   expire: False
 # System settings
 resize_rootfs: True
@@ -139,5 +139,5 @@ final_message: "SYSTEM READY TO LOG IN"
 # Set the default user
 system_info:
   default_user:
-    name: {{ os_default_user }}
+    name: {{ item.os_type }}
 

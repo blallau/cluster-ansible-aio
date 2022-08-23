@@ -29,17 +29,19 @@
       failed_when: false
       when:
         - method == "create"
-        - guest_os_distro == "debian" or guest_os_distro == "centos"
+        - ansible_distribution in ["debian", "ubuntu", "centos"]
 
-# Python not present
-- name: Wait for Python 3 to be installed
+# Python 3 not present on Ubuntu
+- name: 'Wait for Python 3 to be installed'
   hosts: created_nodes
   gather_facts: false
   become: True
   tasks:
     # - raw: echo "nameserver {{ host_ip }}" > /etc/resolv.conf
     - raw: test -e /usr/bin/python3 || (apt -y update && apt install -y python3-minimal)
-      when: method == "create" and ansible_distribution|lower == "ubuntu"
+      when:
+        - method == "create"
+        - ansible_distribution in ["debian", "ubuntu"]
 
     # - raw: echo "nameserver {{ host_ip }}" > /etc/resolv.conf
     # - raw: test -e /usr/bin/python3 || (yum -y update && yum install -y python3)

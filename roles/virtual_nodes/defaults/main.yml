@@ -41,4 +41,3 @@ guest_os_images:
   # centos-8.2: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
   #  centos: "CentOS-8-GenericCloud-8.3.2011-20201204.2.x86_64.qcow2"
   centos: "CentOS-Stream-GenericCloud-8-20220125.1.x86_64.qcow2"
-guest_os_image: "{{ vm_os_images[guest_os_distro] }}"

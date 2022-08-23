@@ -10,8 +10,6 @@
 
 - import_tasks: define_cluster_nodes.yml
 
-- import_tasks: prepare_os_image.yml
-
 - name: "[KVM host] Copy cluster config for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
   blockinfile:
     path: "{{ tmp_dir }}/{{ item.name }}/cluster_config"
@@ -20,6 +18,8 @@
         {{ item | to_nice_json(indent=2) }}
   with_items: "{{ cluster_nodes }}"
   tags: network
+
+- import_tasks: prepare_os_image.yml
 
 - name: "[KVM host] Copy Libvirt XML domain for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
   blockinfile:
@@ -108,7 +108,7 @@
   add_host:
     name: "{{ item.1.address }}"
     instance_name: "{{ item.0.name }}.{{ dns_domain }}"
-    ansible_distribution: "{{ guest_os_distro }}"
+    ansible_distribution: "{{ item.0.os_type }}"
     ansible_user: "{{ item.0.os_type }}"
     groups: created_nodes
   with_subelements:

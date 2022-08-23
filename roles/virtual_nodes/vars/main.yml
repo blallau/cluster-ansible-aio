@@ -6,12 +6,3 @@ allow_virt: False
 
 # to install debug tools(sysdig) set to True
 debug_tools: True
-
-# # kubernetes
-# ############
-# cni_version: v0.8.6
-# kubernetes_version: v1.18.8
-# crictl_version: v1.18.0
-# setup_command: "kubeadm init --config=/etc/kubernetes/kubeadm-custom-config.yaml"
-# pod_subnet: "10.244.0.0/16"
-# kube_binaries_path: "/usr/local/bin"

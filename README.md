@@ -2,7 +2,9 @@
 
 ## Overview
 
-Cluster-ansible-aio is a Vagrant like program, allows to deploy of cluster apps on a single machine, using heavily Ansible and Libvirt (or LXD).
+Cluster-ansible-aio is a Vagrant like program for building and managing virtual machine environments in a single workflow.
+Virtual machines are provisioned on top of Libvirt, or LXD (still beta) using heavily Ansible.
+Cluster-ansible-aio is designed for everyone as the easiest and fastest way to create a virtualized environment!
 
 ![cluster-ansible-aio](https://user-images.githubusercontent.com/9655027/31175714-6e453b1e-a910-11e7-8a60-f7c6d2114b1a.png)
 
@@ -12,7 +14,6 @@ Cluster-ansible-aio is an open source tool for automating deployment of cluster 
 
 ## Features
 
--   Multi-nodes
 -   Libvirt(KVM) or LXD support(beta)
 -   Multi Host OS (CentOS, Ubuntu)
 -   Multi guest OS (CentOS, Ubuntu, Debian, Flatcar, Fedora CoreOS)
@@ -58,17 +59,11 @@ Command:
     git clone https://github.com/blallau/cluster-ansible-aio
     cd cluster-ansible-aio
 
-2. Bootstrap hypervisor, and create virtual nodes.
+2. Describe the type of machine required and how to configure and provision these machines with variables from **group_vars/all.yml**
 
-By default, virtual nodes OS will be same as hypervisor OS.
+3. Bootstrap hypervisor, and create virtual nodes.
 
     ./cluster-ansible-aio create-virtual-nodes
-
-Virtual nodes OS can be override using **guest_os_distro** variable.
-
-Example: in case of Ubuntu hypervisor and Debian virtual nodes wanted.
-
-    ./cluster-ansible-aio create-virtual-nodes -e guest_os_distro=debian
 
 Any of the default role variables can be easily overridden with variables from **group_vars/all.yml**
 and **roles/virtual_nodes/vars/main.yml**.
@@ -92,15 +87,7 @@ Command:
 
 2. Bootstrap hypervisor and create container nodes.
 
-By default, container nodes OS will be same as hypervisor OS.
-
     ./cluster-ansible-aio create-container-nodes
-
-Container nodes OS can be override using **guest_os_distro** variable.
-
-Example: in case of Ubuntu hypervisor and Debian containers wanted.
-
-    ./cluster-ansible-aio create-container-nodes -e guest_os_distro=debian
 
 Any of the default role variables can be easily overridden with variables from **group_vars/all.yml**
 and **roles/container_nodes/vars/main.yml**.

@@ -52,8 +52,6 @@ guest_os_images:
   debian: "debian/10/cloud"
   centos: "centos/8-Stream/cloud"
 
-guest_os_image: "{{ guest_os_images[guest_os_distro] }}"
-
 #######
 # LXD #
 #######
