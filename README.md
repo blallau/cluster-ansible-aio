@@ -59,9 +59,11 @@ Command:
     git clone https://github.com/blallau/cluster-ansible-aio
     cd cluster-ansible-aio
 
-2. Describe the type of machine required and how to configure and provision these machines with variables from **group_vars/all.yml**
+2. Put qcow2 guest OS images defined in roles/virtual_nodes/defaults/main.yml in "tmp_dir" (default: "${HOME}/tmp")
 
-3. Bootstrap hypervisor, and create virtual nodes.
+3. Describe the type of machine required and how to configure and provision these machines with variables from **group_vars/all.yml**
+
+4. Bootstrap hypervisor, and create virtual nodes.
 
     ./cluster-ansible-aio create-virtual-nodes
 

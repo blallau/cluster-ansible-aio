@@ -7,7 +7,7 @@ dns_domain: "mydomain.org"
 allow_virt: False
 
 # to install debug tools(sysdig) set to True
-debug_tools: True
+debug_tools: False
 
 # Storage
 #########

@@ -45,7 +45,7 @@ packages:
 {% endif %}
 {% elif item.os_type == 'centos' %}
   - python3
-  - tc
+#  - tc (not found on Rocky)
   - ebtables
   - iscsi-initiator-utils
 {% if qemu_guest_agent_enabled %}
@@ -62,8 +62,8 @@ packages:
 {# {% endif %} #}
 {# {% endfor %} #}
 #setup the file system on the device
-{% if disks is defined and
-      disks | selectattr('mount_path','defined') | list | length > 0 %}
+{% if item.disks is defined and
+      item.disks | selectattr('mount_path','defined') | list | length > 0 %}
 fs_setup:
 {% for disk in item.disks %}
 {% if disk.mount_path is defined %}   
@@ -99,8 +99,8 @@ write_files:
    owner: root:root
    permissions: '0644'
 {% endif %}
-{% if disks is defined and
-      disks | selectattr('mount_path','defined') | list | length > 0 %}
+{% if item.disks is defined and
+      item.disks | selectattr('mount_path','defined') | list | length > 0 %}
 mounts:
 {% for disk in item.disks %}
 {% if disk.mount_path is defined %}
@@ -111,11 +111,11 @@ mounts:
 timezone: {{ guest_timezone | default(virt_infra_timezone) }}
 runcmd:
   - [ sh, -c, echo "=========runcmd=========" ]
-{% for disk in item.disks %}
-{% if disk.mount_path is defined %}
-  - mkdir {{ disk.mount_path }}
-{% endif %}
-{% endfor %}
+{# {% for disk in item.disks %} #}
+{# {% if disk.mount_path is defined %} #}
+{#   - mkdir {{ disk.mount_path }} #}
+{# {% endif %} #}
+{# {% endfor %} #}
 #  - systemctl disable NetworkManager --now
   - systemctl restart sshd
 {% if allow_virt %}

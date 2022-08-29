@@ -15,8 +15,8 @@ cloud_init_disk: "vdz"
 ########
 # VBMC #
 ########
-# Virtual BMC is enabled by default
-vbmc: True
+# Virtual BMC is disabled by default
+vbmc: False
 
 # By default we install with pip, but if you prefer to do it manually, set this to false
 vbmc_pip: True
@@ -37,7 +37,7 @@ guest_os_images:
   fcos: "fedora-coreos-32.qcow2"
   flatcar: "flatcar-linux1.qcow2"
   # centos: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
-  # centos-7: "CentOS-7-x86_64-GenericCloud-2009.qcow2"
   # centos-8.2: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
-  #  centos: "CentOS-8-GenericCloud-8.3.2011-20201204.2.x86_64.qcow2"
-  centos: "CentOS-Stream-GenericCloud-8-20220125.1.x86_64.qcow2"
+  # centos: "CentOS-8-GenericCloud-8.3.2011-20201204.2.x86_64.qcow2"
+  # centos: "CentOS-Stream-GenericCloud-8-20220125.1.x86_64.qcow2"
+  centos: "Rocky-8-GenericCloud-8.4-20210620.0.x86_64.qcow2"
