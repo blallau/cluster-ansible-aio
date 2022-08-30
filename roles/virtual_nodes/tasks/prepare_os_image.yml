@@ -37,7 +37,7 @@
 
 - name: "[KVM host] Increase the image size"
   become: True
-  command: "qemu-img resize {{ libvirt_dir }}/{{ item.item.name }}-boot.qcow2 +{{ root_disk_size }}G"
+  command: "qemu-img resize {{ libvirt_dir }}/{{ item.item.name }}-boot.qcow2 +{{ item.item.disk_size }}G"
   with_items: "{{ copied.results }}"
   when: item.item.name is not match("flatcar.*")
 

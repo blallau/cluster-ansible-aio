@@ -17,6 +17,7 @@
   ram: {{ node.ram }}
   vcpu: {{ node.cpu }}
   role: {{ node.type }}
+  disk_size: {{ node.root_disk_size | default(root_disk_default_size) }}
   image: {{ guest_os_images[os_type] }}
   os_type: {{ os_type }}
 {% if vbmc | bool %}
@@ -51,7 +52,7 @@
       mode: "{{ net.mode }}"  
 {% set ip = 10 + node_loop.index %}  
       address: "{{ net.cidr | ipaddr(ip) | ipaddr('address') }}"  
-      mac: "{{ mac_prefix }}:1{{ node_loop.index }}:0{{ intf_loop.index }}"  
+      mac: "{{ mac_prefix | random_mac() }}"
 {% if net.mode == 'static' %}  
       netmask: "{{ net.cidr | ipaddr('netmask') }}"  
 {% endif %}  
