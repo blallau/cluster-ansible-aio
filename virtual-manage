@@ -29,6 +29,10 @@ function start_networks {
 	list_inactive_networks | while read NETWORK; do
         if [ ! -z "$NETWORK" ]; then
             virsh net-start $NETWORK | grep -v "^$"
+            # restart failed network
+            if [ $? -ne 0 ]; then
+                virsh net-start $NETWORK | grep -v "^$"
+            fi
         fi
     done
     echo -e "\e[32m\e[1m==> All networks started :) \e[0m"

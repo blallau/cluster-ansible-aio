@@ -1,6 +1,6 @@
-{% set lettres = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
+{% set letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'] %}
 {% macro disk_device(index) -%}
-{% set device = lettres[index | int] -%}
+{% set device = letters[index | int] -%}
 {{ device }}
 {%- endmacro %}
 ---
@@ -78,7 +78,7 @@
       type: {{ disk.type | default('raw') }}
 {% endif %}
 {% if disk.format is defined %}
-      format: {{ disk.type | default('ext4') }}
+      format: {{ disk.format | default('ext4') }}
 {% endif %}
 {% if disk.mount_path is defined %}
       mount_path: {{ disk.mount_path }}
