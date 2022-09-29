@@ -13,7 +13,7 @@
 - name: "[KVM host] Copy cluster config for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
   blockinfile:
     path: "{{ tmp_dir }}/{{ item.name }}/cluster_config"
-    create: True
+    create: true
     block: |
         {{ item | to_nice_json(indent=2) }}
   with_items: "{{ cluster_nodes }}"
@@ -24,7 +24,7 @@
 - name: "[KVM host] Copy Libvirt XML domain for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
   blockinfile:
     path: "{{ tmp_dir }}/{{ item.name }}/domain.xml"
-    create: True
+    create: true
     block: |
         {{ lookup('template', 'vm-template.xml.j2') }}
   with_items: "{{ cluster_nodes }}"
@@ -56,7 +56,7 @@
       # Wait for network so we can get the IP to log in
       # Do this for all VMs, in case they already existed and IP has changed
     - name: Get IP address of VM
-      become: True
+      become: true
       shell: >
         set -o pipefail ;
         virsh

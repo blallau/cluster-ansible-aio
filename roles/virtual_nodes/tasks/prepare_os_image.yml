@@ -28,21 +28,21 @@
   with_items: "{{ cluster_nodes }}"
 
 - name: "[KVM host] Copy OS images to libvirt directory"
-  become: True
+  become: true
   copy:
     src: "{{ tmp_dir }}/{{ item.image }}"
     dest: "{{ libvirt_dir }}/{{ item.name }}-boot.qcow2"
-    remote_src: True
+    remote_src: true
   with_items: "{{ cluster_nodes }}"
 
 - name: "[KVM host] Increase the image size"
-  become: True
+  become: true
   command: "qemu-img resize {{ libvirt_dir }}/{{ item.item.name }}-boot.qcow2 +{{ item.item.disk_size }}G"
   with_items: "{{ copied.results }}"
   when: item.item.name is not match("flatcar.*")
 
 - name: "[KVM host] Run custom shell commands in OS disk"
-  become: True
+  become: true
   command: >
     virt-customize
     -a {{ libvirt_dir }}/{{ item.item.name }}-boot.qcow2
@@ -61,7 +61,7 @@
     - virt_customize_cmd is defined and virt_customize_cmd
 
 - name: "[KVM host] Install required packages into OS disk"
-  become: True
+  become: true
   command: >
     virt-customize
     -a {{ libvirt_dir }}/{{ item.item.name }}-boot.qcow2
@@ -76,7 +76,7 @@
     - virt_customize_packages is defined and virt_customize_packages
 
 - name: "[KVM host] Sysprep guest disk"
-  become: True
+  become: true
   command: >
     virt-sysprep
     --selinux-relabel

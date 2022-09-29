@@ -11,7 +11,7 @@
       register: with_output
       args:
         executable: /bin/bash
-      ignore_errors: True
+      ignore_errors: true
 
     - name: Delete metadata snapshots
       command: "virsh snapshot-delete --metadata --domain {{ item.0.item.name }} {{ item.1 }}"
@@ -24,24 +24,24 @@
       with_subelements:
         - "{{ with_output.results }}"
         - "stdout_lines"
-      ignore_errors: True
+      ignore_errors: true
 
     - name: Destroy VMs
       virt:
         command: destroy
         name: "{{ item.name }}"
       with_items: "{{ cluster_nodes }}"
-      ignore_errors: True
+      ignore_errors: true
 
     - name: Undefine VMs
       virt:
         command: undefine
         name: "{{ item.name }}"
       with_items: "{{ cluster_nodes }}"
-      ignore_errors: True
+      ignore_errors: true
 
     - name: Remove OS images from libvirt directory
-      become: True
+      become: true
       file:
         path: "{{ libvirt_dir }}/{{ item.name }}-boot.qcow2"
         state: absent
@@ -71,7 +71,7 @@
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ ansible_env.HOME }}/.ssh/config"
     state: absent
-  ignore_errors: True
+  ignore_errors: true
 
 - name: Clean nodes from SSH known_hosts
   command:
@@ -80,10 +80,10 @@
     - "{{ cluster_nodes }}"
     - interfaces
   when: item.1.address is defined and item.1.external is defined and item.1.external
-  ignore_errors: True
+  ignore_errors: true
 
 - name: Clean /etc/hosts file
-  become: True
+  become: true
   lineinfile:
     path: /etc/hosts
     line: "{{ item.1.address }} {{ item.0.name }}.{{ dns_domain }} {{ item.0.name }}"
@@ -92,7 +92,7 @@
     - "{{ cluster_nodes }}"
     - interfaces
   when: item.1.address is defined and item.1.external is defined and item.1.external
-  ignore_errors: True
+  ignore_errors: true
 
 - name: "Clean {{ ansible_env.HOME }}/.ssh/known_hosts"
   known_hosts:
@@ -100,14 +100,14 @@
     name: "{{ item.name }}.{{ dns_domain }}"
     state: absent
   with_items: "{{ cluster_nodes }}"
-  ignore_errors: True
+  ignore_errors: true
 
 - name: Remove virtual BMC
   shell: "set -o pipefail && {{ result_vbmc_path.stdout }} delete {{ item.name }}"
   args:
     executable: /bin/bash
   register: result_vbmc_remove
-  ignore_errors: True
+  ignore_errors: true
   when:
     - vbmc_port is defined and vbmc_port
     - vbmc is defined and vbmc

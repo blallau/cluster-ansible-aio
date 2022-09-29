@@ -1,3 +1,4 @@
+---
 - name: Run all the validations
   block:
     - name: Libvirt stuff
@@ -201,10 +202,10 @@
           systemd:
             name: "{{ vbmc_service }}"
             state: restarted
-            daemon_reload: yes
-            enabled: yes
+            daemon_reload: true
+            enabled: true
           register: result_virtualbmc
-          ignore_errors: yes
+          ignore_errors: true
           changed_when: false
           when:
             - vbmc|bool

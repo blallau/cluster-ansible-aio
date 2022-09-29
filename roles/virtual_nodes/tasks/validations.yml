@@ -1,3 +1,4 @@
+---
 - name: Run all the validations
   block:
     - name: Libvirt stuff
@@ -21,9 +22,9 @@
           service:
             name: "libvirtd"
             state: restarted
-            enabled: yes
+            enabled: true
           register: result_libvirtd_restart
-          ignore_errors: yes
+          ignore_errors: true
           when:
             - result_qemuconf.changed
 
@@ -32,9 +33,9 @@
           service:
             name: "libvirtd"
             state: started
-            enabled: yes
+            enabled: true
           register: result_libvirtd
-          ignore_errors: yes
+          ignore_errors: true
 
         - name: "Advise unable to start libvirtd"
           set_fact:
@@ -74,9 +75,9 @@
           service:
             name: "apparmor"
             state: restarted
-            enabled: yes
+            enabled: true
           register: result_apparmor
-          ignore_errors: yes
+          ignore_errors: true
           when:
             - libvirt_security_driver is defined and libvirt_security_driver == "apparmor"
             - result_apparmor_conf.changed
@@ -116,7 +117,7 @@
             name: virtualbmc  {%- if vbmc_pip_version is defined %}=={{ vbmc_pip_version }}{% endif %}
             extra_args: "--prefix /usr/local"
           register: result_vbmc_pip
-          ignore_errors: yes
+          ignore_errors: true
           retries: 30
           delay: 5
           until: result_vbmc_pip is succeeded
@@ -129,7 +130,7 @@
           when:
             - vbmc
           changed_when: false
-          ignore_errors: yes
+          ignore_errors: true
 
         - name: "Advise unable to find virtualbmc"
           set_fact:
@@ -154,7 +155,7 @@
             dest: "/etc/systemd/system/vbmcd.service"
             mode: '0644'
           register: result_vbmc_service
-          ignore_errors: yes
+          ignore_errors: true
           when:
             - vbmc and vbmc_pip
 
@@ -172,8 +173,7 @@
             path: /etc/virtualbmc
             state: directory
             mode: '0755'
-          become: true
-          ignore_errors: yes
+          ignore_errors: true
           when:
             - vbmc and vbmc_pip
 
@@ -183,7 +183,7 @@
             path: /var/lib/vbmcd
             state: directory
             mode: '0755'
-          ignore_errors: yes
+          ignore_errors: true
           when:
             - vbmc and vbmc_pip
 
@@ -193,7 +193,7 @@
             src: templates/virtualbmc.conf.j2
             dest: "/etc/virtualbmc/virtualbmc.conf"
             mode: '0644'
-          ignore_errors: yes
+          ignore_errors: true
           when:
             - vbmc and vbmc_pip
 
@@ -202,10 +202,10 @@
           systemd:
             name: "{{ vbmc_service }}"
             state: restarted
-            daemon_reload: yes
-            enabled: yes
+            daemon_reload: true
+            enabled: true
           register: result_virtualbmc
-          ignore_errors: yes
+          ignore_errors: true
           changed_when: false
           when:
             - vbmc

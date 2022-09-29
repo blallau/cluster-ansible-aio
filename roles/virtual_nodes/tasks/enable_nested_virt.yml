@@ -22,7 +22,7 @@
   register: is_nest_enabled
   when: is_nest_loaded.stat.exists
   changed_when: false
-  ignore_errors: True
+  ignore_errors: true
 
 - name: Unload kvm-intel kernel module
   modprobe:
@@ -35,7 +35,7 @@
     path: /etc/modprobe.d/kvm.conf
     regexp: '^options kvm-intel .*'
     line: 'options kvm-intel nested=1'
-    create: True
+    create: true
   when: (not is_nest_loaded.stat.exists) or (is_nest_enabled is failed)
 
 - name: Load kvm-intel kernel module
