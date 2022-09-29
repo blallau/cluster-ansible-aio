@@ -32,7 +32,7 @@
     name: docker-ce
     description: Docker CE repo
     baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
-    gpgcheck: yes
+    gpgcheck: true
     gpgkey: https://download.docker.com/linux/centos/gpg
   when: ansible_distribution|lower == "centos"
   become: true
@@ -114,7 +114,7 @@
 #   user:
 #     name: "{{ os_default_user }}"
 #     groups: sudo
-#     append: yes
+#     append: true
 
 # - name: Start NTP service
 #   systemd:
@@ -130,7 +130,7 @@
   systemd:
     name: "cockpit"
     state: restarted
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
   when: ansible_distribution|lower == "centos" and cockpit_enabled|bool
   become: true

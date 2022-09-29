@@ -34,7 +34,7 @@
   lineinfile:
     path: /etc/modprobe.d/kvm.conf
     line: 'options kvm-intel nested=1'
-    create: yes
+    create: true
   when: (not is_nest_loaded.stat.exists) or (is_nest_enabled|failed)
 
 - name: Load kvm-intel kernel module

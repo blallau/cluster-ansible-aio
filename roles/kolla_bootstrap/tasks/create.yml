@@ -26,7 +26,7 @@
 #     name: docker-ce
 #     description: Docker CE repo
 #     baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
-#     gpgcheck: yes
+#     gpgcheck: true
 #     gpgkey: https://download.docker.com/linux/centos/gpg
 #   when: ansible_distribution|lower == "centos"
 
@@ -56,7 +56,7 @@
 #   apt_repository:
 #     repo: "deb http://security.ubuntu.com/ubuntu xenial-security main restricted"
 #     state: present
-#     update_cache: "yes"
+#     update_cache: "true"
 #   when: ansible_distribution|lower == "ubuntu"
 
 # - name: Wait for automatic Ubuntu system updates
@@ -66,7 +66,7 @@
 # - name: Install CentOS packages
 #   yum:
 #     name: "{{ item }}"
-#     update_cache: yes
+#     update_cache: true
 #   with_items: "{{ yum_packages }}"
 #   when: ansible_distribution|lower == "centos"
 
@@ -82,7 +82,7 @@
 #   apt:
 #     name: "{{ item }}"
 #     state: latest
-#     update_cache: "yes"
+#     update_cache: "true"
 #   with_items: "{{ apt_packages }}"
 #   when: ansible_distribution|lower == "ubuntu"
 
@@ -100,7 +100,7 @@
 # - name: Start NTP
 #   systemd:
 #     name: "{{ 'ntp' if ansible_distribution|lower == 'ubuntu' else 'ntpd' }}"
-#     enabled: yes
+#     enabled: true
 #     state: started
 
 # - name: Create '{{ config_owner_group }}' group

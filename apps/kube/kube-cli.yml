@@ -18,14 +18,14 @@
         owner: "{{ os_default_user }}"
         group: "{{ os_default_user }}"
         mode: '0644'
-        remote_src: yes
+        remote_src: true
 
     - name: copy kube config to localhost
       become: true
       fetch:
         src: /etc/kubernetes/admin.conf
         dest: "{{ lookup('env','HOME') }}/.kube/config"
-        flat: yes
+        flat: true
 
 # - name: Kube config
 #   hosts: "*worker*,*lb*"

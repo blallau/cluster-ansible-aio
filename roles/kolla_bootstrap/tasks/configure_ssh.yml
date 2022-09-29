@@ -3,7 +3,7 @@
   become_user: "{{ ansible_user }}"
   user:
     name: "{{ ansible_user }}"
-    generate_ssh_key: yes
+    generate_ssh_key: true
     ssh_key_bits: 2048
     ssh_key_file: ~/.ssh/id_rsa
 
@@ -24,7 +24,7 @@
 
 - name: Disable SSH host key checking in /etc/ssh/ssh_config
   blockinfile:
-    create: yes
+    create: true
     block: |
       Host *
       StrictHostKeyChecking no
