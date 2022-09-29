@@ -4,10 +4,10 @@ host_ip: "{{ networks | selectattr('forward', 'defined') | selectattr('forward',
 dns_domain: "mydomain.org"
 
 # to install libvirt stuff in guest set to True
-allow_virt: False
+allow_virt: false
 
 # to install debug tools(sysdig) set to True
-debug_tools: False
+debug_tools: false
 
 # Storage
 #########

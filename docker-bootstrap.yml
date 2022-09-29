@@ -1,6 +1,6 @@
 ---
 - name: Docker boostraping in VMs
   hosts: nodes
-  become: True
+  become: true
   roles:
     - docker_bootstrap

@@ -11,7 +11,7 @@
         mode: '0755'
 
     - name: copy kube config in .kube/config
-      become: True
+      become: true
       copy:
         src: /etc/kubernetes/admin.conf
         dest: "{{ ansible_env.HOME }}/.kube/config"
@@ -21,7 +21,7 @@
         remote_src: yes
 
     - name: copy kube config to localhost
-      become: True
+      become: true
       fetch:
         src: /etc/kubernetes/admin.conf
         dest: "{{ lookup('env','HOME') }}/.kube/config"

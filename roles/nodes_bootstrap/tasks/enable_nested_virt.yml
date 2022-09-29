@@ -1,8 +1,8 @@
 ---
 - name: Verify that Virtualization Technology (VT) is enabled
   command: grep -c -E 'svm|vmx' /proc/cpuinfo
-  changed_when: False
-  failed_when: False
+  changed_when: false
+  failed_when: false
   register: result
 
 - name: Fail if Virtualization Technology (VT) is disabled
@@ -21,7 +21,7 @@
   command: "grep -Ei '1|y' /sys/module/kvm_intel/parameters/nested"
   register: is_nest_enabled
   when: is_nest_loaded.stat.exists
-  changed_when: False
+  changed_when: false
   ignore_errors: True
 
 - name: Unload kvm-intel kernel module

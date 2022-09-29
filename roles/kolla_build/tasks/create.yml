@@ -73,5 +73,5 @@
   command: "kolla-build --profile {{ kolla_build_profile }}"
   args:
     chdir: "{{ kolla_config_path }}"
-  changed_when: False
+  changed_when: false
   tags: build

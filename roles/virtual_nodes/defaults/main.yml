@@ -2,24 +2,25 @@
 ###########
 # Globals #
 ###########
-#libvirt_dir: "/var/lib/libvirt/images"
+# libvirt_dir: "/var/lib/libvirt/images"
 libvirt_dir: "/libvirt/images"
 libvirt_url: qemu:///system
 libvirt_security_driver: none
 libvirt_default_mtu: 9000
 
-destroy_images: False
-rename_net_interface: False
+destroy_images: false
+rename_net_interface: false
 cloud_init_disk: "vdz"
 
 ########
 # VBMC #
 ########
 # Virtual BMC is disabled by default
-vbmc: False
+vbmc: false
 
-# By default we install with pip, but if you prefer to do it manually, set this to false
-vbmc_pip: True
+# By default we install with pip, but if you prefer to do it manually
+# set this to false
+vbmc_pip: true
 
 # Default vbmc service, override if something else on your distro
 vbmc_service: vbmcd
@@ -31,13 +32,11 @@ vbmc_port: 623
 # OS images #
 #############
 guest_os_images:
-  ubuntu: "ubuntu-16.04-server-cloudimg-amd64-disk1.img"
-  #debian: "debian-10-openstack-amd64.qcow2"
+  # ubuntu: "ubuntu-16.04-server-cloudimg-amd64-disk1.img"
+  ubuntu: "focal-server-cloudimg-amd64-disk-kvm.img"
+  # debian: "debian-10-openstack-amd64.qcow2"
   debian: "debian-11-generic-amd64.qcow2"
   fcos: "fedora-coreos-32.qcow2"
   flatcar: "flatcar-linux1.qcow2"
-  # centos: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
-  # centos-8.2: "CentOS-8-GenericCloud-8.2.2004-20200611.2.x86_64.qcow2"
-  # centos: "CentOS-8-GenericCloud-8.3.2011-20201204.2.x86_64.qcow2"
-  # centos: "CentOS-Stream-GenericCloud-8-20220125.1.x86_64.qcow2"
-  centos: "Rocky-8-GenericCloud-8.4-20210620.0.x86_64.qcow2"
+  #  centos: "Rocky-8-GenericCloud-8.4-20210620.0.x86_64.qcow2"
+  centos: "Rocky-8-GenericCloud-8.6.20220702.0.x86_64.qcow2"

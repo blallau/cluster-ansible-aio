@@ -1,6 +1,6 @@
 ---
 - name: Generate '{{ ansible_user }}' user SSH key
-  become: "{{ ansible_user }}"
+  become_user: "{{ ansible_user }}"
   user:
     name: "{{ ansible_user }}"
     generate_ssh_key: yes
@@ -8,7 +8,7 @@
     ssh_key_file: ~/.ssh/id_rsa
 
 - name: Read '{{ ansible_user }}' user SSH public key
-  become: "{{ ansible_user }}"
+  become_user: "{{ ansible_user }}"
   slurp:
     src: "~/.ssh/id_rsa.pub"
   register: ssh_key
@@ -20,7 +20,7 @@
     key: "{{ ssh_key['content'] | b64decode }}"
   delegate_to: "{{ hostvars[item]['ansible_host'] }}"
   remote_user: "{{ hostvars[item]['ansible_user'] }}"
-  with_items: "{{ groups['kolla-nodes'] }}"
+  with_items: "{{ groups['nodes'] }}"
 
 - name: Disable SSH host key checking in /etc/ssh/ssh_config
   blockinfile:

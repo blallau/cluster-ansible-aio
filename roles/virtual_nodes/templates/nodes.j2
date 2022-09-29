@@ -44,20 +44,20 @@
 {% set intf_loop = loop %}
 
 {% for network in networks if network.name == intf.name %}
-{% set net = network %}  
-{% if net.forward is defined and net.forward == 'nat' %}  
-      external: True  
-{% endif %}  
-      bridge: "{{ net.name }}"  
-      mode: "{{ net.mode }}"  
-{% set ip = 10 + node_loop.index %}  
-      address: "{{ net.cidr | ipaddr(ip) | ipaddr('address') }}"  
+{% set net = network %}
+{% if net.forward is defined and net.forward == 'nat' %}
+      external: true
+{% endif %}
+      bridge: "{{ net.name }}"
+      mode: "{{ net.mode }}"
+{% set ip = 10 + node_loop.index %}
+      address: "{{ net.cidr | ipaddr(ip) | ipaddr('address') }}"
       mac: "{{ mac_prefix | random_mac() }}"
-{% if net.mode == 'static' %}  
-      netmask: "{{ net.cidr | ipaddr('netmask') }}"  
-{% endif %}  
-  
-{% endfor %} 
+{% if net.mode == 'static' %}
+      netmask: "{{ net.cidr | ipaddr('netmask') }}"
+{% endif %}
+
+{% endfor %}
 
 {% endfor %}
 

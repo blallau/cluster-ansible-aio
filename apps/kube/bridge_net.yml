@@ -2,7 +2,7 @@
 - name: "set bridge config"
   hosts: "*"
   gather_facts: false
-  become: True
+  become: true
   vars:
     br_intfs:
       - br_name: "multus_br2"

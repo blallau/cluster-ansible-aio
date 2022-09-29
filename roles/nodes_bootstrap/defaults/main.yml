@@ -53,8 +53,8 @@ pip_packages:
 
 pip_venv_path: "{{ ansible_user_dir }}/venv"
 
-network_manager_enabled: False
-nested_virt_enabled: False
+network_manager_enabled: false
+nested_virt_enabled: false
 
 ########
 # VBMC #
@@ -71,11 +71,11 @@ vbmc_service: vbmcd
 # Default vbmc starting port 623
 vbmc_port: 623
 
-cockpit_enabled: False
+cockpit_enabled: false
 
 cloud_init_disk: "vdz"
 vm_volumes_fs_format: "ext4"
-vm_volumes_mount: False
+vm_volumes_mount: false
 vm_volumes: []
 
 #############

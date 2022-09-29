@@ -6,7 +6,7 @@
     build:
       path: roles/virtual_nodes/tasks/docker/server/dns
       dockerfile: Dockerfile
-      pull: False
+      pull: false
     push: True
 
 - name: "Ensure the {{ myvirt_config_path }} directory exist"

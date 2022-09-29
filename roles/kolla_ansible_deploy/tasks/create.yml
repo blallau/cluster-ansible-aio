@@ -100,11 +100,11 @@
     block: |
       [defaults]
       force_valid_group_names = ignore
-      host_key_checking=False
+      host_key_checking=false
       pipelining=True
       forks=100
       remote_user = {{ ansible_user }}
-      retry_files_enabled = False
+      retry_files_enabled = false
       [privilege_escalation]
       become = True
 
@@ -114,7 +114,7 @@
 
 - name: Kolla-ansible bootstrap
   # shell: "source {{ kolla_venv_path }}/bin/activate && kolla-ansible bootstrap-servers -i {{ kolla_node_home_dir }}/multinode"
-  shell: "kolla-ansible bootstrap-servers -i {{ kolla_node_home_dir }}/multinode -e customize_etc_hosts=False"
+  shell: "kolla-ansible bootstrap-servers -i {{ kolla_node_home_dir }}/multinode -e customize_etc_hosts=false"
   tags: deploy
 
 - name: Kolla-ansible prechecks

@@ -3,7 +3,7 @@
 users:
   - default
 
-disable_root: False
+disable_root: false
 ssh_pwauth: True
 
 # mount_default_fields
@@ -16,18 +16,12 @@ chpasswd:
   list: |
     root:root
     {{ item.os_type }}:{{ item.os_type }}
-  expire: False
+  expire: false
 # System settings
 resize_rootfs: True
 packages:
-#  - curl (already on centos)
-#  - rsync (already on centos)
   - socat
-#  - ethtool (already on centos)
   - net-tools
-#  - psmisc (already on centos)
-#  - openssh-server (already on centos)
-#   - gnupg2 (already on centos)
   - conntrack
   - lsof
   - wireshark
@@ -66,7 +60,7 @@ packages:
       item.disks | selectattr('mount_path','defined') | list | length > 0 %}
 fs_setup:
 {% for disk in item.disks %}
-{% if disk.mount_path is defined %}   
+{% if disk.mount_path is defined %}
   - label: '{{ disk.name }}'
     filesystem: '{{ disk.format }}'
     device: /dev/{{ disk.device }}
@@ -140,4 +134,3 @@ final_message: "SYSTEM READY TO LOG IN"
 system_info:
   default_user:
     name: {{ item.os_type }}
-

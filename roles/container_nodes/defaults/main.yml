@@ -2,8 +2,8 @@
 ###########
 # Globals #
 ###########
-destroy_images: False
-rename_net_interface: False
+destroy_images: false
+rename_net_interface: false
 cloud_init_disk: "vdz"
 
 ########

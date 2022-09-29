@@ -12,7 +12,7 @@
 - name: Wait for Python 2 to be installed
   hosts: created_nodes
   gather_facts: false
-  become: True
+  become: true
   tasks:
     # - raw: echo "nameserver {{ host_ip }}" > /etc/resolv.conf
     - raw: test -e /usr/bin/python || (apt -y update && apt install -y python3-minimal)
@@ -23,7 +23,7 @@
 # - name: Populate /etc/resolv.conf file
 #   hosts: created_nodes
 #   gather_facts: false
-#   become: True
+#   become: true
 #   tasks:
 #     - name: Set {{ host_ip }} as nameserver in resolv.conf
 #       lineinfile:

@@ -1,6 +1,6 @@
 ---
 - name: Boostrap Kolla VMs
   hosts: nodes
-  become: True
+  become: true
   roles:
     - kolla_bootstrap

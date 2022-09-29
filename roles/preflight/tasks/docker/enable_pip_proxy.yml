@@ -6,7 +6,7 @@
     build:
       path: roles/virtual_nodes/tasks/docker/proxy/pip
       dockerfile: Dockerfile
-      pull: False
+      pull: false
     push: True
 
 - name: Create a PIP cache proxy
