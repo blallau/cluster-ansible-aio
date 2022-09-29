@@ -1,39 +1,39 @@
 ---
 - name: Install CentOS packages
-  become: True
+  become: true
   yum:
     name: "{{ yum_dependencies }}"
   when: ansible_distribution|lower == "centos"
 
 - name: Install Ubuntu packages
-  become: True
+  become: true
   apt:
     pkg: "{{ apt_dependencies }}"
   when: ansible_distribution|lower in ["ubuntu", "debian"]
   register: install_snap
 
 - name: "Add {{ ansible_user }} to libvirt group"
-  become: True
+  become: true
   user:
     name: "{{ ansible_user }}"
     groups: libvirt
     append: yes
 
 - name: Restart libvirtd service
-  become: True
+  become: true
   service:
     name: libvirtd
     state: restarted
     enabled: yes
 
 - name: Install/Update pip packages
-  become: True
+  become: true
   pip:
     name: "{{ pip_dependencies }}"
     state: latest
 
 - name: Restart the snapd service
-  become: True
+  become: true
   systemd:
     name: snapd.service
     enabled: yes
@@ -41,26 +41,26 @@
   when: install_snap.changed
 
 - name: Install core snap
-  become: True
+  become: true
   snap:
     name:
       - core
 
 - name: Install lxd snap
-  become: True
+  become: true
   snap:
     name:
       - lxd
 
 - name: Add {{ ansible_user }} user to lxd secondary group
-  become: True
+  become: true
   user:
     name: "{{ ansible_user }}"
     append: yes
     groups: lxd
 
 - name: Create /etc/tmpfiles.d/kmsg.conf file
-  become: True
+  become: true
   file:
     path: /etc/tmpfiles.d/kmsg.conf
     state: touch
@@ -69,14 +69,14 @@
     mode: '0644'
 
 - name: "Create /dev/kmsg symlink to /dev/console"
-  become: True
+  become: true
   lineinfile:
     path: "/etc/tmpfiles.d/kmsg.conf"
     line: 'L /dev/kmsg - - - - /dev/console'
     state: present
 
 - name: "Set subuid and subgid for LXD"
-  become: True
+  become: true
   lineinfile:
     path: "{{ item }}"
     line: 'root:1000000:65536'
@@ -92,7 +92,7 @@
   command: /snap/bin/lxd init --auto
   args:
     creates: /var/snap/lxd/common/lxd/storage-pools/default
-  become: True
+  become: true
 
 - import_role:
     name: common
@@ -107,7 +107,7 @@
 - name: "Copy cluster config for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
   blockinfile:
     path: "{{ tmp_dir }}/{{ item.name }}/cluster_config"
-    create: True
+    create: true
     block: |
         {{ item | to_nice_json(indent=2) }}
   with_items: "{{ cluster_nodes }}"
@@ -174,9 +174,9 @@
   when: item.1.address is defined and item.1.external is defined and item.1.external
 
 - name: Insert nodes into ssh_config
-  become: True
+  become: true
   blockinfile:
-    create: True
+    create: true
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ lookup('env', 'HOME') }}/.ssh/config"
   tags: postconf
@@ -195,7 +195,7 @@
   tags: postconf
 
 - name: Populate /etc/hosts file
-  become: True
+  become: true
   lineinfile:
     path: /etc/hosts
     insertafter: EOF

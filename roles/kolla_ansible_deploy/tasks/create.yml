@@ -6,12 +6,12 @@
     version: "{{ kolla_ansible_branch }}"
 
 - name: Install kolla-ansible
-  become: True
+  become: true
   pip:
     name: "file://{{ tmp_dir }}/kolla-ansible"
 
 - name: Ensure the Kolla Ansible configuration directories exist
-  become: True
+  become: true
   file:
     path: "{{ item }}"
     state: directory
@@ -54,7 +54,7 @@
   when: password_overrides is defined
 
 #- name: Create config directory for Nova
-#  become: True
+#  become: true
 #  file:
 #    path: "{{ kolla_config_path }}/config/nova"
 #    state: directory
@@ -63,7 +63,7 @@
 #    mode: 0750
 
 #- name: Configure nova-compute to use QEMU
-#  become: True
+#  become: true
 #  ini_file:
 #    path: "{{ kolla_config_path }}/config/nova/nova-compute.conf"
 #    section: libvirt
@@ -96,17 +96,17 @@
 - name: Create ansible.cfg file
   blockinfile:
     path: "{{ kolla_node_home_dir }}/ansible.cfg"
-    create: True
+    create: true
     block: |
       [defaults]
       force_valid_group_names = ignore
       host_key_checking=false
-      pipelining=True
+      pipelining=true
       forks=100
       remote_user = {{ ansible_user }}
       retry_files_enabled = false
       [privilege_escalation]
-      become = True
+      become = true
 
 # - name: Kolla-ansible pull images
 #   shell: "source {{ kolla_venv_path }}/bin/activate && kolla-ansible pull -i {{ kolla_node_home_dir }}/multinode"

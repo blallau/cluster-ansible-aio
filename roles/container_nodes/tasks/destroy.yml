@@ -27,15 +27,15 @@
   with_items: "{{ cluster_nodes }}"
 
 - name: Clean nodes from ssh_config
-  become: True
+  become: true
   blockinfile:
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ ansible_env.HOME }}/.ssh/config"
     state: absent
-  ignore_errors: True
+  ignore_errors: true
 
 - name: Clean /etc/hosts file
-  become: True
+  become: true
   lineinfile:
     path: /etc/hosts
     line: "{{ item.1.address }} {{ item.0.name }}.{{ dns_domain }} {{ item.0.name }}"
@@ -44,7 +44,7 @@
     - "{{ cluster_nodes }}"
     - interfaces
   when: item.1.address is defined and item.1.external is defined and item.1.external
-  ignore_errors: True
+  ignore_errors: true
 
 - name: "Clean {{ ansible_env.HOME }}/.ssh/known_hosts"
   known_hosts:
@@ -52,4 +52,4 @@
     name: "{{ item.name }}.{{ dns_domain }}"
     state: absent
   with_items: "{{ cluster_nodes }}"
-  ignore_errors: True
+  ignore_errors: true

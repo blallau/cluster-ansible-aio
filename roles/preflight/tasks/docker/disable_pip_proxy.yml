@@ -4,4 +4,4 @@
     name: "{{ docker_pip_cache_name }}"
     image: "{{ docker_pip_cache_image }}"
     state: absent
-  ignore_errors: True
+  ignore_errors: true

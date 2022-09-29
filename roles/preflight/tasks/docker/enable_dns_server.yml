@@ -7,7 +7,7 @@
       path: roles/virtual_nodes/tasks/docker/server/dns
       dockerfile: Dockerfile
       pull: false
-    push: True
+    push: true
 
 - name: "Ensure the {{ myvirt_config_path }} directory exist"
   file:
@@ -19,7 +19,7 @@
 
 - name: "Generate dnsmasq.conf in {{ myvirt_config_path }}"
   blockinfile:
-    create: True
+    create: true
     block: "{{ lookup('template', 'dnsmasq.conf.j2') }}"
     dest: "{{ myvirt_config_path }}/dnsmasq.conf"
 

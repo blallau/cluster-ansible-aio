@@ -7,7 +7,7 @@
 - name: Enable CentOS insecure registry
   lineinfile:
     path: /etc/sysconfig/docker
-    create: True
+    create: true
     regexp: "^INSECURE_REGISTRY=.*"
     line: "INSECURE_REGISTRY='--insecure-registry {{ docker_registry_ip }}:{{ docker_registry_port }}'"
   when: ansible_distribution|lower == "centos"
@@ -15,7 +15,7 @@
 - name: Create the CentOS drop-in unit file
   lineinfile:
     path: /etc/systemd/system/docker.service.d/docker.conf
-    create: True
+    create: true
     line: |
       [Service]
       MountFlags=shared
@@ -27,7 +27,7 @@
 - name: Enable Ubuntu insecure registry
   lineinfile:
     path: /etc/default/docker
-    create: True
+    create: true
     regexp: "^DOCKER_OPTS=.*"
     line: "DOCKER_OPTS='--insecure-registry {{ docker_registry_ip }}:{{ docker_registry_port }}'"
   when: ansible_distribution|lower == "ubuntu"
@@ -36,7 +36,7 @@
   blockinfile:
     path: /etc/systemd/system/docker.service.d/docker.conf
     marker: "## {mark} added by ansible"
-    create: True
+    create: true
     state: present
     block: |
       [Service]
@@ -59,12 +59,12 @@
 - name: Restart Docker service
   systemd:
     name: docker
-    daemon_reload: True
+    daemon_reload: true
     state: restarted
-    enabled: True
+    enabled: true
 
 - name: Add '{{ ansible_user }}' user to Docker group
   user:
     name: "{{ ansible_user }}"
     groups: docker
-    append: True
+    append: true

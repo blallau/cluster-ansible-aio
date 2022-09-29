@@ -3,10 +3,10 @@
 host_ip: "{{ networks | selectattr('forward', 'defined') | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address') | first }}"
 dns_domain: "mydomain.org"
 
-# to install libvirt stuff in guest set to True
+# to install libvirt stuff in guest set to true
 allow_virt: false
 
-# to install debug tools(sysdig) set to True
+# to install debug tools(sysdig) set to true
 debug_tools: false
 
 # Storage

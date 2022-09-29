@@ -60,10 +60,10 @@ nested_virt_enabled: false
 # VBMC #
 ########
 # Virtual BMC is enabled by default
-vbmc: True
+vbmc: true
 
 # By default we install with pip, but if you prefer to do it manually, set this to false
-vbmc_pip: True
+vbmc_pip: true
 
 # Default vbmc service, override if something else on your distro
 vbmc_service: vbmcd

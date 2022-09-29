@@ -1,6 +1,6 @@
 ---
 - name: Ensure source code checkout directory exists
-  become: True
+  become: true
   file:
     path: "{{ tmp_dir }}/kolla"
     state: directory
@@ -13,7 +13,7 @@
     dest: "{{ tmp_dir }}/kolla"
 
 - name: Install Kolla
-  become: True
+  become: true
   pip:
     name: "file://{{ tmp_dir }}/kolla"
 
@@ -24,7 +24,7 @@
     creates: "{{ tmp_dir }}/kolla/etc/kolla/kolla-build.conf"
 
 - name: Ensure the Kolla Ansible configuration directores exist
-  become: True
+  become: true
   file:
     path: "{{ item }}"
     state: directory
@@ -39,7 +39,7 @@
   copy:
     src: "{{ tmp_dir }}/kolla/etc/kolla/kolla-build.conf"
     dest: "{{ kolla_config_path }}/kolla-build.conf"
-    remote_src: True
+    remote_src: true
   tags: build
 
 - name: Override build variables in kolla-build.conf

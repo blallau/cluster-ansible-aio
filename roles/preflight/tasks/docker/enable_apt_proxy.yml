@@ -7,7 +7,7 @@
       path: roles/virtual_nodes/tasks/docker/proxy/apt
       dockerfile: Dockerfile
       pull: false
-    push: True
+    push: true
 
 - name: Create a APT cache proxy
   docker_container:

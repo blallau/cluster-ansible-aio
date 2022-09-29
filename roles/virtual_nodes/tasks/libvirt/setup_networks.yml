@@ -11,7 +11,7 @@
 - name: "Copy networks in {{ tmp_dir }}"
   blockinfile:
     path: "{{ tmp_dir }}/networks"
-    create: True
+    create: true
     block: |
         {{ networks | to_nice_json(indent=2) }}
 
@@ -20,7 +20,7 @@
     - name: "Copy Libvirt XML network domain in {{ tmp_dir }}"
       blockinfile:
         path: "{{ tmp_dir }}/{{ item.name }}.xml"
-        create: True
+        create: true
         block: |
             {{ lookup('template', 'network.xml.j2') }}
       with_items: "{{ networks }}"
@@ -32,13 +32,13 @@
       with_items: "{{ networks }}"
     # - name: Autostart virtual networks
     #   virt_net:
-    #     autostart: True
+    #     autostart: true
     #     name: "{{ item.name }}"
     #   with_items: "{{ networks }}"
     - name: Start virtual networks
       virt_net:
         state: active
-        autostart: True
+        autostart: true
         name: "{{ item.name }}"
       with_items: "{{ networks }}"
   when: (item.name not in ansible_libvirt_networks) or (item.name in ansible_libvirt_networks and ansible_libvirt_networks[item.name].state == 'inactive')

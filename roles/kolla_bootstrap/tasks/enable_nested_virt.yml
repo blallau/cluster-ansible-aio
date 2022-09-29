@@ -22,7 +22,7 @@
   register: is_nest_enabled
   when: is_nest_loaded.stat.exists
   changed_when: false
-  ignore_errors: True
+  ignore_errors: true
 
 - name: Unload kvm-intel kernel module
   modprobe:

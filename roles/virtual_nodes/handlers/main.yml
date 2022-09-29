@@ -10,7 +10,7 @@
     enabled: yes
   listen: "restart virtual bmc"
   register: result_vbmcd_stop
-  become: True
+  become: true
   changed_when: true
   run_once: true
 
@@ -21,6 +21,6 @@
     enabled: yes
   listen: "restart virtual bmc"
   register: result_vbmcd_start
-  become: True
+  become: true
   changed_when: true
   run_once: true

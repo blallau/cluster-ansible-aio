@@ -4,7 +4,7 @@ users:
   - default
 
 disable_root: false
-ssh_pwauth: True
+ssh_pwauth: true
 
 # mount_default_fields
 # These values are used to fill in any entries in 'mounts' that are not
@@ -18,7 +18,7 @@ chpasswd:
     {{ item.os_type }}:{{ item.os_type }}
   expire: false
 # System settings
-resize_rootfs: True
+resize_rootfs: true
 packages:
   - socat
   - net-tools

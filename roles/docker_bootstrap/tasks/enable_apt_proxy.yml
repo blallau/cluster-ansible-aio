@@ -8,7 +8,7 @@
 - name: Set APT config to use apt-cacher-ng proxy
   lineinfile:
     path: "/etc/apt/apt.conf.d/01proxy"
-    create: True
+    create: true
     regexp: "^Acquire::http .*"
     line: "Acquire::http { Proxy \"http://{{ apt_cache_proxy_ip }}:{{ apt_cache_proxy_port }}\"; };"
   when: ansible_distribution|lower == "ubuntu"
@@ -16,7 +16,7 @@
 - name: Set YUM config to use apt-cacher-ng proxy
   lineinfile:
     path: "/etc/yum.conf"
-    create: True
+    create: true
     regexp: "^proxy=.*"
     line: "proxy=http://{{ apt_cache_proxy_ip }}:{{ apt_cache_proxy_port }}"
   when: ansible_distribution|lower == "centos" and apt_cache_enabled | bool

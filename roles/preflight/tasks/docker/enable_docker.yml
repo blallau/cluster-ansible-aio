@@ -4,7 +4,7 @@
     name: docker-ce
     description: Docker CE repo
     baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
-    gpgcheck: True
+    gpgcheck: true
     gpgkey: https://download.docker.com/linux/centos/gpg
   when: ansible_distribution|lower == "centos"
 
@@ -35,7 +35,7 @@
 - name: Enable CentOS insecure registry
   lineinfile:
     path: /etc/sysconfig/docker
-    create: True
+    create: true
     regexp: '^INSECURE_REGISTRY=.*'
     line: "INSECURE_REGISTRY='--insecure-registry {{ docker_registry_ip }}:{{ docker_registry_port }}'"
   when: ansible_distribution|lower == "centos"
@@ -44,7 +44,7 @@
 - name: Create the CentOS drop-in unit file
   lineinfile:
     path: /etc/systemd/system/docker.service.d/docker.conf
-    create: True
+    create: true
     line: |
       [Service]
       EnvironmentFile=/etc/sysconfig/docker
@@ -56,7 +56,7 @@
 - name: Enable Ubuntu insecure registry
   lineinfile:
     path: /etc/default/docker
-    create: True
+    create: true
     state: present
     regexp: '^DOCKER_OPTS=.*'
     line: "DOCKER_OPTS='--insecure-registry {{ docker_registry_ip }}:{{ docker_registry_port }}'"
@@ -67,7 +67,7 @@
   blockinfile:
     path: /etc/systemd/system/docker.service.d/docker.conf
     marker: "## {mark} added by ansible"
-    create: True
+    create: true
     state: present
     block: |
       [Service]
@@ -80,9 +80,9 @@
 - name: Restart Docker service
   systemd:
     name: docker
-    daemon_reload: True
+    daemon_reload: true
     state: restarted
-    enabled: True
+    enabled: true
   when: unitfile.changed or configfile.changed
 
 # Note(bl) add hypervisor default user ???
@@ -90,4 +90,4 @@
 #   user:
 #     name: "{{ os_default_user }}"
 #     groups: docker
-#     append: True
+#     append: true

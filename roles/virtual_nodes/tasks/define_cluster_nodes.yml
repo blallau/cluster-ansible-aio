@@ -6,7 +6,7 @@
 - name: "Copy cluster_nodes in {{ tmp_dir }}"
   blockinfile:
     path: "{{ tmp_dir }}/cluster_nodes"
-    create: True
+    create: true
     block: |
         {{ cluster_nodes | to_nice_json(indent=2) }}
   tags: network
