@@ -6,7 +6,7 @@
 node_prefix: ""
 #os_default_user: "{{ guest_os_distro }}"
 guest_timezone: "UTC"
-qemu_guest_agent_enabled: True
+qemu_guest_agent_enabled: true
 
 # Flatcar stuff
 flatcar_update_server_ip: "11.102.100.1"
@@ -138,7 +138,7 @@ ip_offset: 8
 # Storage
 #########
 # in Go
-root_disk_size: "80"
+root_disk_default_size: "40"
 
 # Additional disks (LVM)
 physical_disks:
@@ -156,34 +156,34 @@ tmp_dir: "{{ home_dir}}/tmp"
 ############################
 # Docker registry defaults #
 ############################
-docker_enabled: "False"
+docker_enabled: "false"
 docker_registry_ip: "{{ host_ip }}"
 docker_registry_port: 5000
-destroy_docker_registry: "False"
-registry_enabled: "False"
+destroy_docker_registry: "false"
+registry_enabled: "false"
 
 ############################
 # Devpi PIP proxy defaults #
 ############################
-pip_cache_enabled: "False"
-destroy_pip_cache: "False"
+pip_cache_enabled: "false"
+destroy_pip_cache: "false"
 pip_cache_proxy_ip: "{{ host_ip }}"
 pip_cache_proxy_port: 3141
 
 ############################
 # APT cache proxy defaults #
 ############################
-apt_cache_enabled: "False"
-destroy_apt_cache: "False"
+apt_cache_enabled: "false"
+destroy_apt_cache: "false"
 apt_cache_proxy_ip: "{{ host_ip }}"
 apt_cache_proxy_port: 3142
 
 ############################
 #   DNS server defaults    #
 ############################
-local_dns_enabled: "True"
-dns_server_enabled: "False"
-destroy_dns_server: "False"
+local_dns_enabled: "true"
+dns_server_enabled: "false"
+destroy_dns_server: "false"
 
 dns_server_proxy_ip: "{{ host_ip }}"
 dns_server_port: 53

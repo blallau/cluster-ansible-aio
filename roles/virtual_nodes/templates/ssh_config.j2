@@ -1,4 +1,4 @@
-#jinja2: trim_blocks: true
+#jinja2: trim_blocks: True
 {% for node in cluster_nodes %}
 
   Host {{ node.name }} | {{ node.interfaces | selectattr('external', 'defined') | map(attribute='address') | first }}
