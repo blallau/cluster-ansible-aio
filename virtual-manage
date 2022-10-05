@@ -210,9 +210,9 @@ function remove-disk {
 
 function snap-create {
     local snap_exists=0
-    SNAP_NAME=$1
+    SNAPSHOT_NAME=$1
 
-    if [[ -z $SNAP_NAME ]]; then
+    if [[ -z $SNAPSHOT_NAME ]]; then
         echo -en "error: expected syntax: virtual-manage --snap-create <string>\n\n"
         exit 0
     fi
@@ -222,8 +222,8 @@ function snap-create {
     shutdown
     while read DOMAIN; do
         while read SNAP; do
-            if [[ "$SNAP_NAME" = "$SNAP" ]]; then
-                echo "Warning : snapshot $SNAP_NAME already exists on $DOMAIN"
+            if [[ "$SNAPSHOT_NAME" = "$SNAP" ]]; then
+                echo "Warning : snapshot $SNAPSHOT_NAME already exists on $DOMAIN"
                 snap_exists=1
                 break 2
             fi
@@ -231,9 +231,9 @@ function snap-create {
     done <<< "$(list_inactive_domains)"
 
     if [[ $snap_exists -eq 1 ]]; then
-        read -p "Snapshot $SNAP_NAME already exists. Recreate them (y/n) ?" -n 1 -r
+        read -p "Snapshot $SNAPSHOT_NAME already exists. Recreate them (y/n) ?" -n 1 -r
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            snap-delete $SNAP_NAME
+            snap-delete $SNAPSHOT_NAME
         else
             return
         fi
@@ -254,8 +254,8 @@ function snap-create {
     # # BEGIN with qemu-guest-agent
     # while read DOMAIN; do
     #     while read SNAP; do
-    #         if [[ "$SNAP_NAME" = "$SNAP" ]]; then
-    #             echo "Warning : snapshot $SNAP_NAME already exists on $DOMAIN"
+    #         if [[ "$SNAPSHOT_NAME" = "$SNAP" ]]; then
+    #             echo "Warning : snapshot $SNAPSHOT_NAME already exists on $DOMAIN"
     #             snap_exists=1
     #             break 2
     #         fi
@@ -263,9 +263,9 @@ function snap-create {
     # done <<< "$(list_running_domains)"
 
     # if [[ $snap_exists -eq 1 ]]; then
-    #     read -p "Snapshot $SNAP_NAME already exists. Recreate them (y/n) ?" -n 1 -r
+    #     read -p "Snapshot $SNAPSHOT_NAME already exists. Recreate them (y/n) ?" -n 1 -r
     #     if [[ $REPLY =~ ^[Yy]$ ]]; then
-    #         snap-delete $SNAP_NAME
+    #         snap-delete $SNAPSHOT_NAME
     #     else
     #         return
     #     fi
@@ -283,9 +283,9 @@ function snap-create {
 }
 
 function snap-delete {
-    SNAP_NAME=$1
+    SNAPSHOT_NAME=$1
 
-    if [[ -z $SNAP_NAME ]]; then
+    if [[ -z $SNAPSHOT_NAME ]]; then
         echo -en "error: expected syntax: virtual-manage --snap-delete <string>\n\n"
         echo -en "snapshots:\n"
         snap-list
@@ -295,7 +295,7 @@ function snap-delete {
 	list_inactive_domains | while read DOMAIN; do
         for node in $NODE_TYPES; do
             if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-                virsh snapshot-delete $DOMAIN --snapshotname $SNAP_NAME
+                virsh snapshot-delete $DOMAIN --snapshotname $SNAPSHOT_NAME
                 echo "Snapshot $SNAPSHOT_NAME remove for domain $DOMAIN"
                 fi
             done
@@ -304,9 +304,9 @@ function snap-delete {
     }
 
     function snap-revert {
-        SNAP_NAME=$1
+        SNAPSHOT_NAME=$1
 
-        if [[ -z $SNAP_NAME ]]; then
+        if [[ -z $SNAPSHOT_NAME ]]; then
             echo -en "error: expected syntax: virtual-manage --snap-revert <string>\n\n"
             echo -en "snapshots:\n"
             snap-list
@@ -316,7 +316,7 @@ function snap-delete {
 	    list_inactive_domains | while read DOMAIN; do
             for node in $NODE_TYPES; do
                 if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-                    virsh snapshot-revert $DOMAIN --snapshotname $SNAP_NAME
+                    virsh snapshot-revert $DOMAIN --snapshotname $SNAPSHOT_NAME
                     echo "Snapshot $SNAPSHOT_NAME revert for domain $DOMAIN"
                 fi
             done
