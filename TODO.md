@@ -1,40 +1,42 @@
 Bug Fix
 -------
-- fix issue when os_image is not present in {{ tmp_dir }}
-- fix gracefully-shutdown
-- manage simultaneous deployments
-  => manage node-prefix in SSH keys
-  => libvirt network conflict (see below)
-- fix bug when different deployments use the same networks
-  => IPs/macs association cannot be set in the previous DHCP config
-  => IPs are random => hence deployment fails [Waiting on IPs]
-- fix idempotency when playbook is running twice
-- bug 'ansible_user' undefined (resolved)
+- [Medium] bug 'ansible_user' undefined (resolved)
 => libvirt_inventory.py can't retrieve dhcp lease (sudo dhclient eth0)
 => launch ./virtual-manage --renew-dhcp_
-- fix SNAP_NAME and SNAPSHOT_NAME redondancy
+- [Minor] fix gracefully-shutdown
+- [Minor] fix idempotency when playbook is running twice
+- [Minor] fix issue when os_image is not present in {{ tmp_dir }}
 
 Todo list
 ---------
-- use Libvirt NSS module instead of using /etc/hosts file https://libvirt.org/nss.html
-- add label to loop in order to simplify loop iteration display
-- In case of many interfaces add a check to get external interface first
-- add task to wait for Flatcar VMs ready
+- [High] manage LXC cluster
+- [High] manage multi cluster
+  manage simultaneous deployments
+  => manage node-prefix in SSH keys
+  => libvirt network conflict (see below)
+  fix bug when different deployments use the same networks
+  => IPs/macs association cannot be set in the previous DHCP config
+  => IPs are random => hence deployment fails [Waiting on IPs]
 
-- [manage QCOW2 with a baseimagefile]
-- [Fix DNS issue when using Docker DNS server instead of Libvirt dnsmasq]
-- [automaticaly retrieve last iso images (debian,centos), to avoid too long package update]
-- [manage remote libvirtd]
-- [remove shutdown before snapshot]
+- [Medium] manage LXC & KVM cluster
+- [Medium] use Libvirt NSS module instead of using /etc/hosts file https://libvirt.org/nss.html
+
+- [Minor] add label to loop in order to simplify loop iteration display
+- [Minor] In case of many interfaces add a check to get external interface first
+- [Minor] add task to wait for Flatcar VMs ready
+- [Minor] manage QCOW2 with a baseimagefile
+- [Minor] Fix DNS issue when using Docker DNS server instead of Libvirt dnsmasq
+- [Minor] automaticaly retrieve last iso images (debian,centos), to avoid too long package update
+- [Minor] manage remote libvirtd
+- [Minor] remove shutdown before snapshot
   => use qemu-guest-agent (fsfreeze before snapshot)
   => NO: external snapshot doesn't manage Guest VM
-- introduce virtio-fs https://virtio-fs.gitlab.io/
+- [Minor] introduce virtio-fs https://virtio-fs.gitlab.io/
+  => take a look at https://virt-lightning.org/
+  => https://github.com/hicknhack-software/ansible-libvirt
 
-- take a look at https://virt-lightning.org/
-
-check https://github.com/hicknhack-software/ansible-libvirt
-
-
+Links
+---
 LXD
 
 https://github.com/hispanico/ansible-lxd
