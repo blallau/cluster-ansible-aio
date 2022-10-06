@@ -86,9 +86,6 @@
 #   with_items: "{{ apt_packages }}"
 #   when: ansible_distribution|lower == "ubuntu"
 
-# - import_tasks: enable_pip_proxy.yml
-#   when: pip_cache_enabled | bool
-
 # - name: Install/Update PIP packages
 #   pip:
 #     name: "{{ item }}"

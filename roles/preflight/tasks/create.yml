@@ -36,7 +36,3 @@
 - import_tasks: docker/enable_apt_proxy.yml
   when: apt_cache_enabled | bool
   tags: apt_cache
-
-- import_tasks: docker/enable_pip_proxy.yml
-  when: pip_cache_enabled | bool
-  tags: pip_cache

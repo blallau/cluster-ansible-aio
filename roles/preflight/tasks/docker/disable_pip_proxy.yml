@@ -1,7 +1,0 @@
----
-- name: Destroy PIP cache proxy
-  docker_container:
-    name: "{{ docker_pip_cache_name }}"
-    image: "{{ docker_pip_cache_image }}"
-    state: absent
-  ignore_errors: true

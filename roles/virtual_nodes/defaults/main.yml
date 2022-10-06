@@ -12,6 +12,12 @@ destroy_images: false
 rename_net_interface: false
 cloud_init_disk: "vdz"
 
+#########
+# Guest #
+#########
+guest_timezone: "UTC"
+qemu_guest_agent_enabled: true
+
 ########
 # VBMC #
 ########
