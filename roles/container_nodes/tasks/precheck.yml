@@ -19,7 +19,7 @@
         xml: "{{ lookup('template', 'pool.xml.j2') }}"
       when: virt_volume_group not in pool_exists.list_pools
 
-    - name: "Copy Libvirt XML pool domain in {{ tmp_dir }}/pool.xml"
+    - name: Copy Libvirt XML pool domain in {{ tmp_dir }}/pool.xml
       blockinfile:
         path: "{{ tmp_dir }}/pool.xml"
         create: true

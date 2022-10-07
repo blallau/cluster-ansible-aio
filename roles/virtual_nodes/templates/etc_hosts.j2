@@ -1,0 +1,4 @@
+#jinja2: trim_blocks: True
+{% for node in cluster_nodes %}
+{{ node.interfaces | selectattr('external', 'defined') | map(attribute='address') | first }} {{ node.name }}.{{ dns_domain }} {{ node.name }}
+{% endfor %}

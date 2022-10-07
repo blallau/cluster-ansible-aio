@@ -59,13 +59,70 @@ Command:
     git clone https://github.com/blallau/cluster-ansible-aio
     cd cluster-ansible-aio
 
-2. Put qcow2 guest OS images defined in roles/virtual_nodes/defaults/main.yml in "tmp_dir" (default: "${HOME}/tmp")
+2. Put qcow2 guest OS images defined in roles/virtual_nodes/defaults/main.yml in "tmp_dir" (default: "${HOME}/.cluster")
 
 3. Describe the type of machine required and how to configure and provision these machines with variables from **group_vars/all.yml**
 
+```
+runtime: "vm"
+
+# one NAT interface is required
+networks:
+  - name: "mgmt-br"
+    cidr: "11.100.100.0/24"
+    forward: nat
+    mode: dhcp
+    pxe: false
+  - name: "prod-br"
+    cidr: "11.100.110.0/24"
+    mode: dhcp
+  - name: "admin-br"
+    cidr: "11.100.120.0/24"
+    mode: dhcp
+
+nodes:
+  - name: "master1"
+    type: "master"
+    cpu: 2
+    ram: 4
+    os_type: "centos"
+    net_intfs:
+      - name: "mgmt-br"
+      - name: "prod-br"
+      - name: "admin-br"
+    disks:
+      - name: containerd
+        mount_path: "/var/lib/containerd"
+        size: 15
+        format: "ext4"
+      - name: kubelet
+        mount_path: "/var/lib/kubelet"
+        size: 1
+        format: "ext4"
+
+  - name: "worker1"
+    type: "worker"
+    cpu: 4
+    ram: 4
+    os_type: "centos"
+    net_intfs:
+      - name: "mgmt-br"
+      - name: "prod-br"
+      - name: "admin-br"
+    disks:
+      - name: containerd
+        mount_path: "/var/lib/containerd"
+        size: 15
+        format: "ext4"
+      - name: kubelet
+        mount_path: "/var/lib/kubelet"
+        size: 1
+        format: "ext4"
+```
+
 4. Bootstrap hypervisor, and create virtual nodes.
 
-    ./cluster-ansible-aio create-virtual-nodes
+    ./cluster-ansible-aio create-virtual-nodes -e group=CLUSTER1
 
 Any of the default role variables can be easily overridden with variables from **group_vars/all.yml**
 and **roles/virtual_nodes/vars/main.yml**.
@@ -74,7 +131,7 @@ and **roles/virtual_nodes/vars/main.yml**.
 
 1. Clean-up hypervisor and remove virtual nodes.
 
-    ./cluster-ansible-aio remove-virtual-nodes --yes-i-really-really-mean-it
+    ./cluster-ansible-aio remove-virtual-nodes  -e group=CLUSTER1 --yes-i-really-really-mean-it
 
 #### Using containers
 

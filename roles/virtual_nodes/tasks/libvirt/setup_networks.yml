@@ -8,7 +8,7 @@
   community.libvirt.virt_net:
     command: facts
 
-- name: "Copy Libvirt XML network domain in {{ tmp_dir }}/{{ group }}"
+- name: Copy Libvirt XML network domain in {{ tmp_dir }}/{{ group }}
   blockinfile:
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}.xml"
     create: true

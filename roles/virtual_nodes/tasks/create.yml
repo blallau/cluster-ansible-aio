@@ -92,7 +92,7 @@
         - interfaces
       when: item.1.address is defined and item.1.external is defined and item.1.external
 
-    - name: "Detach {{ cloud_init_disk }} config drive disk"
+    - name: Detach {{ cloud_init_disk }} config drive disk
       command: virsh detach-disk {{ item.fullname }} --target {{ cloud_init_disk }} --persistent --live
       with_items: "{{ cluster_nodes }}"
       when: item.os_type in ["debian", "centos"]
