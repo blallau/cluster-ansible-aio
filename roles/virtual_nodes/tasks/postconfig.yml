@@ -1,0 +1,58 @@
+---
+- name: Immutable OS
+  block:
+    - name: "[KVM host] Instantiate Ignition config file"
+      template:
+        src: "config-ign.yaml.j2"
+        dest: "{{ tmp_dir}}/{{ group }}/{{ item.name }}/config-ign.yaml"
+    - name: Remove Ignition config file
+      file:
+        path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/config.ign"
+        state: absent
+    - name: "[KVM host] Convert Ignition file from YAML format using FCCT"
+      command: 'docker run --rm --interactive \
+        --security-opt label=disable        \
+        --volume {{ tmp_dir }}/{{ group }}/{{ item.name }}:/work --workdir /work \
+        quay.io/coreos/fcct:release --pretty --strict config-ign.yaml --output config.ign'
+      when: runtime == "vm" and item.os_type == "fcos"
+    - name: "[KVM host] Convert Ignition file from YAML format using CT"
+      shell: 'cat {{ tmp_dir}}/{{ group }}/{{ item.name }}/config-ign.yaml | docker run --rm \
+        --interactive --security-opt label=disable \
+          quay.io/coreos/ct:latest-dev > {{ tmp_dir}}/{{ group }}/{{ item.name }}/config.ign'
+      when: runtime == "vm" and item.os_type == "flatcar"
+      args:
+        executable: /bin/bash
+  when: item.os_type in ["fcos", "flatcar"]
+
+- name: Standard OS
+  block:
+    - name: "[KVM host] Instantiate meta-data file"
+      template:
+        src: "meta-data.j2"
+        dest: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/meta-data"
+    - name: "[KVM host] Instantiate user-data file"
+      template:
+        src: "user-data.j2"
+        dest: "{{ tmp_dir}}/{{ group }}/{{ item.name }}/user-data"
+    - name: "[KVM host] Instantiate network-config file"
+      template:
+        src: "network-config.j2"
+        dest: "{{ tmp_dir}}/{{ group }}/{{ item.name }}/network-config"
+      when: item.os_type in ["debian", "ubuntu"]
+    - name: "[KVM host] Remove config drive files"
+      file:
+        path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/seed.img"
+        state: absent
+      when: runtime == "vm"
+    - name: "[KVM host] Create config drive"
+      command: "cloud-localds -v {{ tmp_dir }}/{{ group }}/{{ item.name }}/seed.img \
+                --network-config {{ tmp_dir }}/{{ group }}/{{ item.name }}/network-config \
+                  {{ tmp_dir }}/{{ group }}/{{ item.name }}/user-data \
+                  {{ tmp_dir }}/{{ group }}/{{ item.name }}/meta-data"
+      when: runtime == "vm" and item.os_type in ["debian", "ubuntu"]
+    - name: "[KVM host] Create config drive"
+      command: "cloud-localds -v {{ tmp_dir }}/{{ group }}/{{ item.name }}/seed.img \
+                  {{ tmp_dir }}/{{ group }}/{{ item.name }}/user-data \
+                  {{ tmp_dir }}/{{ group }}/{{ item.name }}/meta-data"
+      when: runtime == "vm" and item.os_type == "centos"
+  when: item.os_type not in ["fcos", "flatcar"]

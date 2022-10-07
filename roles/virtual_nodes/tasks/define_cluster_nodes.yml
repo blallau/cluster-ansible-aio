@@ -4,9 +4,9 @@
     cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
   tags: network
 
-- name: "Copy cluster_nodes in {{ tmp_dir }}"
+- name: "Copy cluster_nodes in {{ tmp_dir }}/{{ group }}"
   blockinfile:
-    path: "{{ tmp_dir }}/cluster_nodes"
+    path: "{{ tmp_dir }}/{{ group }}/cluster_nodes"
     create: true
     block: |
         {{ cluster_nodes | to_nice_json(indent=2) }}

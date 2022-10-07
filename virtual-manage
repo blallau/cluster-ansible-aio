@@ -1,25 +1,8 @@
 #!/bin/bash
-# CONF_FILE=$HOME/.cluster-ansible-aio-env
-# ALL_VMS=0
-
-# if [[ -z "${NODE_PREFIX}" ]] || [[ ! -f ${CONF_FILE} ]]; then
-#     if [[ ! $ALL_VMS ]]; then
-#         echo "Error: NODE_PREFIX variable must be set"
-#         exit 1
-#     fi
-# fi
-# if [[ -n "${NODE_PREFIX}" ]]; then
-#     echo "${NODE_PREFIX}" > ${CONF_FILE}
-# else
-#     NODE_PREFIX=$(cat ${CONF_FILE})
-# fi
-
-# echo -e "\e[93mEnvironment: $NODE_PREFIX\e[39m"
-NODE_PREFIX=""
-
-NODE_TYPES="^${NODE_PREFIX}.*$"
+LC_ALL=C
+NODE_GROUP="^${GROUP}.*$"
 SNAPSHOT_NAME=""
-DISK_DIRECTORY="${HOME}/tmp"
+DISK_DIRECTORY="${HOME}/.cluster/${GROUP}"
 DISK_SIZE=10
 TIMEOUT=300
 GRACEFULLY_SHUTDOWN=false
@@ -51,7 +34,7 @@ function shutdown_networks {
 function start {
     echo -e "\e[32m\e[1m==> Start all inactive domains\e[0m"
 	list_inactive_domains | while read DOMAIN; do
-        for node in $NODE_TYPES; do
+        for node in $NODE_GROUP; do
             if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
 		        virsh start $DOMAIN | grep -v "^$"
             fi
@@ -62,7 +45,7 @@ function start {
 
 function status {
 	list_all_domains | while read DOMAIN; do
-        for node in $NODE_TYPES; do
+        for node in $NODE_GROUP; do
             if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
 		        echo -e "  $DOMAIN   \e[1m\e[92mrunning\e[39m\e[0m"
                 echo -e "  $(virsh dominfo $DOMAIN | grep CPU\(s\))"
@@ -81,7 +64,7 @@ function status {
 
 function cleanup {
 	list_all_domains | while read DOMAIN; do
-        for node in $NODE_TYPES; do
+        for node in $NODE_GROUP; do
             if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
                 virsh destroy $DOMAIN
 		        virsh undefine --remove-all-storage $DOMAIN
@@ -102,7 +85,7 @@ function clone {
 
 function acpi_shutdown {
 	list_running_domains | while read DOMAIN; do
-        for node in $NODE_TYPES; do
+        for node in $NODE_GROUP; do
             if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
 		        virsh shutdown $DOMAIN --mode acpi
             fi
@@ -113,7 +96,7 @@ function acpi_shutdown {
 function power_shutdown {
 	echo -e "==> power shutdown all running KVM domains..."
 	list_running_domains | while read DOMAIN; do
-        for node in $NODE_TYPES; do
+        for node in $NODE_GROUP; do
             if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
 		        virsh destroy $DOMAIN | grep -v "^$"
 		        # Give libvirt some time for killing off the domain.
@@ -151,7 +134,7 @@ function restart {
 
 function renew-dhcp {
 	list_all_domains | while read -e DOMAIN; do
-        for node in $NODE_TYPES; do
+        for node in $NODE_GROUP; do
             if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
                 ssh -n root@${DOMAIN} "nmcli con up id 'System eth0'" 2>&1 > /dev/null
             fi
@@ -186,7 +169,7 @@ function list_all_snapshots() {
 
 function add-disk {
 	list_running_domains | while read DOMAIN; do
-        for node in $NODE_TYPES; do
+        for node in $NODE_GROUP; do
             if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
                 sudo qemu-img create -f qcow2 ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2 ${DISK_SIZE}G
                 virsh attach-disk --domain $DOMAIN --source ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2 --subdriver qcow2 --target vdd --live --cache none
@@ -198,7 +181,7 @@ function add-disk {
 
 function remove-disk {
 	list_running_domains | while read DOMAIN; do
-        for node in $NODE_TYPES; do
+        for node in $NODE_GROUP; do
             if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
                 virsh detach-disk --domain $DOMAIN --target vdd --live
                 sudo rm ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2
@@ -240,7 +223,7 @@ function snap-create {
     fi
 
 	list_inactive_domains | while read DOMAIN; do
-        for node in $NODE_TYPES; do
+        for node in $NODE_GROUP; do
             if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
                 virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME --atomic | egrep -v "^$"
                 echo "Snapshot $SNAPSHOT_NAME create for domain $DOMAIN"
@@ -272,7 +255,7 @@ function snap-create {
     # fi
 
 	# list_running_domains | while read DOMAIN; do
-    #     for node in $NODE_TYPES; do
+    #     for node in $NODE_GROUP; do
     #         if [[ "$DOMAIN" =~ $node ]]; then
     #             virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME --atomic --quiesce --disk-only | egrep -v "^$"
     #             echo "Snapshot $SNAPSHOT_NAME create for domain $DOMAIN"
@@ -293,7 +276,7 @@ function snap-delete {
     fi
     shutdown
 	list_inactive_domains | while read DOMAIN; do
-        for node in $NODE_TYPES; do
+        for node in $NODE_GROUP; do
             if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
                 virsh snapshot-delete $DOMAIN --snapshotname $SNAPSHOT_NAME
                 echo "Snapshot $SNAPSHOT_NAME remove for domain $DOMAIN"
@@ -301,43 +284,43 @@ function snap-delete {
             done
         done
         # start
-    }
+}
 
-    function snap-revert {
-        SNAPSHOT_NAME=$1
+function snap-revert {
+    SNAPSHOT_NAME=$1
 
-        if [[ -z $SNAPSHOT_NAME ]]; then
-            echo -en "error: expected syntax: virtual-manage --snap-revert <string>\n\n"
-            echo -en "snapshots:\n"
-            snap-list
-            exit 0
-        fi
-        shutdown
-	    list_inactive_domains | while read DOMAIN; do
-            for node in $NODE_TYPES; do
-                if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-                    virsh snapshot-revert $DOMAIN --snapshotname $SNAPSHOT_NAME
-                    echo "Snapshot $SNAPSHOT_NAME revert for domain $DOMAIN"
-                fi
-            done
+    if [[ -z $SNAPSHOT_NAME ]]; then
+        echo -en "error: expected syntax: virtual-manage --snap-revert <string>\n\n"
+        echo -en "snapshots:\n"
+        snap-list
+        exit 0
+    fi
+    shutdown
+	list_inactive_domains | while read DOMAIN; do
+        for node in $NODE_GROUP; do
+            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
+                virsh snapshot-revert $DOMAIN --snapshotname $SNAPSHOT_NAME
+                echo "Snapshot $SNAPSHOT_NAME revert for domain $DOMAIN"
+            fi
         done
-        start
-    }
+    done
+    start
+}
 
-    function snap-list {
-	    list_all_domains | while read DOMAIN; do
-            for node in $NODE_TYPES; do
-                if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-                    #                echo -e "\e[33m$DOMAIN [$(virsh snapshot-info $DOMAIN --current | grep Name | cut -d ":" -f2 | sed -e 's/^[ ]*//')]\e[0m"
-                    echo -e "$DOMAIN \e[92m\e[1m[$(virsh snapshot-current --name $DOMAIN)]\e[0m"
-                    virsh -q snapshot-list --tree --domain $DOMAIN 2>&1
-                fi
-            done
+function snap-list {
+	list_all_domains | while read DOMAIN; do
+        for node in $NODE_GROUP; do
+            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
+                #                echo -e "\e[33m$DOMAIN [$(virsh snapshot-info $DOMAIN --current | grep Name | cut -d ":" -f2 | sed -e 's/^[ ]*//')]\e[0m"
+                echo -e "$DOMAIN \e[92m\e[1m[$(virsh snapshot-current --name $DOMAIN)]\e[0m"
+                virsh -q snapshot-list --tree --domain $DOMAIN 2>&1
+            fi
         done
-    }
+    done
+}
 
-    function usage {
-        cat <<EOF
+function usage {
+    cat <<EOF
 Usage: $0 COMMAND
 
 Commands:
@@ -357,90 +340,95 @@ Commands:
     --add-disk <disk size>           Add disk to VMs
     --remove-disk <disk size>        Remove disk from VMs
 EOF
-    }
+}
 
-    LONG_OPTS="all,clone:,renew-dhcp,cleanup,restart,start,shutdown,status,snap-delete:,snap-create:,snap-revert:,snap-list,add-disk:,remove-disk:,help"
-    ARGS=$(getopt -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }
+# if [[ ${GROUP} =~ [A-Z]* ]]; then
+#     echo -en "Error: \$GROUP must be uppercase but get ${GROUP} \n\n"
+#     exit 0
+# fi
 
-    while [ "$#" -gt 0 ]; do
-        case "$1" in
-            (--all)
-                ALL_VMS=1
-                shift 1
-                ;;
-            (--cleanup)
-                cleanup
-                exit 0
-                ;;
-            (--clone)
-                VM_NAME=$2
-                shift 2
-                clone $VM_NAME
-                exit 0
-                ;;
-            (--restart)
-                restart
-                exit 0
-                ;;
-            (--renew-dhcp)
-                renew-dhcp
-                exit 0
-                ;;
-            (--start)
-                start_networks
-                start
-                exit 0
-                ;;
-            (--shutdown)
-                shutdown
-                shutdown_networks
-                exit 0
-                ;;
-            (--status)
-                status
-                exit 0
-                ;;
-            (--snap-delete)
-                SNAPSHOT_NAME=$2
-                shift 2
-                snap-delete $SNAPSHOT_NAME
-                exit 0
-                ;;
-            (--add-disk)
-                DISK_SIZE=$2
-                shift 2
-                add-disk
-                exit 0
-                ;;
-            (--remove-disk)
-                DISK_SIZE=$2
-                shift 2
-                remove-disk
-                exit 0
-                ;;
-            (--snap-create)
-                SNAPSHOT_NAME=$2
-                shift 2
-                snap-create $SNAPSHOT_NAME
-                exit 0
-                ;;
-            (--snap-revert)
-                SNAPSHOT_NAME=$2
-                shift 2
-                snap-revert $SNAPSHOT_NAME
-                exit 0
-                ;;
-            (--snap-list)
-                snap-list
-                exit 0
-                ;;
-            (--help|-h)
-                usage
-                exit 0
-                ;;
-            (*)
-                usage
-                exit 3
-                ;;
-        esac
-    done
+LONG_OPTS="all,clone:,renew-dhcp,cleanup,restart,start,shutdown,status,snap-delete:,snap-create:,snap-revert:,snap-list,add-disk:,remove-disk:,help"
+ARGS=$(getopt -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        (--all)
+            ALL_VMS=1
+            shift 1
+            ;;
+        (--cleanup)
+            cleanup
+            exit 0
+            ;;
+        (--clone)
+            VM_NAME=$2
+            shift 2
+            clone $VM_NAME
+            exit 0
+            ;;
+        (--restart)
+            restart
+            exit 0
+            ;;
+        (--renew-dhcp)
+            renew-dhcp
+            exit 0
+            ;;
+        (--start)
+            start_networks
+            start
+            exit 0
+            ;;
+        (--shutdown)
+            shutdown
+            shutdown_networks
+            exit 0
+            ;;
+        (--status)
+            status
+            exit 0
+            ;;
+        (--snap-delete)
+            SNAPSHOT_NAME=$2
+            shift 2
+            snap-delete $SNAPSHOT_NAME
+            exit 0
+            ;;
+        (--add-disk)
+            DISK_SIZE=$2
+            shift 2
+            add-disk
+            exit 0
+            ;;
+        (--remove-disk)
+            DISK_SIZE=$2
+            shift 2
+            remove-disk
+            exit 0
+            ;;
+        (--snap-create)
+            SNAPSHOT_NAME=$2
+            shift 2
+            snap-create $SNAPSHOT_NAME
+            exit 0
+            ;;
+        (--snap-revert)
+            SNAPSHOT_NAME=$2
+            shift 2
+            snap-revert $SNAPSHOT_NAME
+            exit 0
+            ;;
+        (--snap-list)
+            snap-list
+            exit 0
+            ;;
+        (--help|-h)
+            usage
+            exit 0
+            ;;
+        (*)
+            usage
+            exit 3
+            ;;
+    esac
+done

@@ -1,12 +1,13 @@
 ---
 - import_tasks: host_precheck.yml
 
+- import_tasks: define_cluster_networks.yml
 - import_tasks: define_cluster_nodes.yml
 
 - name: Steps to destroy VM using Libvirt
   block:
     - name: List snapshots
-      shell: "set -o pipefail ;virsh -q snapshot-list --domain {{ item.name }} | cut -d ' ' -f2"
+      shell: "set -o pipefail ;virsh -q snapshot-list --domain {{ item.fullname }} | cut -d ' ' -f2"
       with_items: "{{ cluster_nodes }}"
       register: with_output
       args:
@@ -29,30 +30,35 @@
     - name: Destroy VMs
       virt:
         command: destroy
-        name: "{{ item.name }}"
+        name: "{{ item.fullname }}"
       with_items: "{{ cluster_nodes }}"
       ignore_errors: true
 
     - name: Undefine VMs
       virt:
         command: undefine
-        name: "{{ item.name }}"
+        name: "{{ item.fullname }}"
       with_items: "{{ cluster_nodes }}"
       ignore_errors: true
 
     - name: Remove OS images from libvirt directory
       become: true
       file:
-        path: "{{ libvirt_dir }}/{{ item.name }}-boot.qcow2"
+        path: "{{ libvirt_dir }}/{{ group }}/{{ item.name }}-boot.qcow2"
         state: absent
       with_items: "{{ cluster_nodes }}"
 
     - name: Delete qcow2 images
       file:
-        path: "{{ libvirt_dir }}/{{ item.name }}.qcow2"
+        path: "{{ libvirt_dir }}/{{ group }}/{{ item.name }}.qcow2"
         state: absent
       with_items: "{{ cluster_nodes }}"
       when: destroy_images | bool
+
+    - name: "Clean group directory in {{ libvirt_dir }}"
+      file:
+        path: "{{ tmp_dir }}/{{ group }}"
+        state: absent
 
 - import_tasks: libvirt/destroy_networks.yml
   when: networks | length > 0

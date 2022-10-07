@@ -13,7 +13,8 @@
 {% set mac_prefix = "52:54:00:33" %}
 {% endif %}
 
-- name: "{{ node_prefix }}{{ node.name }}"
+- name: "{{ node.name }}"
+  fullname: "{{ group }}{{ node.name }}"
   ram: {{ node.ram }}
   vcpu: {{ node.cpu }}
   role: {{ node.type }}
@@ -43,12 +44,12 @@
 
 {% set intf_loop = loop %}
 
-{% for network in networks if network.name == intf.name %}
+{% for network in cluster_networks if network.short_name == intf.name %}
 {% set net = network %}
 {% if net.forward is defined and net.forward == 'nat' %}
       external: true
 {% endif %}
-      bridge: "{{ net.name }}"
+      bridge: "{{ net.bridge_name }}"
       mode: "{{ net.mode }}"
 {% set ip = 10 + node_loop.index %}
       address: "{{ net.cidr | ipaddr(ip) | ipaddr('address') }}"
@@ -69,7 +70,7 @@
   disks:
 {% for disk in node.disks %}
 {% set device = disk_device(loop.index) %}
-    - name: "vol-{{ node_prefix }}{{ node.name }}-{{ loop.index }}"
+    - name: "vol-{{ group }}{{ node.name }}-{{ loop.index }}"
       device: "vd{{ device }}"
       size: {{ disk.size }}
 {% if runtime == 'vm' %}

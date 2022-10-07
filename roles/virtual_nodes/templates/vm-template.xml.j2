@@ -1,15 +1,15 @@
 #jinja2: lstrip_blocks: True
 <domain type='kvm'{% if item.os_type in ['fcos', 'flatcar'] %} xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'{% endif %}>
-  <name>{{ item.name }}</name>
+  <name>{{ group }}{{ item.name }}</name>
   <metadata>
     <aio:instance xmlns:aio='https://github.com/blallau/ansible-aio'>
-      <aio:inventory group='{{ item.role }}' distro='{{ item.os_type }}'/>
+      <aio:inventory group='{{ group }}' role='{{ item.role }}' distro='{{ item.os_type }}'/>
     </aio:instance>
   </metadata>
   {% if item.os_type in ['fcos', 'flatcar'] %}
   <qemu:commandline>
     <qemu:arg value='-fw_cfg'/>
-    <qemu:arg value='name=opt/org.flatcar-linux/config,file={{ tmp_dir }}/{{ item.name }}/config.ign'/>
+    <qemu:arg value='name=opt/org.flatcar-linux/config,file={{ tmp_dir }}/{{ group }}/{{ item.name }}/config.ign'/>
   </qemu:commandline>
   {% endif %}
   <memory unit='GiB'>{{ item.ram }}</memory>
@@ -48,7 +48,7 @@
     {% endif %}
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2' cache='none' io='native'/>
-      <source file='{{ libvirt_dir }}/{{ item.name }}-boot.qcow2'/>
+      <source file='{{ libvirt_dir }}/{{ group }}/{{ item.name }}-boot.qcow2'/>
       <backingStore/>
       <target dev='vda' bus='virtio'/>
       <boot order='1'/>
@@ -56,7 +56,7 @@
     {% if item.os_type != 'fcos' and item.os_type != 'flatcar' %}
     <disk type='file' device='disk'>
       <driver name='qemu' type='raw'/>
-      <source file='{{ tmp_dir }}/{{ item.name }}/seed.img'/>
+      <source file='{{ tmp_dir }}/{{ group }}/{{ item.name }}/seed.img'/>
       <backingStore/>
       <target dev='{{ cloud_init_disk }}' bus='virtio'/>
       <boot order='2'/>
@@ -72,7 +72,7 @@
     {% elif disk.type == 'qcow2' %}
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2'/>
-      <source file='{{ tmp_dir }}/{{ item.name }}/{{ disk.name }}.qcow2'/>
+      <source file='{{ tmp_dir }}/{{ group }}/{{ item.name }}/{{ disk.name }}.qcow2'/>
       <target dev='{{ disk.device }}' bus='virtio'/>
     </disk>
     {% endif %}

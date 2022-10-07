@@ -1,5 +1,16 @@
 ---
-- name: VMs
+- name: precheck
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - fail:
+        msg: The 'group' variable is required
+      when: group is not defined
+    # - fail:
+    #     msg: 'group' value must be in uppercase
+    #   when: group|upper != group
+
+- name: preflight
   hosts: hypervisors
   gather_facts: false
   pre_tasks:

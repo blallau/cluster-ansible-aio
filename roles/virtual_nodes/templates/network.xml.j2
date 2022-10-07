@@ -4,13 +4,13 @@
   <name>{{ item.name }}</name>
 {% if item.forward is defined and item.forward == 'bridge' %}
   <forward mode='bridge'/>
-  <bridge name='{{ item.bridge }}'/>
+  <bridge name='{{ item.bridge_name }}'/>
   <mtu size='{{ libvirt_default_mtu }}'/>
 {% else %}
 {% if item.forward is defined and item.forward == 'nat' %}
   <forward mode='nat'/>
 {% endif %}
-  <bridge name='{{ item.name }}' stp='on' delay='0'/>
+  <bridge name='{{ item.bridge_name }}' stp='on' delay='0'/>
 {% if local_dns_enabled and item.forward is defined and item.forward == 'nat' %}
   <dns enable='yes'/>
   <domain name='{{ dns_domain }}' localOnly='yes'/>
@@ -27,7 +27,7 @@
       <bootp file='http://{{ ip }}/boot.ipxe'/>
 {% endif %}
 {% for node in cluster_nodes %}
-      <host mac='{{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | selectattr('bridge', 'equalto', item.name) | map(attribute='mac') | join }}' ip='{{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | selectattr('bridge', 'equalto', item.name) | map(attribute='address') | join }}'/>
+      <host mac='{{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | selectattr('bridge', 'equalto', item.bridge_name) | map(attribute='mac') | join }}' ip='{{ node.interfaces | selectattr('mode', 'equalto', 'dhcp') | selectattr('bridge', 'equalto', item.bridge_name) | map(attribute='address') | join }}'/>
 {% endfor %}
     </dhcp>
 {% endif %}

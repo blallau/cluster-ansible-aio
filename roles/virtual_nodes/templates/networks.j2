@@ -1,0 +1,19 @@
+---
+{% for net in networks %}
+{% set full_net_name = net.name + '-' + group %}
+- name: "{{ group }}{{ net.name }}"
+  short_name: "{{ net.name }}"
+  bridge_name: "{{ full_net_name[:15] }}"
+  cidr: "{{ net.cidr }}"
+{% if net.forward is defined %}
+  forward: "{{ net.forward }}"
+{% endif %}
+{% if net.mode is defined %}
+  mode: "{{ net.mode }}"
+{% endif %}
+{% if net.pxe is defined %}
+  pxe: "{{ net.pxe }}"
+{% endif %}
+{% endfor %}
+
+...
