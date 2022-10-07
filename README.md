@@ -6,8 +6,6 @@ Cluster-ansible-aio is a Vagrant like program for building and managing virtual 
 Virtual machines are provisioned on top of Libvirt, or LXD (still beta) using heavily Ansible.
 Cluster-ansible-aio is designed for everyone as the easiest and fastest way to create a virtualized environment!
 
-![cluster-ansible-aio](https://user-images.githubusercontent.com/9655027/31175714-6e453b1e-a910-11e7-8a60-f7c6d2114b1a.png)
-
 Cluster-ansible-aio is an open source tool for automating deployment of cluster apps on a single machine using Libvirt.
 
 -   Source: <https://github.com/blallau/cluster-ansible-aio>
