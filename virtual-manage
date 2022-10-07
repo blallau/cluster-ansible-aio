@@ -1,16 +1,30 @@
 #!/bin/bash
 LC_ALL=C
-NODE_GROUP="^${GROUP}.*$"
+CLUSTER_GROUP="^${GROUP}.*$"
 SNAPSHOT_NAME=""
 DISK_DIRECTORY="${HOME}/.cluster/${GROUP}"
 DISK_SIZE=10
 TIMEOUT=300
 GRACEFULLY_SHUTDOWN=false
 
+function configure_etc_hosts {
+    sudo sed -i '/# BEGIN ANSIBLE MANAGED BLOCK/,/# END ANSIBLE MANAGED BLOCK/d' /etc/hosts
+    if [ -f ${HOME}/.cluster/${GROUP}/etc_hosts ]; then
+        cat ${HOME}/.cluster/${GROUP}/etc_hosts | sudo tee -a /etc/hosts
+    fi
+}
+
+function configure_ssh_config {
+    sed -i '/# BEGIN ANSIBLE MANAGED BLOCK/,/# END ANSIBLE MANAGED BLOCK/d' ~/.ssh/config
+    if [ -f ${HOME}/.cluster/${GROUP}/ssh_config ]; then
+        cat ${HOME}/.cluster/${GROUP}/ssh_config >> ~/.ssh/config
+    fi
+}
+
 function start_networks {
     echo -e "\e[32m\e[1m==> Start all inactive networks\e[0m"
 	list_inactive_networks | while read NETWORK; do
-        if [ ! -z "$NETWORK" ]; then
+        if [[ ! -z "$NETWORK" && "$NETWORK" =~ $CLUSTER_GROUP ]]; then
             virsh net-start $NETWORK | grep -v "^$"
             # restart failed network
             if [ $? -ne 0 ]; then
@@ -24,7 +38,7 @@ function start_networks {
 function shutdown_networks {
     echo -e "\e[32m\e[1m==> Shutdown all active networks\e[0m"
 	list_running_networks | while read NETWORK; do
-        if [ ! -z "$NETWORK" ]; then
+        if [[ ! -z "$NETWORK"  && "$NETWORK" =~ $CLUSTER_GROUP ]]; then
             virsh net-destroy $NETWORK | grep -v "^$"
         fi
     done
@@ -34,42 +48,39 @@ function shutdown_networks {
 function start {
     echo -e "\e[32m\e[1m==> Start all inactive domains\e[0m"
 	list_inactive_domains | while read DOMAIN; do
-        for node in $NODE_GROUP; do
-            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-		        virsh start $DOMAIN | grep -v "^$"
-            fi
-        done
-	done
+        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+		    virsh start $DOMAIN | grep -v "^$"
+        fi
+    done
     echo -e "\e[32m\e[1m==> All domains started :) \e[0m"
+    configure_etc_hosts
+    configure_ssh_config
 }
 
 function status {
 	list_all_domains | while read DOMAIN; do
-        for node in $NODE_GROUP; do
-            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-		        echo -e "  $DOMAIN   \e[1m\e[92mrunning\e[39m\e[0m"
-                echo -e "  $(virsh dominfo $DOMAIN | grep CPU\(s\))"
-                echo -e "  $(virsh dominfo $DOMAIN | grep 'Max memory')"
-                echo -e ""
-                echo -e "$(virsh -q domblklist $DOMAIN --details)"
-                echo -e ""
-                echo -e "$(virsh -q domfsinfo $DOMAIN)"
-                echo -e ""
-                echo -e "$(virsh -q domifaddr $DOMAIN --source agent | grep ipv4)"
-                echo -e "\n"
-            fi
-        done
-	done
+        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+		    echo -e "  $DOMAIN   \e[1m\e[92mrunning\e[39m\e[0m"
+            echo -e "  $(virsh dominfo $DOMAIN | grep CPU\(s\))"
+            echo -e "  $(virsh dominfo $DOMAIN | grep 'Max memory')"
+            echo -e ""
+            echo -e "$(virsh -q domblklist $DOMAIN --details)"
+            echo -e ""
+            echo -e "$(virsh -q domfsinfo $DOMAIN)"
+            echo -e ""
+            echo -e "$(virsh -q domifaddr $DOMAIN --source agent | grep ipv4)"
+            echo -e "\n"
+        fi
+    done
+
 }
 
 function cleanup {
 	list_all_domains | while read DOMAIN; do
-        for node in $NODE_GROUP; do
-            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-                virsh destroy $DOMAIN
-		        virsh undefine --remove-all-storage $DOMAIN
-            fi
-        done
+        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh destroy $DOMAIN
+		    virsh undefine --remove-all-storage $DOMAIN
+        fi
 	done
 }
 
@@ -85,24 +96,20 @@ function clone {
 
 function acpi_shutdown {
 	list_running_domains | while read DOMAIN; do
-        for node in $NODE_GROUP; do
-            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-		        virsh shutdown $DOMAIN --mode acpi
-            fi
-        done
+        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+		    virsh shutdown $DOMAIN --mode acpi
+        fi
 	done
 }
 
 function power_shutdown {
 	echo -e "==> power shutdown all running KVM domains..."
 	list_running_domains | while read DOMAIN; do
-        for node in $NODE_GROUP; do
-            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-		        virsh destroy $DOMAIN | grep -v "^$"
-		        # Give libvirt some time for killing off the domain.
-		        sleep 3
-            fi
-        done
+        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+		    virsh destroy $DOMAIN | grep -v "^$"
+		    # Give libvirt some time for killing off the domain.
+		    sleep 3
+        fi
 	done
 }
 
@@ -123,6 +130,10 @@ function shutdown {
 	    done
     fi
     power_shutdown
+
+    sed -i '/# BEGIN ANSIBLE MANAGED BLOCK/,/# END ANSIBLE MANAGED BLOCK/d' ~/.ssh/config
+    sudo sed -i '/# BEGIN ANSIBLE MANAGED BLOCK/,/# END ANSIBLE MANAGED BLOCK/d' /etc/hosts
+
     echo -e "\e[33m\e[1m==> All domains shutdown :)\e[0m"
     # list_inactive_domains
 }
@@ -134,11 +145,9 @@ function restart {
 
 function renew-dhcp {
 	list_all_domains | while read -e DOMAIN; do
-        for node in $NODE_GROUP; do
-            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-                ssh -n root@${DOMAIN} "nmcli con up id 'System eth0'" 2>&1 > /dev/null
-            fi
-        done
+        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            ssh -n root@${DOMAIN} "nmcli con up id 'System eth0'" 2>&1 > /dev/null
+        fi
 	done
 }
 
@@ -169,25 +178,21 @@ function list_all_snapshots() {
 
 function add-disk {
 	list_running_domains | while read DOMAIN; do
-        for node in $NODE_GROUP; do
-            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-                sudo qemu-img create -f qcow2 ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2 ${DISK_SIZE}G
-                virsh attach-disk --domain $DOMAIN --source ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2 --subdriver qcow2 --target vdd --live --cache none
-                echo "Disk added to $DOMAIN domain"
-            fi
-        done
+        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            sudo qemu-img create -f qcow2 ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2 ${DISK_SIZE}G
+            virsh attach-disk --domain $DOMAIN --source ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2 --subdriver qcow2 --target vdd --live --cache none
+            echo "Disk added to $DOMAIN domain"
+        fi
     done
 }
 
 function remove-disk {
 	list_running_domains | while read DOMAIN; do
-        for node in $NODE_GROUP; do
-            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-                virsh detach-disk --domain $DOMAIN --target vdd --live
-                sudo rm ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2
-                echo "Disk removed from $DOMAIN domain"
-            fi
-        done
+        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh detach-disk --domain $DOMAIN --target vdd --live
+            sudo rm ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2
+            echo "Disk removed from $DOMAIN domain"
+        fi
     done
 }
 
@@ -223,12 +228,10 @@ function snap-create {
     fi
 
 	list_inactive_domains | while read DOMAIN; do
-        for node in $NODE_GROUP; do
-            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-                virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME --atomic | egrep -v "^$"
-                echo "Snapshot $SNAPSHOT_NAME create for domain $DOMAIN"
-            fi
-        done
+        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME --atomic | egrep -v "^$"
+            echo "Snapshot $SNAPSHOT_NAME create for domain $DOMAIN"
+        fi
     done
     # start domains
     start
@@ -255,12 +258,10 @@ function snap-create {
     # fi
 
 	# list_running_domains | while read DOMAIN; do
-    #     for node in $NODE_GROUP; do
     #         if [[ "$DOMAIN" =~ $node ]]; then
     #             virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME --atomic --quiesce --disk-only | egrep -v "^$"
     #             echo "Snapshot $SNAPSHOT_NAME create for domain $DOMAIN"
     #         fi
-    #     done
     # done
     # # END with qemu-guest-agent
 }
@@ -276,14 +277,12 @@ function snap-delete {
     fi
     shutdown
 	list_inactive_domains | while read DOMAIN; do
-        for node in $NODE_GROUP; do
-            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-                virsh snapshot-delete $DOMAIN --snapshotname $SNAPSHOT_NAME
-                echo "Snapshot $SNAPSHOT_NAME remove for domain $DOMAIN"
-                fi
-            done
-        done
-        # start
+        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh snapshot-delete $DOMAIN --snapshotname $SNAPSHOT_NAME
+            echo "Snapshot $SNAPSHOT_NAME remove for domain $DOMAIN"
+        fi
+    done
+    # start
 }
 
 function snap-revert {
@@ -297,25 +296,21 @@ function snap-revert {
     fi
     shutdown
 	list_inactive_domains | while read DOMAIN; do
-        for node in $NODE_GROUP; do
-            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-                virsh snapshot-revert $DOMAIN --snapshotname $SNAPSHOT_NAME
-                echo "Snapshot $SNAPSHOT_NAME revert for domain $DOMAIN"
-            fi
-        done
+        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh snapshot-revert $DOMAIN --snapshotname $SNAPSHOT_NAME
+            echo "Snapshot $SNAPSHOT_NAME revert for domain $DOMAIN"
+        fi
     done
     start
 }
 
 function snap-list {
 	list_all_domains | while read DOMAIN; do
-        for node in $NODE_GROUP; do
-            if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $node ]]; then
-                #                echo -e "\e[33m$DOMAIN [$(virsh snapshot-info $DOMAIN --current | grep Name | cut -d ":" -f2 | sed -e 's/^[ ]*//')]\e[0m"
-                echo -e "$DOMAIN \e[92m\e[1m[$(virsh snapshot-current --name $DOMAIN)]\e[0m"
-                virsh -q snapshot-list --tree --domain $DOMAIN 2>&1
-            fi
-        done
+        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            #                echo -e "\e[33m$DOMAIN [$(virsh snapshot-info $DOMAIN --current | grep Name | cut -d ":" -f2 | sed -e 's/^[ ]*//')]\e[0m"
+            echo -e "$DOMAIN \e[92m\e[1m[$(virsh snapshot-current --name $DOMAIN)]\e[0m"
+            virsh -q snapshot-list --tree --domain $DOMAIN 2>&1
+        fi
     done
 }
 

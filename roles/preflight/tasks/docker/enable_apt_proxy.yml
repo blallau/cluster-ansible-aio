@@ -1,6 +1,6 @@
 ---
 - name: Build APT cache proxy image and push it
-  docker_image:
+  community.docker.docker_image:
     name: "{{ docker_apt_cache_image }}"
     source: build
     build:
@@ -10,7 +10,7 @@
     push: true
 
 - name: Create a APT cache proxy
-  docker_container:
+  community.docker.docker_container:
     name: "{{ docker_apt_cache_name }}"
     image: "{{ docker_apt_cache_image }}"
     restart_policy: unless-stopped

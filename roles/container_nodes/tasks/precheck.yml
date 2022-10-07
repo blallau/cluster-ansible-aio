@@ -7,13 +7,13 @@
       when: physical_disks is not defined
 
     - name: List storage pool
-      virt_pool:
+      community.libvirt.virt_pool:
         command: list_pools
       register: pool_exists
 
     - name: "Define {{ virt_volume_group }} storage pool"
       become: true
-      virt_pool:
+      community.libvirt.virt_pool:
         command: define
         name: "{{ virt_volume_group }}"
         xml: "{{ lookup('template', 'pool.xml.j2') }}"
@@ -28,14 +28,14 @@
 
     - name: "Start {{ virt_volume_group }} storage pool"
       become: true
-      virt_pool:
+      community.libvirt.virt_pool:
         command: create
         name: "{{ virt_volume_group }}"
       when: virt_volume_group not in pool_exists.list_pools
 
     - name: "Autostart {{ virt_volume_group }} storage pool"
       become: true
-      virt_pool:
+      community.libvirt.virt_pool:
         autostart: true
         name: "{{ virt_volume_group }}"
 

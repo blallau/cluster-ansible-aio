@@ -10,13 +10,6 @@ Bug Fix
 Todo list
 ---------
 - [High] manage LXC cluster
-- [High] manage multi cluster
-  manage simultaneous deployments
-  => manage node-prefix in SSH keys
-  => libvirt network conflict (see below)
-  fix bug when different deployments use the same networks
-  => IPs/macs association cannot be set in the previous DHCP config
-  => IPs are random => hence deployment fails [Waiting on IPs]
 
 - [Medium] manage LXC & KVM cluster
 - [Medium] use Libvirt NSS module instead of using /etc/hosts file https://libvirt.org/nss.html
@@ -24,10 +17,7 @@ Todo list
 - [Minor] add label to loop in order to simplify loop iteration display
 - [Minor] In case of many interfaces add a check to get external interface first
 - [Minor] add task to wait for Flatcar VMs ready
-- [Minor] manage QCOW2 with a baseimagefile
 - [Minor] Fix DNS issue when using Docker DNS server instead of Libvirt dnsmasq
-- [Minor] automaticaly retrieve last iso images (debian,centos), to avoid too long package update
-- [Minor] manage remote libvirtd
 - [Minor] remove shutdown before snapshot
   => use qemu-guest-agent (fsfreeze before snapshot)
   => NO: external snapshot doesn't manage Guest VM

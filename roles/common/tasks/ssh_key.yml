@@ -1,6 +1,6 @@
 ---
 - name: Generate SSH key cluster_rsa"
-  openssh_keypair:
+  community.crypto.openssh_keypair:
     path: "~/.ssh/cluster_rsa"
     type: rsa
     size: 4096

@@ -1,18 +1,18 @@
 ---
 - name: List virtual bridges
-  virt_net:
+  community.libvirt.virt_net:
     command: list_nets
   register: bridge_exists
 
 - name: Steps to destroy network using Libvirt
   block:
     - name: Destroy virtual bridges
-      virt_net:
+      community.libvirt.virt_net:
         command: destroy
         name: "{{ item.name }}"
       with_items: "{{ cluster_networks }}"
     - name: Undefine virtual bridges
-      virt_net:
+      community.libvirt.virt_net:
         command: undefine
         name: "{{ item.name }}"
       with_items: "{{ cluster_networks }}"

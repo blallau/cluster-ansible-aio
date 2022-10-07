@@ -271,7 +271,7 @@ kube_exec_on_master=${EXEC_ON_MASTER}
 offline=${OFFLINE}
 offline_binaries_folder=${KAST_BINARIES}
 
-node_prefix=${OS}
+group=${OS}
 
 kube_ha=${KUBE_HA}
 

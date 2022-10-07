@@ -1,11 +1,11 @@
 ---
 - name: List virtual networks
-  virt_net:
+  community.libvirt.virt_net:
     command: list_nets
   register: net_exists
 
 - name: Collect facts about existing Libvirt networks
-  virt_net:
+  community.libvirt.virt_net:
     command: facts
 
 - name: "Copy Libvirt XML network domain in {{ tmp_dir }}/{{ group }}"
@@ -19,14 +19,14 @@
 - name: Steps to setup networks using Libvirt
   block:
     - name: Define virtual networks
-      virt_net:
+      community.libvirt.virt_net:
         command: define
         name: "{{ item.name }}"
         xml: '{{ lookup("template", "network.xml.j2") }}'
       with_items: "{{ cluster_networks }}"
 
     - name: Start virtual networks
-      virt_net:
+      community.libvirt.virt_net:
         state: active
         autostart: true
         name: "{{ item.name }}"

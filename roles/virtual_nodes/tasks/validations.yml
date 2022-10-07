@@ -47,7 +47,7 @@
         # TODO: use this? 'virt-host-validate qemu'
         - name: "Test that we can talk to libvirtd"
           become: true
-          virt:
+          community.libvirt.virt:
             command: list_vms
             uri: "{{ libvirt_url }}"
           register: result_libvirtd

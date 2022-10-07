@@ -43,13 +43,13 @@
 - name: Libvirt setup VMs
   block:
     - name: Define VMs
-      virt:
+      community.libvirt.virt:
         command: define
         xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
       with_items: "{{ cluster_nodes }}"
 
     - name: Start a VMs
-      virt:
+      community.libvirt.virt:
         name: "{{ item.fullname }}"
         state: running
       with_items: "{{ cluster_nodes }}"
@@ -105,6 +105,12 @@
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ ansible_env.HOME }}/.ssh/config"
 
+- name: Create file {{ tmp_dir }}/{{ group }}/ssh_config
+  blockinfile:
+    create: true
+    block: "{{ lookup('template', 'ssh_config.j2') }}"
+    path: "{{ tmp_dir }}/{{ group }}/ssh_config"
+
 - name: Add new nodes to created_nodes Ansible group
   add_host:
     name: "{{ item.1.address }}"
@@ -115,19 +121,24 @@
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.1.address is defined and item.1.external is defined and item.1.external | bool
+  when:
+    - item.1.address is defined
+    - item.1.external is defined
+    - item.1.external | bool
+
+- name: Create file {{ tmp_dir }}/{{ group }}/etc_hosts
+  become: true
+  blockinfile:
+    create: true
+    block: "{{ lookup('template', 'etc_hosts.j2') }}"
+    path: "{{ tmp_dir }}/{{ group }}/ssh_config"
 
 - name: Populate /etc/hosts file
   become: true
-  lineinfile:
-    path: /etc/hosts
-    insertafter: EOF
-    regexp: "^{{ item.1.address }} {{ item.0.name }}.{{ dns_domain }} {{ item.0.name }}"
-    line: "{{ item.1.address }} {{ item.0.name }}.{{ dns_domain }} {{ item.0.name }}"
-  with_subelements:
-    - "{{ cluster_nodes }}"
-    - interfaces
-  when: item.1.address is defined and item.1.external is defined and item.1.external | bool
+  blockinfile:
+    create: true
+    block: "{{ lookup('template', 'etc_hosts.j2') }}"
+    path: "/etc/hosts"
 
 # - import_tasks: docker/enable_dns_server.yml
 #   when: dns_server_enabled | bool

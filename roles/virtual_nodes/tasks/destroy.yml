@@ -66,9 +66,9 @@
 
 - include_tasks: libvirt/destroy_disks.yml
 
-- name: "Clean nodes config in {{ tmp_dir }}"
+- name: "Clean nodes config in {{ tmp_dir }}/{{ group }}"
   file:
-    path: "{{ tmp_dir }}/{{ item.name }}"
+    path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}"
     state: absent
   with_items: "{{ cluster_nodes }}"
 
