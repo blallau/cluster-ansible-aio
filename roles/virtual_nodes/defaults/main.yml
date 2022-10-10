@@ -25,6 +25,12 @@ tmp_dir: "{{ home_dir}}/.cluster"
 guest_timezone: "UTC"
 qemu_guest_agent_enabled: true
 
+################
+# virt-customize
+################
+virt_customize_packages: []
+virt_customize_cmd: []
+
 ########
 # VBMC #
 ########

@@ -17,7 +17,7 @@ KUBE_NIC_NAME="enp2s0"
 ####
 if [ "$CREATE_INSTANCE" == true ]; then
     cd ${CAIO_DIR}
-    ${CAIO_DIR}/cluster-ansible-aio create-virtual-nodes -s preflight -e lb_nb=${LB_NB} -e worker_nb=${WORKER_NB} -e docker_enabled=false -e node_prefix=${OS} -e net_prefix="" -v
+    ${CAIO_DIR}/cluster-ansible-aio create-virtual-nodes -s preflight -e lb_nb=${LB_NB} -e worker_nb=${WORKER_NB} -e docker_enabled=false -e group=${OS} -v
     if [ $? -eq 0 ]
     then
         echo "Intances successfully created"

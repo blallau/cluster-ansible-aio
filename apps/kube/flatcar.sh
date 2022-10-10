@@ -14,7 +14,7 @@ generateInventory
 # VM
 ####
 cd ${CAIO_DIR}
-${CAIO_DIR}/cluster-ansible-aio create-virtual-nodes -s preflight -e lb_nb=${LB_NB} -e worker_nb=${WORKER_NB} -e docker_enabled=false -e os_default_user=core -e node_prefix=${OS} -e net_prefix=${OS::3} -v
+${CAIO_DIR}/cluster-ansible-aio create-virtual-nodes -s preflight -e lb_nb=${LB_NB} -e worker_nb=${WORKER_NB} -e docker_enabled=false -e os_default_user=core -e group=${OS} -v
 
 # KUBE
 ######
