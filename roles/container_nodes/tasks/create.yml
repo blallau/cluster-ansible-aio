@@ -102,7 +102,6 @@
 
 - import_tasks: libvirt/setup_networks.yml
   when: networks | length > 0
-  tags: network
 
 - name: "Copy cluster config for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
   blockinfile:
@@ -111,7 +110,6 @@
     block: |
         {{ item | to_nice_json(indent=2) }}
   loop: "{{ cluster_nodes }}"
-  tags: network
 
 - name: Prepare CloudInit/Ignition config
   include_tasks: postconfig.yml
@@ -119,7 +117,6 @@
 
 - import_tasks: libvirt/setup_networks.yml
   when: networks | length > 0
-  tags: network
 
 - include_tasks: lxd/create_disks.yml
 
@@ -179,7 +176,6 @@
     create: true
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ lookup('env', 'HOME') }}/.ssh/config"
-  tags: postconf
 
 - name: Add new nodes to created_nodes Ansible group
   add_host:
@@ -192,7 +188,6 @@
     - "{{ cluster_nodes }}"
     - interfaces
   when: item.1.address is defined and item.1.external is defined and item.1.external
-  tags: postconf
 
 - name: Populate /etc/hosts file
   become: true
@@ -205,4 +200,3 @@
     - "{{ cluster_nodes }}"
     - interfaces
   when: item.1.address is defined and item.1.external is defined and item.1.external
-  tags: postconf

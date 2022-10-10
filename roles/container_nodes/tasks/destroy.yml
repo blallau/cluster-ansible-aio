@@ -16,7 +16,6 @@
 # - import_tasks: lxd/destroy_networks.yml
 - import_tasks: libvirt/destroy_networks.yml
   when: networks | length > 0
-  tags: network
 
 - include_tasks: lxd/destroy_disks.yml
 

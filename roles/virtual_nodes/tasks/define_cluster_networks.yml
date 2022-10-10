@@ -2,7 +2,6 @@
 - name: Load networks variables
   set_fact:
     cluster_networks: "{{ lookup('template','networks.j2') | from_yaml }}"
-  tags: network
 
 - name: "Copy cluster_networks in {{ tmp_dir }}/{{ group }}"
   blockinfile:
@@ -10,9 +9,7 @@
     create: true
     block: |
         {{ cluster_networks | to_nice_json(indent=2) }}
-  tags: network
 
 - name: "Display networks"
   debug:
     msg: "{{ cluster_networks | to_nice_yaml(indent=2) }}"
-  tags: network

@@ -20,7 +20,6 @@
   pip:
     name: "{{ pip_dependencies }}"
     state: latest
-  tags: network
 
 - import_tasks: docker/enable_registry.yml
   when: registry_enabled | bool
@@ -31,8 +30,6 @@
     name: "libvirtd"
     state: started
     enabled: true
-  tags: network
 
 - import_tasks: docker/enable_apt_proxy.yml
   when: apt_cache_enabled | bool
-  tags: apt_cache

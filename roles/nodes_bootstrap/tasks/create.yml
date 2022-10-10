@@ -2,12 +2,10 @@
 - name: Load cluster_nodes variables
   set_fact:
     cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
-  tags: network
 
 - name: "Display cluster_nodes"
   debug:
     msg: "{{ cluster_nodes | to_nice_yaml(indent=2) }}"
-  tags: network
 
 - import_tasks: enable_nested_virt.yml
   become: true
@@ -79,7 +77,6 @@
 - import_tasks: enable_apt_proxy.yml
   when: apt_cache_enabled | bool
   become: true
-  tags: apt_cache
 
 - name: Wait for automatic Ubuntu system updates
   shell: while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 1; done;
@@ -124,7 +121,6 @@
 
 - import_tasks: configure_ssh.yml
   become: true
-  tags: ssh
 
 - name: Enable cockpit
   systemd:

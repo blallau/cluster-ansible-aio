@@ -18,7 +18,6 @@
     block: |
         {{ item | to_nice_json(indent=2) }}
   loop: "{{ cluster_nodes }}"
-  tags: network
 
 - import_tasks: prepare_os_image.yml
 
@@ -36,7 +35,6 @@
 
 - import_tasks: libvirt/setup_networks.yml
   when: networks | length > 0
-  tags: network
 
 - include_tasks: libvirt/create_disks.yml
 
@@ -142,7 +140,6 @@
 
 # - import_tasks: docker/enable_dns_server.yml
 #   when: dns_server_enabled | bool
-#   tags: dns_server
 
 - name: Create virtual BMC
   shell: >

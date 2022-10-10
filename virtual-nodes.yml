@@ -18,7 +18,6 @@
        gather_subset: min
   roles:
     - preflight
-  tags: preflight
 
 - name: VMs
   hosts: hypervisors

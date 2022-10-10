@@ -72,7 +72,6 @@
 
 # - import_tasks: enable_apt_proxy.yml
 #   when: apt_cache_enabled | bool
-#   tags: apt_cache
 
 # - name: Wait for automatic Ubuntu system updates
 #   shell: while sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1; do sleep 1; done;
@@ -103,13 +102,10 @@
 # - name: Create '{{ config_owner_group }}' group
 #   group:
 #     name: "{{ config_owner_group }}"
-#   tags: user
 
 # - name: Create '{{ config_owner_user }}' user
 #   user:
 #     name: "{{ config_owner_user }}"
 #     group: kolla
-#   tags: user
 
 - import_tasks: configure_ssh.yml
-  tags: ssh

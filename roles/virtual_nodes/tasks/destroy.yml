@@ -62,7 +62,6 @@
 
 - import_tasks: libvirt/destroy_networks.yml
   when: networks | length > 0
-  tags: network
 
 - include_tasks: libvirt/destroy_disks.yml
 
