@@ -107,7 +107,6 @@ class LibvirtInventory(object):
             hostvars = dict(libvirt_name=domain.name(),
                             libvirt_id=domain.ID(),
                             libvirt_uuid=domain.UUIDString())
-            domain_name = domain.name()
             state, _ = domain.state()
             # 2 is the state for a running guest
             if state != 1:
@@ -119,28 +118,34 @@ class LibvirtInventory(object):
             aio_ns = {'aio': 'https://github.com/blallau/ansible-aio'}
 
             tag_elem = root.find('./metadata/aio:instance/aio:inventory', aio_ns)
-            if tag_elem is not None:
-                distro = tag_elem.get('distro')
-                _push(inventory, 'nodes', domain_name)
-                interfaces = root.findall("./devices/interface[@type='bridge']")
-                if interfaces is not None:
-                    # interface network(DHCP) interfaces[0]
-                    # interface tunnel (DHCP) interfaces[1]
-                    # interface ext (DHCP) interfaces[2]
-                    interface_prov = interfaces[0]
-                    source_elem = interface_prov.find('source')
-                    mac_elem = interface_prov.find('mac')
-                    if source_elem is not None and mac_elem is not None:
-                        dhcp_leases = conn.networkLookupByName(source_elem.get('bridge')) \
-                                          .DHCPLeases(mac_elem.get('address'))
-                        if len(dhcp_leases) > 0:
-                            ip_address = dhcp_leases[0]['ipaddr']
-                            hostvars['ansible_python_interpreter'] = "/usr/bin/python3"
-                            hostvars['ansible_user'] = distro
-                            hostvars['ansible_host'] = ip_address
-                            hostvars['libvirt_ip_address'] = ip_address
-                        else:
-                            print("Warning: %s no DHCP lease" % domain_name)
+            if tag_elem is None:
+                print("Domain %s was not created by cluster-ansible-aio" % fullname)
+                sys.exit(1)
+            distro = tag_elem.get('distro')
+            group = tag_elem.get('group')
+            domain_fullname = domain.name()
+            domain_name = domain_fullname.lstrip(group)
+            _push(inventory, 'nodes', domain_name)
+            interfaces = root.findall("./devices/interface[@type='bridge']")
+            if interfaces is not None:
+                # interface network(DHCP) interfaces[0]
+                # interface tunnel (DHCP) interfaces[1]
+                # interface ext (DHCP) interfaces[2]
+                interface_prov = interfaces[0]
+                source_elem = interface_prov.find('source')
+                mac_elem = interface_prov.find('mac')
+                if source_elem is not None and mac_elem is not None:
+                    network = source_elem.get('bridge').split('|')[-1] + source_elem.get('bridge').split('|')[0]
+                    dhcp_leases = conn.networkLookupByName(network) \
+                                      .DHCPLeases(mac_elem.get('address'))
+                    if len(dhcp_leases) > 0:
+                        ip_address = dhcp_leases[0]['ipaddr']
+                        hostvars['ansible_python_interpreter'] = "/usr/bin/python3"
+                        hostvars['ansible_user'] = distro
+                        hostvars['ansible_host'] = ip_address
+                        hostvars['libvirt_ip_address'] = ip_address
+                    else:
+                        print("Warning: %s no DHCP lease" % domain_name)
                 inventory['_meta']['hostvars'][domain_name] = hostvars
         return inventory
 

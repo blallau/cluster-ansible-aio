@@ -1,27 +1,28 @@
 Bug Fix
 -------
-- [Medium] bug 'ansible_user' undefined (resolved)
+- [High] Add a check on GROUP var (must be uppercase)
+- [Medium] Bug 'ansible_user' undefined (resolved)
 => libvirt_inventory.py can't retrieve dhcp lease (sudo dhclient eth0)
 => launch ./virtual-manage --renew-dhcp_
-- [Minor] fix gracefully-shutdown
-- [Minor] fix idempotency when playbook is running twice
-- [Minor] fix issue when os_image is not present in {{ tmp_dir }}
+- [Minor] Fix gracefully-shutdown
+- [Minor] Fix idempotency when playbook is running twice
+- [Minor] Fix issue when os_image is not present in {{ tmp_dir }}
 
 Todo list
 ---------
-- [High] manage LXC cluster
-
-- [Medium] manage LXC & KVM cluster
-- [Medium] use Libvirt NSS module instead of using /etc/hosts file https://libvirt.org/nss.html
-
-- [Minor] add label to loop in order to simplify loop iteration display
+- [High] Manage LXC cluster
+- [High] Refactor documentation (add virtual-manage explanation, add schemas, ...)
+- [High] Cleanup DNS & APT docker stuff
+- [Medium] Manage LXC & KVM cluster in the same cluster
+- [Medium] Use Libvirt NSS module instead of using /etc/hosts file https://libvirt.org/nss.html
+- [Minor] Add label to loop in order to simplify loop iteration display
 - [Minor] In case of many interfaces add a check to get external interface first
-- [Minor] add task to wait for Flatcar VMs ready
+- [Minor] Add task to wait for Flatcar VMs ready
 - [Minor] Fix DNS issue when using Docker DNS server instead of Libvirt dnsmasq
-- [Minor] remove shutdown before snapshot
+- [Minor] Remove shutdown before snapshot
   => use qemu-guest-agent (fsfreeze before snapshot)
   => NO: external snapshot doesn't manage Guest VM
-- [Minor] introduce virtio-fs https://virtio-fs.gitlab.io/
+- [Minor] Introduce virtio-fs https://virtio-fs.gitlab.io/
   => take a look at https://virt-lightning.org/
   => https://github.com/hicknhack-software/ansible-libvirt
 

@@ -131,7 +131,7 @@
   blockinfile:
     create: true
     block: "{{ lookup('template', 'etc_hosts.j2') }}"
-    path: "{{ tmp_dir }}/{{ group }}/ssh_config"
+    path: "{{ tmp_dir }}/{{ group }}/etc_hosts"
 
 - name: Populate /etc/hosts file
   become: true

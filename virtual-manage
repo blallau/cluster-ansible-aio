@@ -1,6 +1,6 @@
 #!/bin/bash
 LC_ALL=C
-CLUSTER_GROUP="^${GROUP}.*$"
+CLUSTER_GROUP="^${GROUP}.+$"
 SNAPSHOT_NAME=""
 DISK_DIRECTORY="${HOME}/.cluster/${GROUP}"
 DISK_SIZE=10
@@ -10,7 +10,7 @@ GRACEFULLY_SHUTDOWN=false
 function configure_etc_hosts {
     sudo sed -i '/# BEGIN ANSIBLE MANAGED BLOCK/,/# END ANSIBLE MANAGED BLOCK/d' /etc/hosts
     if [ -f ${HOME}/.cluster/${GROUP}/etc_hosts ]; then
-        cat ${HOME}/.cluster/${GROUP}/etc_hosts | sudo tee -a /etc/hosts
+        cat ${HOME}/.cluster/${GROUP}/etc_hosts | sudo tee -a /etc/hosts > /dev/null
     fi
 }
 
@@ -46,13 +46,13 @@ function shutdown_networks {
 }
 
 function start {
-    echo -e "\e[32m\e[1m==> Start all inactive domains\e[0m"
+    echo -e "\e[32m\e[1m==> Start all inactive domains in ${GROUP} cluster\e[0m"
 	list_inactive_domains | while read DOMAIN; do
         if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
 		    virsh start $DOMAIN | grep -v "^$"
         fi
     done
-    echo -e "\e[32m\e[1m==> All domains started :) \e[0m"
+    echo -e "\e[32m\e[1m==> All domains started in ${GROUP} cluster :) \e[0m"
     configure_etc_hosts
     configure_ssh_config
 }
@@ -114,7 +114,7 @@ function power_shutdown {
 }
 
 function shutdown {
-    echo -e "\e[33m\e[1m==> Shutdown all domains\e[0m"
+    echo -e "\e[33m\e[1m==> Shutdown all domains in ${GROUP} cluster\e[0m"
     if [ "$GRACEFULLY_SHUTDOWN" = true ]; then
 	    echo -e "Try to cleanly shutdown all running KVM domains...\n"
         acpi_shutdown
@@ -134,7 +134,7 @@ function shutdown {
     sed -i '/# BEGIN ANSIBLE MANAGED BLOCK/,/# END ANSIBLE MANAGED BLOCK/d' ~/.ssh/config
     sudo sed -i '/# BEGIN ANSIBLE MANAGED BLOCK/,/# END ANSIBLE MANAGED BLOCK/d' /etc/hosts
 
-    echo -e "\e[33m\e[1m==> All domains shutdown :)\e[0m"
+    echo -e "\e[33m\e[1m==> All domains shutdown in ${GROUP} cluster :)\e[0m"
     # list_inactive_domains
 }
 
@@ -146,7 +146,8 @@ function restart {
 function renew-dhcp {
 	list_all_domains | while read -e DOMAIN; do
         if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
-            ssh -n root@${DOMAIN} "nmcli con up id 'System eth0'" 2>&1 > /dev/null
+            ssh -q -n root@${DOMAIN#"${GROUP}"} "nmcli con up id 'System eth0'" 2>&1 > /dev/null
+            echo "${DOMAIN#"${GROUP}"} network interface 'eth0' restarted"
         fi
 	done
 }
@@ -337,10 +338,14 @@ Commands:
 EOF
 }
 
-# if [[ ${GROUP} =~ [A-Z]* ]]; then
-#     echo -en "Error: \$GROUP must be uppercase but get ${GROUP} \n\n"
-#     exit 0
-# fi
+if [[ -z ${GROUP} ]]; then
+    echo -en "Error: \$GROUP variable must be defined\n\n"
+    exit 0
+fi
+if [[ ! ${GROUP} =~ ^[[:upper:]]+$ ]]; then
+    echo -en "Error: \$GROUP must be uppercase, but get: ${GROUP}\n\n"
+    exit 0
+fi
 
 LONG_OPTS="all,clone:,renew-dhcp,cleanup,restart,start,shutdown,status,snap-delete:,snap-create:,snap-revert:,snap-list,add-disk:,remove-disk:,help"
 ARGS=$(getopt -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }

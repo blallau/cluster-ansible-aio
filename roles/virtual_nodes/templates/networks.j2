@@ -1,6 +1,6 @@
 ---
 {% for net in networks %}
-{% set full_net_name = net.name + '-' + group %}
+{% set full_net_name = net.name + '|' + group %}
 - name: "{{ group }}{{ net.name }}"
   short_name: "{{ net.name }}"
   bridge_name: "{{ full_net_name[:15] }}"
@@ -15,5 +15,3 @@
   pxe: "{{ net.pxe }}"
 {% endif %}
 {% endfor %}
-
-...

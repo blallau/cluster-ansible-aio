@@ -6,9 +6,9 @@
     - fail:
         msg: The 'group' variable is required
       when: group is not defined
-    # - fail:
-    #     msg: 'group' value must be in uppercase
-    #   when: group|upper != group
+    - fail:
+        msg: '"group" value must be in ^[A-Z0-9]+$'
+      when: group is not regex("^[A-Z0-9]+$")
 
 - name: preflight
   hosts: hypervisors

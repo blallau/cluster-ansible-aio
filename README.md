@@ -129,9 +129,9 @@ and **roles/virtual_nodes/vars/main.yml**.
 
 1. Clean-up hypervisor and remove virtual nodes.
 
-    ./cluster-ansible-aio remove-virtual-nodes  -e group=CLUSTER1 --yes-i-really-really-mean-it
+    ./cluster-ansible-aio remove-virtual-nodes -e group=CLUSTER1 --yes-i-really-really-mean-it
 
-#### Using containers
+#### Using containers[Beta]
 
 ##### Deployment
 
@@ -157,5 +157,9 @@ and **roles/container_nodes/vars/main.yml**.
 
 ## Troubleshooting guide
 
-* deployment fails on "virtual_nodes : Get IP address of VM":
+* Deployment fails on "virtual_nodes : Get IP address of VM":
 => maybe network interfaces naming in VM is in conflict with cloudinit config.
+
+* Error 'ansible_user' undefined
+=> Reason: libvirt_inventory.py can't retrieve dhcp lease (sudo dhclient eth0)
+=> Solution: launch ./virtual-manage --renew-dhcp
