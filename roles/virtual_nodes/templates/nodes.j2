@@ -70,7 +70,7 @@
   disks:
 {% for disk in node.disks %}
 {% set device = disk_device(loop.index) %}
-    - name: "vol-{{ group }}{{ node.name }}-{{ loop.index }}"
+    - name: "vol-{{ node.name }}-{{ loop.index }}"
       device: "vd{{ device }}"
       size: {{ disk.size }}
 {% if runtime == 'vm' %}
