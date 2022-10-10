@@ -11,7 +11,7 @@
         name: "{{ item.name }}"
         state: absent
         snap_url: "{{ lxd_snap_url }}"
-      with_items: "{{ cluster_nodes }}"
+      loop: "{{ cluster_nodes }}"
 
 # - import_tasks: lxd/destroy_networks.yml
 - import_tasks: libvirt/destroy_networks.yml
@@ -24,7 +24,7 @@
   file:
     path: "{{ tmp_dir }}/{{ item.name }}"
     state: absent
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
 
 - name: Clean nodes from ssh_config
   become: true
@@ -51,5 +51,5 @@
     path: "{{ ansible_env.HOME }}/.ssh/known_hosts"
     name: "{{ item.name }}.{{ dns_domain }}"
     state: absent
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
   ignore_errors: true

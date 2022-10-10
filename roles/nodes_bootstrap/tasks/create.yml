@@ -18,7 +18,7 @@
     path: /etc/hosts
     insertafter: EOF
     line: "{{ hostvars[item.name]['ansible_' + item.interfaces | selectattr('external', 'defined') | map(attribute='name') | first]['ipv4']['address'] }}  {{ hostvars[item.name]['inventory_hostname'] }}"
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
   become: true
 
 - name: Disable SELinux

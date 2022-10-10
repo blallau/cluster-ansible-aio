@@ -14,7 +14,7 @@
     create: true
     block: |
         {{ lookup('template', 'network.xml.j2') }}
-  with_items: "{{ cluster_networks }}"
+  loop: "{{ cluster_networks }}"
 
 - name: Steps to setup networks using Libvirt
   block:
@@ -23,12 +23,12 @@
         command: define
         name: "{{ item.name }}"
         xml: '{{ lookup("template", "network.xml.j2") }}'
-      with_items: "{{ cluster_networks }}"
+      loop: "{{ cluster_networks }}"
 
     - name: Start virtual networks
       community.libvirt.virt_net:
         state: active
         autostart: true
         name: "{{ item.name }}"
-      with_items: "{{ cluster_networks }}"
+      loop: "{{ cluster_networks }}"
   when: (item.name not in ansible_libvirt_networks) or (item.name in ansible_libvirt_networks and ansible_libvirt_networks[item.name].state == 'inactive')

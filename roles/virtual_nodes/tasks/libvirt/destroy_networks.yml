@@ -10,10 +10,10 @@
       community.libvirt.virt_net:
         command: destroy
         name: "{{ item.name }}"
-      with_items: "{{ cluster_networks }}"
+      loop: "{{ cluster_networks }}"
     - name: Undefine virtual bridges
       community.libvirt.virt_net:
         command: undefine
         name: "{{ item.name }}"
-      with_items: "{{ cluster_networks }}"
+      loop: "{{ cluster_networks }}"
   when: item.name in bridge_exists.list_nets

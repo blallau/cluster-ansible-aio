@@ -20,7 +20,7 @@
       ipv6.address: "none"
     description: "cluster-ansible-aio network"
     url: "{{ lxd_snap_url }}"
-  with_items: "{{ networks }}"
+  loop: "{{ networks }}"
   when: "networks is defined"
 
 ...

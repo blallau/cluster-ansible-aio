@@ -21,7 +21,7 @@
     key_options: 'no-X11-forwarding,no-agent-forwarding,no-port-forwarding'
   delegate_to: "{{ hostvars[item]['ansible_host'] }}"
 #  remote_user: "{{ hostvars[item]['ansible_user'] }}"
-  with_items: "{{ groups['nodes'] }}"
+  loop: "{{ groups['nodes'] }}"
 #  when: item is defined and item != inventory_hostname
 
 - name: Disable SSH host key checking in /etc/ssh/ssh_config

@@ -27,7 +27,7 @@
     regexp='^\#(baseurl)'
     replace='\1'
   when: ansible_distribution|lower == "centos" and apt_cache_enabled | bool
-  with_items:
+  loop:
    - /etc/yum.repos.d/CentOS-Base.repo
    - /etc/yum.repos.d/CentOS-Debuginfo.repo
    - /etc/yum.repos.d/CentOS-Media.repo
@@ -43,7 +43,7 @@
     regexp='(^mirrorlist)'
     replace='#\1'
   when: ansible_distribution|lower == "centos" and apt_cache_enabled | bool
-  with_items:
+  loop:
    - /etc/yum.repos.d/CentOS-Base.repo
    - /etc/yum.repos.d/CentOS-Debuginfo.repo
    - /etc/yum.repos.d/CentOS-Media.repo

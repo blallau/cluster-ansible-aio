@@ -14,7 +14,7 @@
     path: "{{ item }}"
     state: directory
     mode: 0750
-  with_items:
+  loop:
     - "{{ myvirt_config_path }}"
 
 - name: "Generate dnsmasq.conf in {{ myvirt_config_path }}"

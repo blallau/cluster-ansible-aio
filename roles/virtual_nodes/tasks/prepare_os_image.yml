@@ -2,13 +2,13 @@
 - name: "[KVM host] Check qcow2 OS image {{ tmp_dir }}/{{ item.image }} is present"
   stat:
     path: "{{ tmp_dir }}/{{ item.image }}"
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
   register: check_os_image
 
 - fail:
     msg: "In order to deploy VMs, you must first copy OS image to {{ tmp_dir }}"
   when: not item.stat.exists
-  with_items: "{{ check_os_image.results }}"
+  loop: "{{ check_os_image.results }}"
 
 - name: "[KVM host] Make sure temp directory exists"
   file:
@@ -19,12 +19,12 @@
   file:
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}"
     state: directory
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
 
 - name: "[KVM host] Check if OS files are already in libvirt directory"
   stat:
     path: "{{ libvirt_dir }}/{{ group }}/{{ item.name }}-boot.qcow2"
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
   register: copied
 
 - name: "[KVM host] Make sure libvirt OS directory exists"
@@ -39,12 +39,12 @@
     src: "{{ tmp_dir }}/{{ item.image }}"
     dest: "{{ libvirt_dir }}/{{ group }}/{{ item.name }}-boot.qcow2"
     remote_src: true
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
 
 - name: "[KVM host] Increase the image size"
   become: true
   command: "qemu-img resize {{ libvirt_dir }}/{{ group }}/{{ item.item.name }}-boot.qcow2 +{{ item.item.disk_size }}G"
-  with_items: "{{ copied.results }}"
+  loop: "{{ copied.results }}"
   when: item.item.name is not match("flatcar.*")
 
 - name: "[KVM host] Run custom shell commands in OS disk"
@@ -61,7 +61,7 @@
   retries: 10
   delay: 2
   until: result_disk_cmd is succeeded
-  with_items: "{{ copied.results }}"
+  loop: "{{ copied.results }}"
   when:
     - item.item.name is not match("flatcar.*")
     - virt_customize_cmd is defined and virt_customize_cmd
@@ -76,7 +76,7 @@
   retries: 10
   delay: 2
   until: result_disk_deps is succeeded
-  with_items: "{{ copied.results }}"
+  loop: "{{ copied.results }}"
   when:
     - item.item.name is not match("flatcar.*")
     - virt_customize_packages is defined and virt_customize_packages
@@ -91,6 +91,6 @@
     {% endif %}
     --add {{ libvirt_dir }}/{{ group }}/{{ item.item.name }}-boot.qcow2
   register: result_disk_sysprep
-  with_items: "{{ copied.results }}"
+  loop: "{{ copied.results }}"
   when:
     - item.item.name is not match("flatcar.*")

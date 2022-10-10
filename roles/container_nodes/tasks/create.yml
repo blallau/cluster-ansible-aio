@@ -110,7 +110,7 @@
     create: true
     block: |
         {{ item | to_nice_json(indent=2) }}
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
   tags: network
 
 - name: Prepare CloudInit/Ignition config
@@ -159,7 +159,7 @@
     wait_for_ipv4_addresses: true
     snap_url: "{{ lxd_snap_url }}"
     timeout: 600
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
   when: "cluster_nodes is defined"
 
 - name: Wait for containers to be ready

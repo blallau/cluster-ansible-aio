@@ -17,7 +17,7 @@
     create: true
     block: |
         {{ item | to_nice_json(indent=2) }}
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
   tags: network
 
 - import_tasks: prepare_os_image.yml
@@ -28,7 +28,7 @@
     create: true
     block: |
         {{ lookup('template', 'vm-template.xml.j2') }}
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
 
 - name: Prepare CloudInit/Ignition config
   include_tasks: postconfig.yml
@@ -46,13 +46,13 @@
       community.libvirt.virt:
         command: define
         xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
-      with_items: "{{ cluster_nodes }}"
+      loop: "{{ cluster_nodes }}"
 
     - name: Start a VMs
       community.libvirt.virt:
         name: "{{ item.fullname }}"
         state: running
-      with_items: "{{ cluster_nodes }}"
+      loop: "{{ cluster_nodes }}"
 
       # Wait for network so we can get the IP to log in
       # Do this for all VMs, in case they already existed and IP has changed
@@ -79,7 +79,7 @@
       changed_when: false
       args:
         executable: /bin/bash
-      with_items: "{{ cluster_nodes }}"
+      loop: "{{ cluster_nodes }}"
 
     - name: Wait for VMs to listen on port 22
       wait_for:
@@ -94,7 +94,7 @@
 
     - name: Detach {{ cloud_init_disk }} config drive disk
       command: virsh detach-disk {{ item.fullname }} --target {{ cloud_init_disk }} --persistent --live
-      with_items: "{{ cluster_nodes }}"
+      loop: "{{ cluster_nodes }}"
       when: item.os_type in ["debian", "centos"]
       ignore_errors: true
 
@@ -160,7 +160,7 @@
   when:
     - vbmc_port is defined and vbmc_port
     - vbmc is defined and vbmc|bool
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
   notify:
     - restart virtual bmc
 
@@ -176,6 +176,6 @@
   when:
     - vbmc_port is defined and vbmc_port
     - vbmc is defined and vbmc|bool
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
 
 - meta: flush_handlers

@@ -6,7 +6,7 @@
     path: /etc/hosts
     insertafter: EOF
     line: "{{ hostvars[item]['ansible_host'] }}  {{ hostvars[item]['inventory_hostname'] }}"
-  with_items: "{{ groups['nodes'] }}"
+  loop: "{{ groups['nodes'] }}"
 
 # - name: Disable SELinux
 #   selinux:
@@ -67,7 +67,7 @@
 #   yum:
 #     name: "{{ item }}"
 #     update_cache: true
-#   with_items: "{{ yum_packages }}"
+#   loop: "{{ yum_packages }}"
 #   when: ansible_distribution|lower == "centos"
 
 # - import_tasks: enable_apt_proxy.yml
@@ -83,14 +83,14 @@
 #     name: "{{ item }}"
 #     state: latest
 #     update_cache: "true"
-#   with_items: "{{ apt_packages }}"
+#   loop: "{{ apt_packages }}"
 #   when: ansible_distribution|lower == "ubuntu"
 
 # - name: Install/Update PIP packages
 #   pip:
 #     name: "{{ item }}"
 #     state: latest
-#   with_items: "{{ pip_packages }}"
+#   loop: "{{ pip_packages }}"
 
 # - import_tasks: enable_docker.yml
 

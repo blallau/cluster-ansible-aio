@@ -14,25 +14,25 @@
       template:
         src: "templates/bridge_interface.j2"
         dest: "/etc/network/interfaces.d/{{ item.br_name }}"
-      with_items: "{{ br_intfs }}"
+      loop: "{{ br_intfs }}"
 
     - name: "modify /etc/network/interfaces"
       replace:
         path: "/etc/network/interfaces"
         regexp: '^(\S+) {{ item.intf_name }}(.*)$'
         replace: '#\1 {{ item.intf_name }}\2'
-      with_items: "{{ br_intfs }}"
+      loop: "{{ br_intfs }}"
 
     - name: "modify /etc/network/interfaces.d/50-cloud-init"
       replace:
         path: "/etc/network/interfaces.d/50-cloud-init"
         regexp: '^(\S+) {{ item.intf_name }}(.*)$'
         replace: '#\1 {{ item.intf_name }}\2'
-      with_items: "{{ br_intfs }}"
+      loop: "{{ br_intfs }}"
 
     - name: "Delete IPs from {{ item.intf_name }}"
       command: "ip addr flush dev {{ item.intf_name }}"
-      with_items: "{{ br_intfs }}"
+      loop: "{{ br_intfs }}"
 
     - name: restart networking service
       systemd:

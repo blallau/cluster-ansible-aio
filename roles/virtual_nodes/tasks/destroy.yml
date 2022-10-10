@@ -8,7 +8,7 @@
   block:
     - name: List snapshots
       shell: "set -o pipefail ;virsh -q snapshot-list --domain {{ item.fullname }} | cut -d ' ' -f2"
-      with_items: "{{ cluster_nodes }}"
+      loop: "{{ cluster_nodes }}"
       register: with_output
       args:
         executable: /bin/bash
@@ -31,14 +31,14 @@
       virt:
         command: destroy
         name: "{{ item.fullname }}"
-      with_items: "{{ cluster_nodes }}"
+      loop: "{{ cluster_nodes }}"
       ignore_errors: true
 
     - name: Undefine VMs
       virt:
         command: undefine
         name: "{{ item.fullname }}"
-      with_items: "{{ cluster_nodes }}"
+      loop: "{{ cluster_nodes }}"
       ignore_errors: true
 
     - name: Remove OS images from libvirt directory
@@ -46,13 +46,13 @@
       file:
         path: "{{ libvirt_dir }}/{{ group }}/{{ item.name }}-boot.qcow2"
         state: absent
-      with_items: "{{ cluster_nodes }}"
+      loop: "{{ cluster_nodes }}"
 
     - name: Delete qcow2 images
       file:
         path: "{{ libvirt_dir }}/{{ group }}/{{ item.name }}.qcow2"
         state: absent
-      with_items: "{{ cluster_nodes }}"
+      loop: "{{ cluster_nodes }}"
       when: destroy_images | bool
 
     - name: "Clean group directory in {{ libvirt_dir }}"
@@ -70,7 +70,7 @@
   file:
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}"
     state: absent
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
 
 - name: Clean nodes from ssh_config
   blockinfile:
@@ -105,7 +105,7 @@
     path: "{{ ansible_env.HOME }}/.ssh/known_hosts"
     name: "{{ item.name }}.{{ dns_domain }}"
     state: absent
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
   ignore_errors: true
 
 - name: Remove virtual BMC
@@ -117,7 +117,7 @@
   when:
     - vbmc_port is defined and vbmc_port
     - vbmc is defined and vbmc
-  with_items: "{{ cluster_nodes }}"
+  loop: "{{ cluster_nodes }}"
   notify:
     - restart virtual bmc
 

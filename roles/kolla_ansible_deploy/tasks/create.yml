@@ -18,7 +18,7 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: 0750
-  with_items:
+  loop:
     - "{{ kolla_config_path }}"
     - "{{ kolla_config_path }}/inventory"
 
@@ -28,7 +28,7 @@
     src: "{{ tmp_dir }}/kolla-ansible/etc/kolla/{{ item }}"
     remote_src: true
     dest: "{{ kolla_config_path }}/{{ item }}"
-  with_items:
+  loop:
     - globals.yml
     - passwords.yml
 
