@@ -58,21 +58,21 @@ function start {
 }
 
 function status {
-	list_all_domains | while read DOMAIN; do
-        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
-		    echo -e "  $DOMAIN   \e[1m\e[92mrunning\e[39m\e[0m"
-            echo -e "  $(virsh dominfo $DOMAIN | grep CPU\(s\))"
-            echo -e "  $(virsh dominfo $DOMAIN | grep 'Max memory')"
-            echo -e ""
-            echo -e "$(virsh -q domblklist $DOMAIN --details)"
-            echo -e ""
-            echo -e "$(virsh -q domfsinfo $DOMAIN)"
-            echo -e ""
-            echo -e "$(virsh -q domifaddr $DOMAIN --source agent | grep ipv4)"
-            echo -e "\n"
-        fi
+	list_running_domains | while read DOMAIN; do
+		echo -e "$DOMAIN\t\t\e[1m\e[92mrunning\e[39m\e[0m"
+        echo -e "$(virsh dominfo $DOMAIN | grep CPU\(s\))"
+        echo -e "$(virsh dominfo $DOMAIN | grep 'Max memory')"
+        echo -e ""
+        echo -e "$(virsh -q domblklist $DOMAIN --details)"
+        echo -e ""
+        echo -e "$(virsh -q domfsinfo $DOMAIN)"
+        echo -e ""
+        echo -e "$(virsh -q domifaddr $DOMAIN --source agent | grep ipv4)"
+        echo -e "\n"
     done
-
+    list_inactive_domains | while read DOMAIN; do
+        echo -e "$DOMAIN\t\t\e[1m\e[91mshut off\e[39m\e[0m"
+    done
 }
 
 function cleanup {
@@ -144,7 +144,7 @@ function restart {
 }
 
 function renew-dhcp {
-	list_all_domains | while read -e DOMAIN; do
+	list_running_domains | while read -e DOMAIN; do
         if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
             ssh -q -n root@${DOMAIN#"${GROUP}"} "nmcli con up id 'System eth0'" 2>&1 > /dev/null
             echo "${DOMAIN#"${GROUP}"} network interface 'eth0' restarted"
@@ -153,28 +153,28 @@ function renew-dhcp {
 }
 
 function list_running_networks() {
-    virsh net-list --persistent --name
+    virsh net-list --persistent --name | grep -v '^[[:space:]]*$'
 }
 
 function list_inactive_networks() {
-    virsh net-list --inactive --name
+    virsh net-list --inactive --name | grep -v '^[[:space:]]*$'
 }
 
 function list_inactive_domains() {
-    virsh list --inactive --name
+    virsh list --inactive --name | grep -v '^[[:space:]]*$'
 }
 
 function list_running_domains() {
-    virsh list --state-running --name
+    virsh list --state-running --name | grep -v '^[[:space:]]*$'
 }
 
 function list_all_domains() {
-    virsh list --name
+    virsh list --name --all | grep -v '^[[:space:]]*$'
 }
 
 function list_all_snapshots() {
     DOMAIN=$1
-    virsh snapshot-list --domain $DOMAIN --name
+    virsh snapshot-list --domain $DOMAIN --name  | grep -v '^[[:space:]]*$'
 }
 
 function add-disk {
@@ -306,7 +306,7 @@ function snap-revert {
 }
 
 function snap-list {
-	list_all_domains | while read DOMAIN; do
+	list_running_domains | while read DOMAIN; do
         if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
             #                echo -e "\e[33m$DOMAIN [$(virsh snapshot-info $DOMAIN --current | grep Name | cut -d ":" -f2 | sed -e 's/^[ ]*//')]\e[0m"
             echo -e "$DOMAIN \e[92m\e[1m[$(virsh snapshot-current --name $DOMAIN)]\e[0m"
@@ -338,14 +338,16 @@ Commands:
 EOF
 }
 
-if [[ -z ${GROUP} ]]; then
-    echo -en "Error: \$GROUP variable must be defined\n\n"
-    exit 0
-fi
-if [[ ! ${GROUP} =~ ^[[:upper:]]+$ ]]; then
-    echo -en "Error: \$GROUP must be uppercase, but get: ${GROUP}\n\n"
-    exit 0
-fi
+function precheck() {
+    if [[ -z ${GROUP} ]]; then
+        echo -en "Error: \$GROUP variable must be defined\n\n"
+        exit 0
+    fi
+    if [[ ! ${GROUP} =~ ^[[:upper:]]+$ ]]; then
+        echo -en "Error: \$GROUP must be uppercase, but get: ${GROUP}\n\n"
+        exit 0
+    fi
+}
 
 LONG_OPTS="all,clone:,renew-dhcp,cleanup,restart,start,shutdown,status,snap-delete:,snap-create:,snap-revert:,snap-list,add-disk:,remove-disk:,help"
 ARGS=$(getopt -l "${LONG_OPTS}" --name "$0" -- "$@") || { usage >&2; exit 2; }
@@ -357,29 +359,35 @@ while [ "$#" -gt 0 ]; do
             shift 1
             ;;
         (--cleanup)
+            precheck
             cleanup
             exit 0
             ;;
         (--clone)
+            precheck
             VM_NAME=$2
             shift 2
             clone $VM_NAME
             exit 0
             ;;
         (--restart)
+            precheck
             restart
             exit 0
             ;;
         (--renew-dhcp)
+            precheck
             renew-dhcp
             exit 0
             ;;
         (--start)
+            precheck
             start_networks
             start
             exit 0
             ;;
         (--shutdown)
+            precheck
             shutdown
             shutdown_networks
             exit 0
@@ -389,36 +397,42 @@ while [ "$#" -gt 0 ]; do
             exit 0
             ;;
         (--snap-delete)
+            precheck
             SNAPSHOT_NAME=$2
             shift 2
             snap-delete $SNAPSHOT_NAME
             exit 0
             ;;
         (--add-disk)
+            precheck
             DISK_SIZE=$2
             shift 2
             add-disk
             exit 0
             ;;
         (--remove-disk)
+            precheck
             DISK_SIZE=$2
             shift 2
             remove-disk
             exit 0
             ;;
         (--snap-create)
+            precheck
             SNAPSHOT_NAME=$2
             shift 2
             snap-create $SNAPSHOT_NAME
             exit 0
             ;;
         (--snap-revert)
+            precheck
             SNAPSHOT_NAME=$2
             shift 2
             snap-revert $SNAPSHOT_NAME
             exit 0
             ;;
         (--snap-list)
+            precheck
             snap-list
             exit 0
             ;;
