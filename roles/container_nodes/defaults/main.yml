@@ -2,24 +2,31 @@
 ###########
 # Globals #
 ###########
+
 destroy_images: false
 rename_net_interface: false
 cloud_init_disk: "vdz"
 
-########
-# VBMC #
-########
-# Virtual BMC is enabled by default
-vbmc: true
+host_ip: "{{ networks | selectattr('forward', 'defined') | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address') | first }}"
 
-# By default we install with pip, but if you prefer to do it manually, set this to false
-vbmc_pip: true
+home_dir: "{{ ansible_user_dir }}"
+tmp_dir: "{{ home_dir}}/.cluster"
 
-# Default vbmc service, override if something else on your distro
-vbmc_service: vbmcd
+###########
+# Libvirt #
+###########
+libvirt_dir: "/libvirt/images"
+libvirt_url: qemu:///system
+libvirt_security_driver: none
+libvirt_default_mtu: 9000
 
-# Default vbmc starting port 623
-vbmc_port: 623
+#######
+# LXD #
+#######
+lxd_socket_path: /var/snap/lxd/common/lxd/unix.socket
+lxd_url: "unix:{{ lxd_socket_path }}"
+lxd_snap_url: "{{ lxd_url }}"
+lxd_image_url: "https://images.linuxcontainers.org"
 
 ############
 # Packages #
@@ -52,10 +59,19 @@ guest_os_images:
   debian: "debian/10/cloud"
   centos: "centos/8-Stream/cloud"
 
-#######
-# LXD #
-#######
-lxd_socket_path: /var/snap/lxd/common/lxd/unix.socket
-lxd_url: "unix:{{ lxd_socket_path }}"
-lxd_snap_url: "{{ lxd_url }}"
-lxd_image_url: "https://images.linuxcontainers.org"
+########
+# VBMC #
+########
+# Virtual BMC is enabled by default
+vbmc: false
+
+# By default we install with pip, but if you prefer to do it manually, set this to false
+vbmc_pip: true
+
+# Default vbmc service, override if something else on your distro
+vbmc_service: vbmcd
+
+# Default vbmc starting port 623
+vbmc_port: 623
+
+qemu_guest_agent_enabled: false

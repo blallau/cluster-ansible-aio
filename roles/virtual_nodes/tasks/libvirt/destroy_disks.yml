@@ -1,5 +1,5 @@
 ---
-- name: Destroy virtual volumes
+- name: "Destroy virtual volumes"
   virt_volume:
     name: "{{ item.1.name }}"
     pool: "{{ virt_volume_group }}"
@@ -9,7 +9,7 @@
     - disks
   when: item.1.type == 'raw'
 
-- name: Delete QCOW2 disk
+- name: "Delete QCOW2 disk"
   file:
     path: "{{ tmp_dir }}/{{ group }}/{{ item.0.name }}/{{ item.1.name }}.qcow2"
     state: absent

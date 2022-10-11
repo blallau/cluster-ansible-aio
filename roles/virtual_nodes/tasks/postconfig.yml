@@ -5,7 +5,7 @@
       template:
         src: "config-ign.yaml.j2"
         dest: "{{ tmp_dir}}/{{ group }}/{{ item.name }}/config-ign.yaml"
-    - name: Remove Ignition config file
+    - name: "[KVM host] Remove Ignition config file"
       file:
         path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/config.ign"
         state: absent
@@ -28,15 +28,15 @@
   block:
     - name: "[KVM host] Instantiate meta-data file"
       template:
-        src: "meta-data.j2"
+        src: "cloudinit/meta-data.j2"
         dest: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/meta-data"
     - name: "[KVM host] Instantiate user-data file"
       template:
-        src: "user-data.j2"
+        src: "cloudinit/user-data.j2"
         dest: "{{ tmp_dir}}/{{ group }}/{{ item.name }}/user-data"
     - name: "[KVM host] Instantiate network-config file"
       template:
-        src: "network-config.j2"
+        src: "cloudinit/network-config.j2"
         dest: "{{ tmp_dir}}/{{ group }}/{{ item.name }}/network-config"
       when: item.os_type in ["debian", "ubuntu"]
     - name: "[KVM host] Remove config drive files"

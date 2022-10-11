@@ -3,6 +3,13 @@
   block:
     - name: Libvirt stuff
       block:
+        - name: "[KVM host] Add {{ ansible_user_id }} to libvirt group"
+          become: true
+          user:
+            name: "{{ ansible_user_id }}"
+            groups: libvirt
+            append: true
+
         # Set security driver on qemu (none/selinux/apparmor)
         # RHEL/CentOS/Fedora/openSUSE are set to selinux by default
         # Debian/Ubuntu are set to apparmor by default

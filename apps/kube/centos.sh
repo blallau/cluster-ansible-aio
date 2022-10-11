@@ -3,10 +3,6 @@
 set -x
 set -e
 
-echo centos > ${HOME}/.cluster-ansible-aio-env
-
-OS='centos'
-
 ############ DO NOT MOVE ###############
 . ${HOME}/work/GIT/cluster-ansible-aio/apps/kube/kube_params.sh
 . ${HOME}/work/GIT/cluster-ansible-aio/apps/kube/kube_lib.sh

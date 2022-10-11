@@ -1,38 +1,24 @@
 ---
-- name: Install CentOS packages
+- name: "[KVM host] Install CentOS packages"
   become: true
   yum:
     name: "{{ yum_dependencies }}"
   when: ansible_distribution|lower == "centos"
 
-- name: Install Ubuntu packages
+- name: "[KVM host] Install Ubuntu packages"
   become: true
   apt:
     pkg: "{{ apt_dependencies }}"
   when: ansible_distribution|lower in ["ubuntu", "debian"]
   register: install_snap
 
-- name: "Add {{ ansible_user }} to libvirt group"
-  become: true
-  user:
-    name: "{{ ansible_user }}"
-    groups: libvirt
-    append: true
-
-- name: Restart libvirtd service
-  become: true
-  service:
-    name: libvirtd
-    state: restarted
-    enabled: true
-
-- name: Install/Update pip packages
+- name: "[KVM host] Install/Update pip packages"
   become: true
   pip:
     name: "{{ pip_dependencies }}"
     state: latest
 
-- name: Restart the snapd service
+- name: "[KVM host] Restart the snapd service"
   become: true
   systemd:
     name: snapd.service
@@ -40,26 +26,26 @@
     state: restarted
   when: install_snap.changed
 
-- name: Install core snap
+- name: "[KVM host] Install core snap"
   become: true
   snap:
     name:
       - core
 
-- name: Install lxd snap
+- name: "[KVM host] Install lxd snap"
   become: true
   snap:
     name:
       - lxd
 
-- name: Add {{ ansible_user }} user to lxd secondary group
+- name: "[KVM host] Add {{ ansible_user_id }} user to lxd secondary group"
   become: true
   user:
-    name: "{{ ansible_user }}"
+    name: "{{ ansible_user_id }}"
     append: true
     groups: lxd
 
-- name: Create /etc/tmpfiles.d/kmsg.conf file
+- name: "[KVM host] Create /etc/tmpfiles.d/kmsg.conf file"
   become: true
   file:
     path: /etc/tmpfiles.d/kmsg.conf
@@ -68,14 +54,14 @@
     group: root
     mode: '0644'
 
-- name: "Create /dev/kmsg symlink to /dev/console"
+- name: "[KVM host] Create /dev/kmsg symlink to /dev/console"
   become: true
   lineinfile:
     path: "/etc/tmpfiles.d/kmsg.conf"
     line: 'L /dev/kmsg - - - - /dev/console'
     state: present
 
-- name: "Set subuid and subgid for LXD"
+- name: "[KVM host] Set subuid and subgid for LXD"
   become: true
   lineinfile:
     path: "{{ item }}"
@@ -85,27 +71,28 @@
     - "/etc/subuid"
     - "/etc/subgid"
 
-- name: reset ssh connection to allow user changes to affect 'current login user'
+- name: "[KVM host] Reset ssh connection to allow user changes to affect 'current login user'"
   meta: reset_connection
 
-- name: /snap/bin/lxd init --auto
+- name: "[KVM host] /snap/bin/lxd init --auto"
   command: /snap/bin/lxd init --auto
   args:
     creates: /var/snap/lxd/common/lxd/storage-pools/default
   become: true
 
+- import_tasks: defaults-get.yml
+- import_tasks: host_precheck.yml
+
 - import_role:
     name: common
     tasks_from: ssh_key
 
+- import_tasks: define_cluster_networks.yml
 - import_tasks: define_cluster_nodes.yml
 
-- import_tasks: libvirt/setup_networks.yml
-  when: networks | length > 0
-
-- name: "Copy cluster config for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
+- name: "[KVM host] Copy cluster config for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
   blockinfile:
-    path: "{{ tmp_dir }}/{{ item.name }}/cluster_config"
+    path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/cluster_config"
     create: true
     block: |
         {{ item | to_nice_json(indent=2) }}

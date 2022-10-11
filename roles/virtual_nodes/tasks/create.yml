@@ -26,7 +26,7 @@
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/domain.xml"
     create: true
     block: |
-        {{ lookup('template', 'vm-template.xml.j2') }}
+        {{ lookup('template', 'libvirt/vm.xml.j2') }}
   loop: "{{ cluster_nodes }}"
 
 - name: Prepare CloudInit/Ignition config
@@ -40,13 +40,13 @@
 
 - name: Libvirt setup VMs
   block:
-    - name: Define VMs
+    - name: "Define VMs"
       community.libvirt.virt:
         command: define
-        xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
+        xml: "{{ lookup('template', 'libvirt/vm.xml.j2') }}"
       loop: "{{ cluster_nodes }}"
 
-    - name: Start a VMs
+    - name: "Start a VMs"
       community.libvirt.virt:
         name: "{{ item.fullname }}"
         state: running
@@ -54,7 +54,7 @@
 
       # Wait for network so we can get the IP to log in
       # Do this for all VMs, in case they already existed and IP has changed
-    - name: Get IP address of VM
+    - name: "Get IP address of VM"
       become: true
       shell: >
         set -o pipefail ;
@@ -79,7 +79,7 @@
         executable: /bin/bash
       loop: "{{ cluster_nodes }}"
 
-    - name: Wait for VMs to listen on port 22
+    - name: "Wait for VMs to listen on port 22"
       wait_for:
         host: "{{ item.1.address }}"
         port: 22
@@ -90,26 +90,26 @@
         - interfaces
       when: item.1.address is defined and item.1.external is defined and item.1.external
 
-    - name: Detach {{ cloud_init_disk }} config drive disk
+    - name: "Detach {{ cloud_init_disk }} config drive disk"
       command: virsh detach-disk {{ item.fullname }} --target {{ cloud_init_disk }} --persistent --live
       loop: "{{ cluster_nodes }}"
       when: item.os_type in ["debian", "centos"]
       ignore_errors: true
 
-- name: Insert nodes into ssh_config
+- name: "Insert nodes into ssh_config"
   become: true
   blockinfile:
     create: true
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ ansible_env.HOME }}/.ssh/config"
 
-- name: Create file {{ tmp_dir }}/{{ group }}/ssh_config
+- name: "Create file {{ tmp_dir }}/{{ group }}/ssh_config"
   blockinfile:
     create: true
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ tmp_dir }}/{{ group }}/ssh_config"
 
-- name: Add new nodes to created_nodes Ansible group
+- name: "Add new nodes to created_nodes Ansible group"
   add_host:
     name: "{{ item.1.address }}"
     instance_name: "{{ item.0.name }}.{{ dns_domain }}"
@@ -124,14 +124,14 @@
     - item.1.external is defined
     - item.1.external | bool
 
-- name: Create file {{ tmp_dir }}/{{ group }}/etc_hosts
+- name: "Create file {{ tmp_dir }}/{{ group }}/etc_hosts"
   become: true
   blockinfile:
     create: true
     block: "{{ lookup('template', 'etc_hosts.j2') }}"
     path: "{{ tmp_dir }}/{{ group }}/etc_hosts"
 
-- name: Populate /etc/hosts file
+- name: "Populate /etc/hosts file"
   become: true
   blockinfile:
     create: true
@@ -141,7 +141,7 @@
 # - import_tasks: docker/enable_dns_server.yml
 #   when: dns_server_enabled | bool
 
-- name: Create virtual BMC
+- name: "Create virtual BMC"
   shell: >
     {{ result_vbmc_path.stdout }} add {{ item.name }}
     --libvirt-uri {{ libvirt_url }}
@@ -161,7 +161,7 @@
   notify:
     - restart virtual bmc
 
-- name: Start virtual BMC
+- name: "Start virtual BMC"
   shell: "set -o pipefail && {{ result_vbmc_path.stdout }} start {{ item.name }}"
   args:
     executable: /bin/bash

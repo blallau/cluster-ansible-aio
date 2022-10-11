@@ -1,6 +1,5 @@
 ---
 
-host_ip: "{{ networks | selectattr('forward', 'defined') | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address') | first }}"
 dns_domain: "mydomain.org"
 
 # to install libvirt stuff in guest set to true
@@ -8,16 +7,3 @@ allow_virt: false
 
 # to install debug tools(sysdig) set to true
 debug_tools: false
-
-# Storage
-#########
-root_disk_size: "50"
-# Additional disks (LVM)
-physical_disks:
-  - /dev/nvme0n1p6
-virt_volume_group: "virtvg"
-
-# vm_volumes:
-#   - name: vol-osd
-#     size: 50
-#     format: raw

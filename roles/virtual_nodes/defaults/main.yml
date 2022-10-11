@@ -2,12 +2,6 @@
 ###########
 # Globals #
 ###########
-# libvirt_dir: "/var/lib/libvirt/images"
-libvirt_dir: "/libvirt/images"
-libvirt_url: qemu:///system
-libvirt_security_driver: none
-libvirt_default_mtu: 9000
-
 destroy_images: false
 rename_net_interface: false
 cloud_init_disk: "vdz"
@@ -24,6 +18,15 @@ tmp_dir: "{{ home_dir}}/.cluster"
 #########
 guest_timezone: "UTC"
 qemu_guest_agent_enabled: true
+
+###########
+# Libvirt #
+###########
+# libvirt_dir: "/var/lib/libvirt/images"
+libvirt_dir: "/libvirt/images"
+libvirt_url: qemu:///system
+libvirt_security_driver: none
+libvirt_default_mtu: 9000
 
 ################
 # virt-customize

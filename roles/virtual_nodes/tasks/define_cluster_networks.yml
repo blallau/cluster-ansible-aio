@@ -1,15 +1,15 @@
 ---
-- name: Load networks variables
+- name: "[KVM host] Load cluster_networks variables"
   set_fact:
     cluster_networks: "{{ lookup('template','networks.j2') | from_yaml }}"
 
-- name: "Copy cluster_networks in {{ tmp_dir }}/{{ group }}"
+- name: "[KVM host] Copy cluster_networks in {{ tmp_dir }}/{{ group }}"
   blockinfile:
     path: "{{ tmp_dir }}/{{ group }}/cluster_networks"
     create: true
     block: |
         {{ cluster_networks | to_nice_json(indent=2) }}
 
-- name: "Display networks"
+- name: "[KVM host] Display networks"
   debug:
     msg: "{{ cluster_networks | to_nice_yaml(indent=2) }}"
