@@ -1,6 +1,7 @@
 ---
 - name: precheck
   hosts: localhost
+  connection: local
   gather_facts: false
   tasks:
     - fail:
@@ -11,7 +12,8 @@
       when: group is not regex("^[A-Z0-9]+$")
 
 - name: preflight
-  hosts: hypervisors
+  hosts: localhost
+  connection: local
   gather_facts: false
   pre_tasks:
    - setup:
@@ -20,7 +22,8 @@
     - preflight
 
 - name: VMs
-  hosts: hypervisors
+  hosts: localhost
+  connection: local
   gather_facts: false
   pre_tasks:
    - setup:

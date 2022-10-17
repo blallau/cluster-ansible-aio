@@ -96,20 +96,20 @@
       when: item.os_type in ["debian", "centos"]
       ignore_errors: true
 
-- name: "Insert nodes into ssh_config"
+- name: "[KVM host] Insert nodes into ssh_config"
   become: true
   blockinfile:
     create: true
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ ansible_env.HOME }}/.ssh/config"
 
-- name: "Create file {{ tmp_dir }}/{{ group }}/ssh_config"
+- name: "[KVM host] Create file {{ tmp_dir }}/{{ group }}/ssh_config"
   blockinfile:
     create: true
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ tmp_dir }}/{{ group }}/ssh_config"
 
-- name: "Add new nodes to created_nodes Ansible group"
+- name: "[KVM host] Add new nodes to created_nodes Ansible group"
   add_host:
     name: "{{ item.1.address }}"
     instance_name: "{{ item.0.name }}.{{ dns_domain }}"
@@ -124,14 +124,14 @@
     - item.1.external is defined
     - item.1.external | bool
 
-- name: "Create file {{ tmp_dir }}/{{ group }}/etc_hosts"
+- name: "[KVM host] Create file {{ tmp_dir }}/{{ group }}/etc_hosts"
   become: true
   blockinfile:
     create: true
     block: "{{ lookup('template', 'etc_hosts.j2') }}"
     path: "{{ tmp_dir }}/{{ group }}/etc_hosts"
 
-- name: "Populate /etc/hosts file"
+- name: "[KVM host] Populate /etc/hosts file"
   become: true
   blockinfile:
     create: true
@@ -141,7 +141,7 @@
 # - import_tasks: docker/enable_dns_server.yml
 #   when: dns_server_enabled | bool
 
-- name: "Create virtual BMC"
+- name: "[KVM host] Create virtual BMC"
   shell: >
     {{ result_vbmc_path.stdout }} add {{ item.name }}
     --libvirt-uri {{ libvirt_url }}
@@ -161,7 +161,7 @@
   notify:
     - restart virtual bmc
 
-- name: "Start virtual BMC"
+- name: "[KVM host] Start virtual BMC"
   shell: "set -o pipefail && {{ result_vbmc_path.stdout }} start {{ item.name }}"
   args:
     executable: /bin/bash

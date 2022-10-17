@@ -23,7 +23,7 @@ function check_ansible {
     echo version "ansible $version"
     if [[ "$version" < "2.9.13" ]]; then
         echo -e "Ansible version < 2.9.13"
-        echo -e "Install it using: sudo pip install -U ansible" && exit 1
+        echo -e "Install it using: sudo pip3 install -U ansible" && exit 1
     fi
 }
 

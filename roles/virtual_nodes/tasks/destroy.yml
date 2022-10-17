@@ -15,13 +15,13 @@
       ignore_errors: true
 
     - name: Delete metadata snapshots
-      command: "virsh snapshot-delete --metadata --domain {{ item.0.item.name }} {{ item.1 }}"
+      command: "virsh snapshot-delete --metadata --domain {{ item.0.item.fullname }} {{ item.1 }}"
       with_subelements:
         - "{{ with_output.results }}"
         - "stdout_lines"
 
     - name: Delete snapshots
-      command: "virsh snapshot-delete --domain {{ item.0.item.name }} {{ item.1 }}"
+      command: "virsh snapshot-delete --domain {{ item.0.item.fullname }} {{ item.1 }}"
       with_subelements:
         - "{{ with_output.results }}"
         - "stdout_lines"

@@ -109,3 +109,15 @@
 #     group: kolla
 
 - import_tasks: configure_ssh.yml
+
+- name: Install newer ansible version & netaddr
+  become: true
+  pip:
+    executable: pip3.6
+    name:
+      - ansible
+      - netaddr
+
+- name: Install podman
+  package:
+    name: podman
