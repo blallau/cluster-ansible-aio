@@ -1,15 +1,15 @@
 ---
 - name: "[KVM host] Load cluster_nodes variables"
-  set_fact:
+  ansible.builtin.set_fact:
     cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
 
 - name: "[KVM host] Copy cluster_nodes in {{ tmp_dir }}/{{ group }}"
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: "{{ tmp_dir }}/{{ group }}/cluster_nodes"
     create: true
     block: |
         {{ cluster_nodes | to_nice_json(indent=2) }}
 
 - name: "[KVM host] Display cluster_nodes"
-  debug:
+  ansible.builtin.debug:
     msg: "{{ cluster_nodes | to_nice_yaml(indent=2) }}"

@@ -75,7 +75,7 @@
   meta: reset_connection
 
 - name: "[KVM host] /snap/bin/lxd init --auto"
-  command: /snap/bin/lxd init --auto
+  ansible.builtin.command: /snap/bin/lxd init --auto
   args:
     creates: /var/snap/lxd/common/lxd/storage-pools/default
   become: true
@@ -91,7 +91,7 @@
 - import_tasks: define_cluster_nodes.yml
 
 - name: "[KVM host] Copy cluster config for {{ item.name }} in {{ tmp_dir }}/{{ item.name }}"
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/cluster_config"
     create: true
     block: |
@@ -159,7 +159,7 @@
 
 - name: Insert nodes into ssh_config
   become: true
-  blockinfile:
+  ansible.builtin.blockinfile:
     create: true
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ lookup('env', 'HOME') }}/.ssh/config"

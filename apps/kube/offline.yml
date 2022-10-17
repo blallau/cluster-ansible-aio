@@ -25,15 +25,18 @@
         - name: Containerd
           block:
             - name: load {{ img_tar }} image using ctr
-              command: ctr -n=k8s.io images import {{ app_path }}/images/{{ img_tar | basename }}
+              ansible.builtin.command: >
+                ctr -n=k8s.io images import {{ app_path }}/images/{{ img_tar | basename }}
             - name: push {{ img_tar }} image using ctr
-              command: ctr -n=k8s.io images push {% if unsecure|bool %}--plain-http=true{% endif %} {{ private_registry_endpoint }}/{{ img_name }}
+              ansible.builtin.command: >
+                ctr -n=k8s.io images push {% if unsecure|bool %}--plain-http=true{% endif %}
+                {{ private_registry_endpoint }}/{{ img_name }}
               vars:
                 unsecure: "{% if private_registry_endpoint.endswith('30005') %}true{% else %}false{% endif %}"
               when: img_push is not defined or img_push|bool
               run_once: true
             - name: Post-push cleanup for {{ img_tar }}
-              command: crictl rmi {{ private_registry_endpoint }}/{{ img_name }}
+              ansible.builtin.command: crictl rmi {{ private_registry_endpoint }}/{{ img_name }}
               when: img_push is not defined or img_push|bool
       vars:
         # Only keep everything after last / (if present) and replace the : by - between name and version and add .tar at the end

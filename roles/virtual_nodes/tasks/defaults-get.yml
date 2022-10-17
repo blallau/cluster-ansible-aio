@@ -1,10 +1,11 @@
+---
 # Get timezone from KVM host to use as defaults for cloud-init
 # This is only used if no timezone is specified
 # Unfortunately can't use date from "{{ hostvars[].ansible_date_time.tz }}"
 # as it's an achronym which can't be resolved to country/city for cloud-init
 # Due to Ubuntu Bionic, can't use 'timedatectl -p Timezone --value show'
 - name: "[KVM host] Get timezone from KVM host for cloud-init"
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
       timedatectl |grep 'Time zone:' |awk '{ print $3 }'
   register: result_timezone
@@ -14,5 +15,5 @@
     executable: /bin/bash
 
 - name: "[KVM host] Store timezone from KVM host"
-  set_fact:
+  ansible.builtin.set_fact:
     virt_infra_timezone: "{{ result_timezone.stdout }}"

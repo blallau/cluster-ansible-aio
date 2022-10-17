@@ -31,7 +31,7 @@
       loop: "{{ br_intfs }}"
 
     - name: "Delete IPs from {{ item.intf_name }}"
-      command: "ip addr flush dev {{ item.intf_name }}"
+      ansible.builtin.command: "ip addr flush dev {{ item.intf_name }}"
       loop: "{{ br_intfs }}"
 
     - name: restart networking service

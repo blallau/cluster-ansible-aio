@@ -1,13 +1,20 @@
 ---
-- import_tasks: host_precheck.yml
+- name: Check host
+  ansible.builtin.import_tasks: host_precheck.yml
 
-- import_tasks: define_cluster_networks.yml
-- import_tasks: define_cluster_nodes.yml
+- name: Define cluster_networks
+  ansible.builtin.import_tasks: define_cluster_networks.yml
+
+- name: Define cluster_nodes
+  ansible.builtin.import_tasks: define_cluster_nodes.yml
 
 - name: Steps to destroy VM using Libvirt
   block:
     - name: List snapshots
-      shell: "set -o pipefail ;virsh -q snapshot-list --domain {{ item.fullname }} | cut -d ' ' -f2"
+      ansible.builtin.shell: >
+        set -o pipefail ;
+        virsh -q snapshot-list --domain {{ item.fullname }} |
+        cut -d ' ' -f2
       loop: "{{ cluster_nodes }}"
       register: with_output
       args:
@@ -15,27 +22,34 @@
       ignore_errors: true
 
     - name: Delete metadata snapshots
-      command: "virsh snapshot-delete --metadata --domain {{ item.0.item.fullname }} {{ item.1 }}"
+      ansible.builtin.command: >
+        virsh snapshot-delete
+        --metadata
+        --domain {{ item.0.item.fullname }}
+        {{ item.1 }}
       with_subelements:
         - "{{ with_output.results }}"
         - "stdout_lines"
 
     - name: Delete snapshots
-      command: "virsh snapshot-delete --domain {{ item.0.item.fullname }} {{ item.1 }}"
+      ansible.builtin.command: >
+        virsh snapshot-delete
+        --domain {{ item.0.item.fullname }}
+        {{ item.1 }}
       with_subelements:
         - "{{ with_output.results }}"
         - "stdout_lines"
       ignore_errors: true
 
     - name: Destroy VMs
-      virt:
+      community.libvirt.virt:
         command: destroy
         name: "{{ item.fullname }}"
       loop: "{{ cluster_nodes }}"
       ignore_errors: true
 
     - name: Undefine VMs
-      virt:
+      community.libvirt.virt:
         command: undefine
         name: "{{ item.fullname }}"
       loop: "{{ cluster_nodes }}"
@@ -43,64 +57,72 @@
 
     - name: Remove OS images from libvirt directory
       become: true
-      file:
+      ansible.builtin.file:
         path: "{{ libvirt_dir }}/{{ group }}/{{ item.name }}-boot.qcow2"
         state: absent
       loop: "{{ cluster_nodes }}"
 
     - name: Delete qcow2 images
-      file:
+      ansible.builtin.file:
         path: "{{ libvirt_dir }}/{{ group }}/{{ item.name }}.qcow2"
         state: absent
       loop: "{{ cluster_nodes }}"
       when: destroy_images | bool
 
     - name: "Clean group directory in {{ libvirt_dir }}"
-      file:
+      ansible.builtin.file:
         path: "{{ tmp_dir }}/{{ group }}"
         state: absent
 
-- import_tasks: libvirt/destroy_networks.yml
+- name: Destroy networks
+  ansible.builtin.import_tasks: libvirt/destroy_networks.yml
   when: networks | length > 0
 
-- include_tasks: libvirt/destroy_disks.yml
+- name: Destroy disks
+  ansible.builtin.include_tasks: libvirt/destroy_disks.yml
 
 - name: "Clean nodes config in {{ tmp_dir }}/{{ group }}"
-  file:
+  ansible.builtin.file:
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}"
     state: absent
   loop: "{{ cluster_nodes }}"
 
 - name: Clean nodes from ssh_config
-  blockinfile:
+  ansible.builtin.blockinfile:
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ ansible_env.HOME }}/.ssh/config"
     state: absent
   ignore_errors: true
 
 - name: Clean nodes from SSH known_hosts
-  command:
-    cmd: ssh-keygen -f "{{ ansible_env.HOME }}/.ssh/known_hosts" -R "{{ item.1.address }}"
+  ansible.builtin.command:
+    ssh-keygen -f "{{ ansible_env.HOME }}/.ssh/known_hosts" -R "{{ item.1.address }}"
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.1.address is defined and item.1.external is defined and item.1.external
+  when:
+    - item.1.address is defined
+    - item.1.external is defined
+    - item.1.external | bool
   ignore_errors: true
 
 - name: Clean /etc/hosts file
   become: true
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/hosts
     line: "{{ item.1.address }} {{ item.0.name }}.{{ dns_domain }} {{ item.0.name }}"
     state: absent
   with_subelements:
     - "{{ cluster_nodes }}"
     - interfaces
-  when: item.1.address is defined and item.1.external is defined and item.1.external
+  when:
+    - item.1.address is defined
+    - item.1.external is defined
+    - item.1.external | bool
   ignore_errors: true
 
 - name: "Clean {{ ansible_env.HOME }}/.ssh/known_hosts"
-  known_hosts:
+  ansible.builtin.known_hosts:
     path: "{{ ansible_env.HOME }}/.ssh/known_hosts"
     name: "{{ item.name }}.{{ dns_domain }}"
     state: absent
@@ -108,7 +130,8 @@
   ignore_errors: true
 
 - name: Remove virtual BMC
-  shell: "set -o pipefail && {{ result_vbmc_path.stdout }} delete {{ item.name }}"
+  ansible.builtin.shell: >
+    set -o pipefail && {{ result_vbmc_path.stdout }} delete {{ item.name }}
   args:
     executable: /bin/bash
   register: result_vbmc_remove
@@ -120,4 +143,5 @@
   notify:
     - restart virtual bmc
 
-- meta: flush_handlers
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers

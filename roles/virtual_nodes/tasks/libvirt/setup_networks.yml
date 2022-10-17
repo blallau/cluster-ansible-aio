@@ -9,7 +9,7 @@
     command: facts
 
 - name: "Copy Libvirt XML network domain in {{ tmp_dir }}/{{ group }}"
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}.xml"
     create: true
     block: |
@@ -31,4 +31,6 @@
         autostart: true
         name: "{{ item.name }}"
       loop: "{{ cluster_networks }}"
-  when: (item.name not in ansible_libvirt_networks) or (item.name in ansible_libvirt_networks and ansible_libvirt_networks[item.name].state == 'inactive')
+  when: >
+    (item.name not in ansible_libvirt_networks) or
+    (item.name in ansible_libvirt_networks and ansible_libvirt_networks[item.name].state == 'inactive')

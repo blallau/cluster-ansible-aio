@@ -1,42 +1,55 @@
 ---
-- import_tasks: input_precheck.yml
-- import_tasks: host_precheck.yml
-- import_tasks: defaults-get.yml
-- import_tasks: lvm_storage.yml
+- name: Check nodes & network usage
+  ansible.builtin.import_tasks: input_precheck.yml
+- name: Check host precheck
+  ansible.builtin.import_tasks: host_precheck.yml
+- name: Get timezone
+  ansible.builtin.import_tasks: defaults-get.yml
+- name: Check LVM related stuff
+  ansible.builtin.import_tasks: lvm_storage.yml
 
-- import_role:
+- name: Generate SSH key
+  ansible.builtin.import_role:
     name: common
     tasks_from: ssh_key
 
-- import_tasks: define_cluster_networks.yml
-- import_tasks: define_cluster_nodes.yml
+- name: Define cluster_networks
+  ansible.builtin.import_tasks: define_cluster_networks.yml
+
+- name: Define cluster_nodes
+  ansible.builtin.import_tasks: define_cluster_nodes.yml
 
 - name: "[KVM host] Copy cluster config for {{ item.name }} in {{ tmp_dir }}//{{ group }}/{{ item.name }}"
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/cluster_config"
+    mode: 0644
     create: true
     block: |
         {{ item | to_nice_json(indent=2) }}
   loop: "{{ cluster_nodes }}"
 
-- import_tasks: prepare_os_image.yml
+- name: Prepare OS image
+  ansible.builtin.import_tasks: prepare_os_image.yml
 
 - name: "[KVM host] Copy Libvirt XML domain for {{ item.name }} in {{ tmp_dir }}/{{ group }}/{{ item.name }}"
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/domain.xml"
+    mode: 0644
     create: true
     block: |
         {{ lookup('template', 'libvirt/vm.xml.j2') }}
   loop: "{{ cluster_nodes }}"
 
 - name: Prepare CloudInit/Ignition config
-  include_tasks: postconfig.yml
+  ansible.builtin.include_tasks: postconfig.yml
   loop: "{{ cluster_nodes }}"
 
-- import_tasks: libvirt/setup_networks.yml
+- name: Create networks
+  ansible.builtin.import_tasks: libvirt/setup_networks.yml
   when: networks | length > 0
 
-- include_tasks: libvirt/create_disks.yml
+- name: Create disks
+  ansible.builtin.include_tasks: libvirt/create_disks.yml
 
 - name: Libvirt setup VMs
   block:
@@ -56,7 +69,7 @@
       # Do this for all VMs, in case they already existed and IP has changed
     - name: "Get IP address of VM"
       become: true
-      shell: >
+      ansible.builtin.shell: >
         set -o pipefail ;
         virsh
         --connect {{ libvirt_url }}
@@ -80,7 +93,7 @@
       loop: "{{ cluster_nodes }}"
 
     - name: "Wait for VMs to listen on port 22"
-      wait_for:
+      ansible.builtin.wait_for:
         host: "{{ item.1.address }}"
         port: 22
         delay: 10
@@ -88,29 +101,38 @@
       with_subelements:
         - "{{ cluster_nodes }}"
         - interfaces
-      when: item.1.address is defined and item.1.external is defined and item.1.external
+      when:
+        - item.1.address is defined
+        - item.1.external is defined
+        - item.1.external | bool
 
     - name: "Detach {{ cloud_init_disk }} config drive disk"
-      command: virsh detach-disk {{ item.fullname }} --target {{ cloud_init_disk }} --persistent --live
+      ansible.builtin.command: >
+        virsh detach-disk {{ item.fullname }}
+        --target {{ cloud_init_disk }}
+        --persistent
+        --live
       loop: "{{ cluster_nodes }}"
       when: item.os_type in ["debian", "centos"]
       ignore_errors: true
 
 - name: "[KVM host] Insert nodes into ssh_config"
   become: true
-  blockinfile:
+  ansible.builtin.blockinfile:
+    mode: 0644
     create: true
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ ansible_env.HOME }}/.ssh/config"
 
 - name: "[KVM host] Create file {{ tmp_dir }}/{{ group }}/ssh_config"
-  blockinfile:
+  ansible.builtin.blockinfile:
+    mode: 0644
     create: true
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ tmp_dir }}/{{ group }}/ssh_config"
 
 - name: "[KVM host] Add new nodes to created_nodes Ansible group"
-  add_host:
+  ansible.builtin.add_host:
     name: "{{ item.1.address }}"
     instance_name: "{{ item.0.name }}.{{ dns_domain }}"
     ansible_distribution: "{{ item.0.os_type }}"
@@ -126,14 +148,16 @@
 
 - name: "[KVM host] Create file {{ tmp_dir }}/{{ group }}/etc_hosts"
   become: true
-  blockinfile:
+  ansible.builtin.blockinfile:
+    mode: 0644
     create: true
     block: "{{ lookup('template', 'etc_hosts.j2') }}"
     path: "{{ tmp_dir }}/{{ group }}/etc_hosts"
 
 - name: "[KVM host] Populate /etc/hosts file"
   become: true
-  blockinfile:
+  ansible.builtin.blockinfile:
+    mode: 0644
     create: true
     block: "{{ lookup('template', 'etc_hosts.j2') }}"
     path: "/etc/hosts"
@@ -142,7 +166,7 @@
 #   when: dns_server_enabled | bool
 
 - name: "[KVM host] Create virtual BMC"
-  shell: >
+  ansible.builtin.shell: >
     {{ result_vbmc_path.stdout }} add {{ item.name }}
     --libvirt-uri {{ libvirt_url }}
     --port {{ item.vbmc_port }}
@@ -162,7 +186,10 @@
     - restart virtual bmc
 
 - name: "[KVM host] Start virtual BMC"
-  shell: "set -o pipefail && {{ result_vbmc_path.stdout }} start {{ item.name }}"
+  ansible.builtin.shell: >
+    set -o pipefail
+    &&
+    {{ result_vbmc_path.stdout }} start {{ item.name }}
   args:
     executable: /bin/bash
   register: result_vbmc_start
@@ -175,4 +202,5 @@
     - vbmc is defined and vbmc|bool
   loop: "{{ cluster_nodes }}"
 
-- meta: flush_handlers
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers

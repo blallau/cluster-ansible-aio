@@ -1,41 +1,42 @@
 ---
 - name: "[KVM host] Check qcow2 OS image {{ tmp_dir }}/{{ item.image }} is present"
-  stat:
+  ansible.builtin.stat:
     path: "{{ tmp_dir }}/{{ item.image }}"
   loop: "{{ cluster_nodes }}"
   register: check_os_image
 
-- fail:
+- name: Fail if OS image not present
+  ansible.builtin.fail:
     msg: "In order to deploy VMs, you must first copy OS image to {{ tmp_dir }}"
   when: not item.stat.exists
   loop: "{{ check_os_image.results }}"
 
 - name: "[KVM host] Make sure temp directory exists"
-  file:
+  ansible.builtin.file:
     path: "{{ tmp_dir }}/{{ group }}"
     state: directory
 
 - name: "[KVM host] Create VM-specific directories"
-  file:
+  ansible.builtin.file:
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}"
     state: directory
   loop: "{{ cluster_nodes }}"
 
 - name: "[KVM host] Check if OS files are already in libvirt directory"
-  stat:
+  ansible.builtin.stat:
     path: "{{ libvirt_dir }}/{{ group }}/{{ item.name }}-boot.qcow2"
   loop: "{{ cluster_nodes }}"
   register: copied
 
 - name: "[KVM host] Make sure libvirt OS directory exists"
-  file:
+  ansible.builtin.file:
     path: "{{ libvirt_dir }}/{{ group }}"
     state: directory
   become: true
 
 - name: "[KVM host] Copy OS images to libvirt directory"
   become: true
-  copy:
+  ansible.builtin.copy:
     src: "{{ tmp_dir }}/{{ item.image }}"
     dest: "{{ libvirt_dir }}/{{ group }}/{{ item.name }}-boot.qcow2"
     remote_src: true
@@ -43,13 +44,16 @@
 
 - name: "[KVM host] Increase the image size"
   become: true
-  command: "qemu-img resize {{ libvirt_dir }}/{{ group }}/{{ item.item.name }}-boot.qcow2 +{{ item.item.disk_size }}G"
+  ansible.builtin.command: >
+    qemu-img resize
+    {{ libvirt_dir }}/{{ group }}/{{ item.item.name }}-boot.qcow2
+    +{{ item.item.disk_size }}G
   loop: "{{ copied.results }}"
   when: item.item.name is not match("flatcar.*")
 
 - name: "[KVM host] Run custom shell commands in OS disk"
   become: true
-  command: >
+  ansible.builtin.command: >
     virt-customize
     -a {{ libvirt_dir }}/{{ group }}/{{ item.item.name }}-boot.qcow2
     {% if virt_customize_cmd is defined and virt_customize_cmd %}
@@ -68,7 +72,7 @@
 
 - name: "[KVM host] Install required packages into OS disk"
   become: true
-  command: >
+  ansible.builtin.command: >
     virt-customize
     -a {{ libvirt_dir }}/{{ group }}/{{ item.item.name }}-boot.qcow2
     --install {{ virt_customize_packages | join(',') }}
@@ -79,11 +83,12 @@
   loop: "{{ copied.results }}"
   when:
     - item.item.name is not match("flatcar.*")
-    - virt_customize_packages is defined and virt_customize_packages
+    - virt_customize_packages is defined
+    - virt_customize_packages
 
 - name: "[KVM host] Sysprep guest disk"
   become: true
-  command: >
+  ansible.builtin.command: >
     virt-sysprep
     --selinux-relabel
     {% if virt_root_password is defined and virt_root_password %}

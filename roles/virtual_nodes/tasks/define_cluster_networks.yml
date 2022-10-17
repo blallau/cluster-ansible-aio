@@ -1,15 +1,15 @@
 ---
 - name: "[KVM host] Load cluster_networks variables"
-  set_fact:
+  ansible.builtin.set_fact:
     cluster_networks: "{{ lookup('template','networks.j2') | from_yaml }}"
 
 - name: "[KVM host] Copy cluster_networks in {{ tmp_dir }}/{{ group }}"
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: "{{ tmp_dir }}/{{ group }}/cluster_networks"
     create: true
     block: |
         {{ cluster_networks | to_nice_json(indent=2) }}
 
 - name: "[KVM host] Display networks"
-  debug:
+  ansible.builtin.debug:
     msg: "{{ cluster_networks | to_nice_yaml(indent=2) }}"
