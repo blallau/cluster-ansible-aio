@@ -1,0 +1,31 @@
+skip_list:
+  - fqcn-builtins
+  # [E701] galaxy_info missing in metadata
+  - '701'
+  # [E602] https://github.com/ansible/ansible-lint/issues/457
+  - '602'
+  # [E301] Commands should not change things if nothing needs doing
+  # TODO(mnasiadka): Fix tasks that fail this check in a later iteration
+  - '301'
+  # [E503] Tasks that run when changed should likely be handlers
+  # TODO(mnasiadka): Rework baremetal role to do handlers instead of when: *.changed
+  - '503'
+  # [E106] Role name {} does not match ``^[a-z][a-z0-9_]+$`` pattern
+  - '106'
+  # [E208] permissions not mentioned
+  # FIXME(mnasiadka): Rework file/template to include permissions
+  - '208'
+  # [unnamed-task] All tasks should be named
+  # FIXME(mgoddard): Add names to all tasks
+  - unnamed-task
+  # disable experimental rules
+  - experimental
+  # Package installs should not use latest
+  - package-latest
+  # Most files should not contain tabs
+  - no-tabs
+  # NOTE(frickler): Agreed at Zed PTG not to use FQCN for builtin actions for now, due to
+  # conflicts with open patches and backports.
+  - fqcn-builtins
+  # Allow Jinja templating inside task and play names
+  - name[template]

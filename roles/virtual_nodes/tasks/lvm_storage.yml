@@ -3,7 +3,7 @@
   block:
     - name: "[KVM host] Set lvm_storage"
       ansible.builtin.set_fact:
-        lvm_storage: "{{ vm_volumes is defined and vm_volumes|length > 0 and 'raw' in vm_volumes|map(attribute='format')|list }}"
+        lvm_storage: "{{ vm_volumes is defined and vm_volumes | length > 0 and 'raw' in vm_volumes | map(attribute='format') | list }}"
 
     - name: "[KVM host] Check physical_disks is set"
       ansible.builtin.fail:

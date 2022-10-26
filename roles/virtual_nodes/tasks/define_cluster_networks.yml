@@ -1,7 +1,7 @@
 ---
 - name: "[KVM host] Load cluster_networks variables"
   ansible.builtin.set_fact:
-    cluster_networks: "{{ lookup('template','networks.j2') | from_yaml }}"
+    cluster_networks: "{{ lookup('template', 'networks.j2') | from_yaml }}"
 
 - name: "[KVM host] Copy cluster_networks in {{ tmp_dir }}/{{ group }}"
   ansible.builtin.blockinfile:

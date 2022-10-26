@@ -4,7 +4,7 @@
     - name: "[KVM host] Instantiate Ignition config file"
       ansible.builtin.template:
         src: "config-ign.yaml.j2"
-        dest: "{{ tmp_dir}}/{{ group }}/{{ item.name }}/config-ign.yaml"
+        dest: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/config-ign.yaml"
     - name: "[KVM host] Remove Ignition config file"
       ansible.builtin.file:
         path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/config.ign"
@@ -24,10 +24,10 @@
         - item.os_type == "fcos"
     - name: "[KVM host] Convert Ignition file from YAML format using CT"
       ansible.builtin.shell: >
-        cat {{ tmp_dir}}/{{ group }}/{{ item.name }}/config-ign.yaml
+        cat {{ tmp_dir }}/{{ group }}/{{ item.name }}/config-ign.yaml
         | docker run --rm --interactive --security-opt label=disable
         quay.io/coreos/ct:latest-dev
-        > {{ tmp_dir}}/{{ group }}/{{ item.name }}/config.ign
+        > {{ tmp_dir }}/{{ group }}/{{ item.name }}/config.ign
       when:
         - runtime == "vm"
         - item.os_type == "flatcar"
@@ -44,11 +44,11 @@
     - name: "[KVM host] Instantiate user-data file"
       ansible.builtin.template:
         src: "cloudinit/user-data.j2"
-        dest: "{{ tmp_dir}}/{{ group }}/{{ item.name }}/user-data"
+        dest: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/user-data"
     - name: "[KVM host] Instantiate network-config file"
       ansible.builtin.template:
         src: "cloudinit/network-config.j2"
-        dest: "{{ tmp_dir}}/{{ group }}/{{ item.name }}/network-config"
+        dest: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/network-config"
       when: item.os_type in ["debian", "ubuntu"]
     - name: "[KVM host] Remove config drive files"
       ansible.builtin.file:
