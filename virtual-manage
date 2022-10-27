@@ -9,28 +9,28 @@ GRACEFULLY_SHUTDOWN=false
 
 function configure_etc_hosts {
     sudo sed -i '/# BEGIN ANSIBLE MANAGED BLOCK/,/# END ANSIBLE MANAGED BLOCK/d' /etc/hosts
-    if [ -f ${HOME}/.cluster/${GROUP}/etc_hosts ]; then
-        cat ${HOME}/.cluster/${GROUP}/etc_hosts | sudo tee -a /etc/hosts > /dev/null
+    if [ -f "${HOME}/.cluster/${GROUP}/etc_hosts" ]; then
+        cat "${HOME}/.cluster/${GROUP}/etc_hosts" | sudo tee -a /etc/hosts > /dev/null
         echo -e "\e[93m\e[1m==> Modify /etc/hosts with values from ~/.cluster/${GROUP}/etc_hosts\e[0m"
     fi
 }
 
 function configure_ssh_config {
     sed -i '/# BEGIN ANSIBLE MANAGED BLOCK/,/# END ANSIBLE MANAGED BLOCK/d' ~/.ssh/config
-    if [ -f ${HOME}/.cluster/${GROUP}/ssh_config ]; then
-        cat ${HOME}/.cluster/${GROUP}/ssh_config >> ~/.ssh/config
+    if [ -f "${HOME}/.cluster/${GROUP}/ssh_config" ]; then
+        cat "${HOME}/.cluster/${GROUP}/ssh_config" >> ~/.ssh/config
         echo -e "\e[93m\e[1m==> Modify ~/.ssh/config with values from ~/.cluster/${GROUP}/ssh_config\e[0m"
     fi
 }
 
 function start_networks {
     echo -e "\e[93m\e[1m==> Start all inactive networks\e[0m"
-    list_inactive_networks | while read NETWORK; do
-        if [[ ! -z "$NETWORK" && "$NETWORK" =~ $CLUSTER_GROUP ]]; then
-            virsh net-start $NETWORK | grep -v "^$"
+    list_inactive_networks | while read -r NETWORK; do
+        if [[ -n "$NETWORK" && "$NETWORK" =~ $CLUSTER_GROUP ]]; then
+            virsh net-start "$NETWORK" | grep -v "^$"
             # restart failed network
             if [ $? -ne 0 ]; then
-                virsh net-start $NETWORK | grep -v "^$"
+                virsh net-start "$NETWORK" | grep -v "^$"
             fi
         fi
     done
@@ -39,9 +39,9 @@ function start_networks {
 
 function shutdown_networks {
     echo -e "\e[93m\e[1m==> Shutdown all active networks\e[0m"
-    list_running_networks | while read NETWORK; do
-        if [[ ! -z "$NETWORK"  && "$NETWORK" =~ $CLUSTER_GROUP ]]; then
-            virsh net-destroy $NETWORK | grep -v "^$"
+    list_running_networks | while read -r NETWORK; do
+        if [[ -n "$NETWORK"  && "$NETWORK" =~ $CLUSTER_GROUP ]]; then
+            virsh net-destroy "$NETWORK" | grep -v "^$"
         fi
     done
     echo -e "\e[32m\e[1m==> All networks shutdown :) \e[0m"
@@ -49,9 +49,9 @@ function shutdown_networks {
 
 function start {
     echo -e "\e[93m\e[1m==> Start all inactive domains in ${GROUP} cluster\e[0m"
-    list_inactive_domains | while read DOMAIN; do
-        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
-            virsh start $DOMAIN | grep -v "^$"
+    list_inactive_domains | while read -r DOMAIN; do
+        if [[ -n "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh start "$DOMAIN" | grep -v "^$"
         fi
     done
     echo -e "\e[32m\e[1m==> All domains started in ${GROUP} cluster :) \e[0m"
@@ -60,28 +60,28 @@ function start {
 }
 
 function status {
-    list_running_domains | while read DOMAIN; do
+    list_running_domains | while read -r DOMAIN; do
         echo -e "$DOMAIN\t\t\e[1m\e[92mrunning\e[39m\e[0m"
-        echo -e "$(virsh dominfo $DOMAIN | grep CPU\(s\))"
-        echo -e "$(virsh dominfo $DOMAIN | grep 'Max memory')"
+        echo -e "$(virsh dominfo "$DOMAIN" | grep CPU\(s\))"
+        echo -e "$(virsh dominfo "$DOMAIN" | grep 'Max memory')"
         echo -e ""
-        echo -e "$(virsh -q domblklist $DOMAIN --details)"
+        echo -e "$(virsh -q domblklist "$DOMAIN" --details)"
         echo -e ""
-        echo -e "$(virsh -q domfsinfo $DOMAIN)"
+        echo -e "$(virsh -q domfsinfo "$DOMAIN")"
         echo -e ""
-        echo -e "$(virsh -q domifaddr $DOMAIN --source agent | grep ipv4)"
+        echo -e "$(virsh -q domifaddr "$DOMAIN" --source agent | grep ipv4)"
         echo -e "\n"
     done
-    list_inactive_domains | while read DOMAIN; do
+    list_inactive_domains | while read -r DOMAIN; do
         echo -e "$DOMAIN\t\t\e[1m\e[91mshut off\e[39m\e[0m"
     done
 }
 
 function cleanup {
-    list_all_domains | while read DOMAIN; do
-        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
-            virsh destroy $DOMAIN
-            virsh undefine --remove-all-storage $DOMAIN
+    list_all_domains | while read -r DOMAIN; do
+        if [[ -n "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh destroy "$DOMAIN"
+            virsh undefine --remove-all-storage "$DOMAIN"
         fi
     done
 }
@@ -89,26 +89,26 @@ function cleanup {
 function clone {
     VM_NAME=$1
 
-    if [[ -z $VM_NAME ]]; then
+    if [[ -z "$VM_NAME" ]]; then
         echo -en "error: expected syntax: virtual-manage --clone <string>\n\n"
         exit 0
     fi
-    virt-clone -o ${VM_NAME} -n ${VM_NAME}_clone -f /var/lib/libvirt/images/${VM_NAME}_clone.qcow2
+    virt-clone -o "${VM_NAME}" -n "${VM_NAME}"_clone -f "/var/lib/libvirt/images/${VM_NAME}_clone.qcow2"
 }
 
 function acpi_shutdown {
-    list_running_domains | while read DOMAIN; do
-        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
-            virsh shutdown $DOMAIN --mode acpi
+    list_running_domains | while read -r DOMAIN; do
+        if [[ -n "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh shutdown "$DOMAIN" --mode acpi
         fi
     done
 }
 
 function power_shutdown {
     echo -e "==> power shutdown all running KVM domains..."
-    list_running_domains | while read DOMAIN; do
-        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
-            virsh destroy $DOMAIN | grep -v "^$"
+    list_running_domains | while read -r DOMAIN; do
+        if [[ -n "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh destroy "$DOMAIN" | grep -v "^$"
             # Give libvirt some time for killing off the domain.
             sleep 3
         fi
@@ -124,7 +124,7 @@ function shutdown {
         # Wait until all domains are shut down or timeout has reached.
         END_TIME=$(date -d "$TIMEOUT seconds" +%s)
 
-        while [ $(date +%s) -lt $END_TIME ]; do
+        while [ $(date +%s) -lt "$END_TIME" ]; do
             # Break while loop when no domains are left.
             test -z "$(list_running_domains)" && break
             # Wait a litte, we don't want to DoS libvirt.
@@ -146,8 +146,8 @@ function restart {
 }
 
 function renew-dhcp {
-    list_running_domains | while read -e DOMAIN; do
-        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+    list_running_domains | while read -r -e DOMAIN; do
+        if [[ -n "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
             ssh -q -n root@${DOMAIN#"${GROUP}"} "nmcli con up id 'System eth0'" 2>&1 > /dev/null
             echo "${DOMAIN#"${GROUP}"} network interface 'eth0' restarted"
         fi
@@ -176,24 +176,24 @@ function list_all_domains() {
 
 function list_all_snapshots() {
     DOMAIN=$1
-    virsh snapshot-list --domain $DOMAIN --name  | grep -v '^[[:space:]]*$'
+    virsh snapshot-list --domain "$DOMAIN" --name  | grep -v '^[[:space:]]*$'
 }
 
 function add-disk {
-    list_running_domains | while read DOMAIN; do
-        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
-            sudo qemu-img create -f qcow2 ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2 ${DISK_SIZE}G
-            virsh attach-disk --domain $DOMAIN --source ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2 --subdriver qcow2 --target vdd --live --cache none
+    list_running_domains | while read -r DOMAIN; do
+        if [[ -n "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            sudo qemu-img create -f qcow2 "${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2" "${DISK_SIZE}G"
+            virsh attach-disk --domain "$DOMAIN" --source "${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2" --subdriver qcow2 --target vdd --live --cache none
             echo "Disk added to $DOMAIN domain"
         fi
     done
 }
 
 function remove-disk {
-    list_running_domains | while read DOMAIN; do
-        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
-            virsh detach-disk --domain $DOMAIN --target vdd --live
-            sudo rm ${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2
+    list_running_domains | while read -r DOMAIN; do
+        if [[ -n "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh detach-disk --domain "$DOMAIN" --target vdd --live
+            sudo rm "${DISK_DIRECTORY}/${DOMAIN}/disk-${DISK_SIZE}.qcow2"
             echo "Disk removed from $DOMAIN domain"
         fi
     done
@@ -211,28 +211,28 @@ function snap-create {
     # BEGIN without qemu-guest-agent
     # shutdown domains
     shutdown
-    while read DOMAIN; do
-        while read SNAP; do
+    while read -r DOMAIN; do
+        while read -r SNAP; do
             if [[ "$SNAPSHOT_NAME" = "$SNAP" ]]; then
                 echo "Warning : snapshot $SNAPSHOT_NAME already exists on $DOMAIN"
                 snap_exists=1
                 break 2
             fi
-        done <<< "$(list_all_snapshots $DOMAIN)"
+        done <<< "$(list_all_snapshots "$DOMAIN")"
     done <<< "$(list_inactive_domains)"
 
     if [[ $snap_exists -eq 1 ]]; then
-        read -p "Snapshot $SNAPSHOT_NAME already exists. Recreate them (y/n) ?" -n 1 -r
+        read -r -p "Snapshot $SNAPSHOT_NAME already exists. Recreate them (y/n) ?" -n 1 -r
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            snap-delete $SNAPSHOT_NAME
+            snap-delete "$SNAPSHOT_NAME"
         else
             return
         fi
     fi
 
-    list_inactive_domains | while read DOMAIN; do
-        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
-            virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME --atomic | egrep -v "^$"
+    list_inactive_domains | while read -r DOMAIN; do
+        if [[ -n "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh snapshot-create-as --domain "$DOMAIN" --name "$SNAPSHOT_NAME" --atomic | grep -E -v "^$"
             echo "Snapshot $SNAPSHOT_NAME create for domain $DOMAIN"
         fi
     done
@@ -241,8 +241,8 @@ function snap-create {
     # END without qemu-guest-agent
 
     # # BEGIN with qemu-guest-agent
-    # while read DOMAIN; do
-    #     while read SNAP; do
+    # while read -r DOMAIN; do
+    #     while read -r SNAP; do
     #         if [[ "$SNAPSHOT_NAME" = "$SNAP" ]]; then
     #             echo "Warning : snapshot $SNAPSHOT_NAME already exists on $DOMAIN"
     #             snap_exists=1
@@ -252,7 +252,7 @@ function snap-create {
     # done <<< "$(list_running_domains)"
 
     # if [[ $snap_exists -eq 1 ]]; then
-    #     read -p "Snapshot $SNAPSHOT_NAME already exists. Recreate them (y/n) ?" -n 1 -r
+    #     read -r -p "Snapshot $SNAPSHOT_NAME already exists. Recreate them (y/n) ?" -n 1 -r
     #     if [[ $REPLY =~ ^[Yy]$ ]]; then
     #         snap-delete $SNAPSHOT_NAME
     #     else
@@ -260,7 +260,7 @@ function snap-create {
     #     fi
     # fi
 
-    # list_running_domains | while read DOMAIN; do
+    # list_running_domains | while read -r DOMAIN; do
     #         if [[ "$DOMAIN" =~ $node ]]; then
     #             virsh snapshot-create-as --domain $DOMAIN --name $SNAPSHOT_NAME --atomic --quiesce --disk-only | egrep -v "^$"
     #             echo "Snapshot $SNAPSHOT_NAME create for domain $DOMAIN"
@@ -279,9 +279,9 @@ function snap-delete {
         exit 0
     fi
     shutdown
-    list_inactive_domains | while read DOMAIN; do
-        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
-            virsh snapshot-delete $DOMAIN --snapshotname $SNAPSHOT_NAME
+    list_inactive_domains | while read -r DOMAIN; do
+        if [[ -n "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh snapshot-delete "$DOMAIN" --snapshotname "$SNAPSHOT_NAME"
             echo "Snapshot $SNAPSHOT_NAME remove for domain $DOMAIN"
         fi
     done
@@ -298,9 +298,9 @@ function snap-revert {
         exit 0
     fi
     shutdown
-    list_inactive_domains | while read DOMAIN; do
-        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
-            virsh snapshot-revert $DOMAIN --snapshotname $SNAPSHOT_NAME
+    list_inactive_domains | while read -r DOMAIN; do
+        if [[ -n "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+            virsh snapshot-revert "$DOMAIN" --snapshotname "$SNAPSHOT_NAME"
             echo "Snapshot $SNAPSHOT_NAME revert for domain $DOMAIN"
         fi
     done
@@ -308,11 +308,11 @@ function snap-revert {
 }
 
 function snap-list {
-    list_running_domains | while read DOMAIN; do
-        if [[ ! -z "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
+    list_running_domains | while read -r DOMAIN; do
+        if [[ -n "$DOMAIN" && "$DOMAIN" =~ $CLUSTER_GROUP ]]; then
             #                echo -e "\e[33m$DOMAIN [$(virsh snapshot-info $DOMAIN --current | grep Name | cut -d ":" -f2 | sed -e 's/^[ ]*//')]\e[0m"
-            echo -e "$DOMAIN \e[92m\e[1m[$(virsh snapshot-current --name $DOMAIN)]\e[0m"
-            virsh -q snapshot-list --tree --domain $DOMAIN 2>&1
+            echo -e "$DOMAIN \e[92m\e[1m[$(virsh snapshot-current --name "$DOMAIN")]\e[0m"
+            virsh -q snapshot-list --tree --domain "$DOMAIN" 2>&1
         fi
     done
 }
@@ -367,9 +367,9 @@ while [ "$#" -gt 0 ]; do
             ;;
         (--clone)
             precheck
-            VM_NAME=$2
+            VM_NAME="$2"
             shift 2
-            clone $VM_NAME
+            clone "$VM_NAME"
             exit 0
             ;;
         (--restart)
@@ -400,37 +400,37 @@ while [ "$#" -gt 0 ]; do
             ;;
         (--snap-delete)
             precheck
-            SNAPSHOT_NAME=$2
+            SNAPSHOT_NAME="$2"
             shift 2
-            snap-delete $SNAPSHOT_NAME
+            snap-delete "$SNAPSHOT_NAME"
             exit 0
             ;;
         (--add-disk)
             precheck
-            DISK_SIZE=$2
+            DISK_SIZE="$2"
             shift 2
             add-disk
             exit 0
             ;;
         (--remove-disk)
             precheck
-            DISK_SIZE=$2
+            DISK_SIZE="$2"
             shift 2
             remove-disk
             exit 0
             ;;
         (--snap-create)
             precheck
-            SNAPSHOT_NAME=$2
+            SNAPSHOT_NAME="$2"
             shift 2
-            snap-create $SNAPSHOT_NAME
+            snap-create "$SNAPSHOT_NAME"
             exit 0
             ;;
         (--snap-revert)
             precheck
-            SNAPSHOT_NAME=$2
+            SNAPSHOT_NAME="$2"
             shift 2
-            snap-revert $SNAPSHOT_NAME
+            snap-revert "$SNAPSHOT_NAME"
             exit 0
             ;;
         (--snap-list)

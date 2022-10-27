@@ -223,5 +223,5 @@ esac
 
 check_ansible
 
-CMD="python3 $(which ansible-playbook) -i $INVENTORY $EXTRA_OPTS $PLAYBOOK $VERBOSITY"
+CMD="python3 $(command -v ansible-playbook) -i $INVENTORY $EXTRA_OPTS $PLAYBOOK $VERBOSITY"
 process_cmd
