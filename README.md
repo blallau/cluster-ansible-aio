@@ -8,18 +8,18 @@ Cluster-ansible-aio is designed for everyone as the easiest and fastest way to c
 
 Cluster-ansible-aio is an open source tool for automating deployment of cluster apps on a single machine using Libvirt.
 
--   Source: <https://github.com/blallau/cluster-ansible-aio>
+- Source: <https://github.com/blallau/cluster-ansible-aio>
 
 ## Features
 
--   Libvirt(KVM) or LXD support(beta)
--   Multi Host OS (CentOS, Ubuntu)
--   Multi guest OS (CentOS, Ubuntu, Debian, Flatcar, Fedora CoreOS)
--   Multi network types using DHCP or static IPs
--   Multi block storage (using Logical Volume or QCOW2 files)
--   Heavily automated using Cloudinit for standard OS (or Ignition for immutable OS)
--   Heavily automated using Ansible
--   IPMI support using VirtualBMC
+- Libvirt(KVM) or LXD support(beta)
+- Multi Host OS (CentOS, Ubuntu)
+- Multi guest OS (CentOS, Ubuntu, Debian, Flatcar, Fedora CoreOS)
+- Multi network types using DHCP or static IPs
+- Multi block storage (using Logical Volume or QCOW2 files)
+- Heavily automated using Cloudinit for standard OS (or Ignition for immutable OS)
+- Heavily automated using Ansible
+- IPMI support using VirtualBMC
 
 ## Quickstart guide
 
@@ -157,9 +157,11 @@ and **roles/container_nodes/vars/main.yml**.
 
 ## Troubleshooting guide
 
-* Deployment fails on "virtual_nodes : Get IP address of VM":
+- Deployment fails on "virtual_nodes : Get IP address of VM":
+
 => maybe network interfaces naming in VM is in conflict with cloudinit config.
 
-* Error 'ansible_user' undefined
+- Error 'ansible_user' undefined
+
 => Reason: libvirt_inventory.py can't retrieve dhcp lease (sudo dhclient eth0)
 => Solution: launch ./virtual-manage --renew-dhcp
