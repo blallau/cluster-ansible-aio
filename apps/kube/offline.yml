@@ -1,11 +1,10 @@
 ---
-
 - name: Offline image retriever
   block:
     - name: Create image dir app
       file:
         path: "{{ app_path }}/images"
-        mode: 0755
+        mode: "0755"
         state: directory
     - name: offline images retriever
       block:

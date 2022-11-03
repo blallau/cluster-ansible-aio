@@ -8,7 +8,7 @@
     path: "{{ tmp_dir }}/{{ group }}/cluster_nodes"
     create: true
     block: |
-        {{ cluster_nodes | to_nice_json(indent=2) }}
+      {{ cluster_nodes | to_nice_json(indent=2) }}
 
 - name: "[KVM host] Display cluster_nodes"
   ansible.builtin.debug:

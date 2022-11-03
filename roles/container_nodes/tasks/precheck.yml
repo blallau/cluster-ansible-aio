@@ -24,7 +24,7 @@
         path: "{{ tmp_dir }}/pool.xml"
         create: true
         block: |
-            {{ lookup('template', 'libvirt/pool.xml.j2') }}
+          {{ lookup('template', 'libvirt/pool.xml.j2') }}
 
     - name: "Start {{ virt_volume_group }} storage pool"
       become: true

@@ -13,7 +13,7 @@
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}.xml"
     create: true
     block: |
-        {{ lookup('template', 'libvirt/network.xml.j2') }}
+      {{ lookup('template', 'libvirt/network.xml.j2') }}
   loop: "{{ cluster_networks }}"
 
 - name: "Steps to setup networks using Libvirt"

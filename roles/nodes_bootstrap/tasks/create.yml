@@ -1,3 +1,4 @@
+# yamllint disable rule:line-length
 ---
 - name: Load cluster_nodes variables
   set_fact:
@@ -15,7 +16,8 @@
   lineinfile:
     path: /etc/hosts
     insertafter: EOF
-    line: "{{ hostvars[item.name]['ansible_' + item.interfaces | selectattr('external', 'defined') | map(attribute='name') | first]['ipv4']['address'] }}  {{ hostvars[item.name]['inventory_hostname'] }}"
+    line: >
+      {{ hostvars[item.name]['ansible_' + item.interfaces | selectattr('external', 'defined') | map(attribute='name') | first]['ipv4']['address'] }}  {{ hostvars[item.name]['inventory_hostname'] }}
   loop: "{{ cluster_nodes }}"
   become: true
 

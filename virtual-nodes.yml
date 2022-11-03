@@ -16,8 +16,8 @@
   connection: local
   gather_facts: false
   pre_tasks:
-   - setup:
-       gather_subset: min
+    - setup:
+        gather_subset: min
   roles:
     - preflight
 
@@ -26,41 +26,39 @@
   connection: local
   gather_facts: false
   pre_tasks:
-   - setup:
-       gather_subset: min
+    - setup:
+        gather_subset: min
   roles:
     - virtual_nodes
 
 # Wait cloud-init completion
-- name: 'Wait for cloud-init completion'
+- name: "Wait for cloud-init completion"
   hosts: created_nodes
   gather_facts: false
-  become: True
+  become: true
   tasks:
-    - name: 'Wait using cloud-init status --wait'
-      command: 'cloud-init status --wait'
+    - name: "Wait using cloud-init status --wait"
+      command: "cloud-init status --wait"
       failed_when: false
       when:
         - method == "create"
         - ansible_distribution in ["debian", "ubuntu", "centos"]
 
 # Python 3 not present on Ubuntu
-- name: 'Wait for Python 3 to be installed'
+- name: "Wait for Python 3 to be installed"
   hosts: created_nodes
   gather_facts: false
-  become: True
+  become: true
   tasks:
     # - raw: echo "nameserver {{ host_ip }}" > /etc/resolv.conf
     - raw: test -e /usr/bin/python3 || (apt -y update && apt install -y python3-minimal)
       when:
         - method == "create"
         - ansible_distribution in ["debian", "ubuntu"]
-
     # - raw: echo "nameserver {{ host_ip }}" > /etc/resolv.conf
     # - raw: test -e /usr/bin/python3 || (yum -y update && yum install -y python3)
     #   when: method == "create" and ansible_distribution|lower == "centos"
     #   retries: 2
-
 # - name: Populate /etc/resolv.conf file
 #   hosts: created_nodes
 #   gather_facts: false
@@ -78,5 +76,7 @@
 #         path: "/etc/resolv.conf"
 #         regexp: '^search .*'
 #         #Fix using {{ dns_domain }} from virtual-nodes playbook
+#         line: 'search mydomain.org'
+#       when: method == "create" and not ansible_distribution|lower == "fedora"
 #         line: 'search mydomain.org'
 #       when: method == "create" and not ansible_distribution|lower == "fedora"

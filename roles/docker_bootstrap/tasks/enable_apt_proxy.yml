@@ -28,14 +28,14 @@
     replace='\1'
   when: ansible_distribution|lower == "centos" and apt_cache_enabled | bool
   loop:
-   - /etc/yum.repos.d/CentOS-Base.repo
-   - /etc/yum.repos.d/CentOS-Debuginfo.repo
-   - /etc/yum.repos.d/CentOS-Media.repo
-   - /etc/yum.repos.d/CentOS-Vault.repo
-   - /etc/yum.repos.d/CentOS-CR.repo
-   - /etc/yum.repos.d/CentOS-fasttrack.repo
-   - /etc/yum.repos.d/CentOS-Sources.repo
-   - /etc/yum.repos.d/epel.repo
+    - /etc/yum.repos.d/CentOS-Base.repo
+    - /etc/yum.repos.d/CentOS-Debuginfo.repo
+    - /etc/yum.repos.d/CentOS-Media.repo
+    - /etc/yum.repos.d/CentOS-Vault.repo
+    - /etc/yum.repos.d/CentOS-CR.repo
+    - /etc/yum.repos.d/CentOS-fasttrack.repo
+    - /etc/yum.repos.d/CentOS-Sources.repo
+    - /etc/yum.repos.d/epel.repo
 
 - name: Disable mirrorlist in repositories (mirror mode)
   replace: >
@@ -44,14 +44,14 @@
     replace='#\1'
   when: ansible_distribution|lower == "centos" and apt_cache_enabled | bool
   loop:
-   - /etc/yum.repos.d/CentOS-Base.repo
-   - /etc/yum.repos.d/CentOS-Debuginfo.repo
-   - /etc/yum.repos.d/CentOS-Media.repo
-   - /etc/yum.repos.d/CentOS-Vault.repo
-   - /etc/yum.repos.d/CentOS-CR.repo
-   - /etc/yum.repos.d/CentOS-fasttrack.repo
-   - /etc/yum.repos.d/CentOS-Sources.repo
-   - /etc/yum.repos.d/epel.repo
+    - /etc/yum.repos.d/CentOS-Base.repo
+    - /etc/yum.repos.d/CentOS-Debuginfo.repo
+    - /etc/yum.repos.d/CentOS-Media.repo
+    - /etc/yum.repos.d/CentOS-Vault.repo
+    - /etc/yum.repos.d/CentOS-CR.repo
+    - /etc/yum.repos.d/CentOS-fasttrack.repo
+    - /etc/yum.repos.d/CentOS-Sources.repo
+    - /etc/yum.repos.d/epel.repo
 
 - name: Disable fastestmirror plugin
   lineinfile:

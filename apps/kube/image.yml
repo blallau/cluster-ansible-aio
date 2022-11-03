@@ -1,12 +1,12 @@
 - hosts: any
   become: true
   tasks:
-  - name: image pusher
-    block:
-    - name: kubectl offline image retriever
-      include_tasks: offline.yml
-      vars:
-        kube_apps_file_dir: /tmp/kast
-        app_path: "{{ kube_apps_file_dir }}/kast-checker"
-        img_name: "{{ image_version }}"
-        private_registry_endpoint: kast-registry:30005
+    - name: image pusher
+      block:
+        - name: kubectl offline image retriever
+          include_tasks: offline.yml
+          vars:
+            kube_apps_file_dir: /tmp/kast
+            app_path: "{{ kube_apps_file_dir }}/kast-checker"
+            img_name: "{{ image_version }}"
+            private_registry_endpoint: kast-registry:30005

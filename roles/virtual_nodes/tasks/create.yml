@@ -22,10 +22,10 @@
 - name: "[KVM host] Copy cluster config for {{ item.name }} in {{ tmp_dir }}//{{ group }}/{{ item.name }}"
   ansible.builtin.blockinfile:
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/cluster_config"
-    mode: 0644
+    mode: "0644"
     create: true
     block: |
-        {{ item | to_nice_json(indent=2) }}
+      {{ item | to_nice_json(indent=2) }}
   loop: "{{ cluster_nodes }}"
 
 - name: Prepare OS image
@@ -34,10 +34,10 @@
 - name: "[KVM host] Copy Libvirt XML domain for {{ item.name }} in {{ tmp_dir }}/{{ group }}/{{ item.name }}"
   ansible.builtin.blockinfile:
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/domain.xml"
-    mode: 0644
+    mode: "0644"
     create: true
     block: |
-        {{ lookup('template', 'libvirt/vm.xml.j2') }}
+      {{ lookup('template', 'libvirt/vm.xml.j2') }}
   loop: "{{ cluster_nodes }}"
 
 - name: Prepare CloudInit/Ignition config
@@ -119,14 +119,14 @@
 - name: "[KVM host] Insert nodes into ssh_config"
   become: true
   ansible.builtin.blockinfile:
-    mode: 0644
+    mode: "0644"
     create: true
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ ansible_env.HOME }}/.ssh/config"
 
 - name: "[KVM host] Create file {{ tmp_dir }}/{{ group }}/ssh_config"
   ansible.builtin.blockinfile:
-    mode: 0644
+    mode: "0644"
     create: true
     block: "{{ lookup('template', 'ssh_config.j2') }}"
     path: "{{ tmp_dir }}/{{ group }}/ssh_config"
@@ -149,7 +149,7 @@
 - name: "[KVM host] Create file {{ tmp_dir }}/{{ group }}/etc_hosts"
   become: true
   ansible.builtin.blockinfile:
-    mode: 0644
+    mode: "0644"
     create: true
     block: "{{ lookup('template', 'etc_hosts.j2') }}"
     path: "{{ tmp_dir }}/{{ group }}/etc_hosts"
@@ -157,7 +157,7 @@
 - name: "[KVM host] Populate /etc/hosts file"
   become: true
   ansible.builtin.blockinfile:
-    mode: 0644
+    mode: "0644"
     create: true
     block: "{{ lookup('template', 'etc_hosts.j2') }}"
     path: "/etc/hosts"

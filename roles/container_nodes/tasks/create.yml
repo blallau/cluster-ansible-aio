@@ -95,7 +95,7 @@
     path: "{{ tmp_dir }}/{{ group }}/{{ item.name }}/cluster_config"
     create: true
     block: |
-        {{ item | to_nice_json(indent=2) }}
+      {{ item | to_nice_json(indent=2) }}
   loop: "{{ cluster_nodes }}"
 
 - name: Prepare CloudInit/Ignition config

@@ -13,7 +13,7 @@
   file:
     path: "{{ item }}"
     state: directory
-    mode: 0750
+    mode: "0750"
   loop:
     - "{{ myvirt_config_path }}"
 
