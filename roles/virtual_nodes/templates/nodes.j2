@@ -17,6 +17,9 @@
   fullname: "{{ group }}{{ node.name }}"
   ram: {{ node.ram }}
   vcpu: {{ node.cpu }}
+{% if node.gpu is defined and node.gpu | bool %}
+  gpu_passthrough: true
+{% endif %}
   role: {{ node.type }}
   disk_size: {{ node.root_disk_size | default(root_disk_default_size) }}
   image: {{ guest_os_images[os_type] }}
@@ -24,7 +27,6 @@
 {% if vbmc | bool %}
   vbmc_port: {{ vbmc_port + loop.index }}
 {% endif %}
-
 {% if node.net_intfs is defined and node.net_intfs|length > 0 %}
   interfaces:
 {% set node_loop = loop %}

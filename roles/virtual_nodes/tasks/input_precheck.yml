@@ -1,4 +1,18 @@
 ---
+- name: Validate cpu architecture supports virtualization
+  ansible.builtin.shell: egrep '^flags.*(vmx|svm)' /proc/cpuinfo
+  ignore_errors: true
+  register: virt_bit
+
+- name: Set fact
+  ansible.builtin.set_fact:
+    virtu: false
+  when: virt_bit.rc == 1
+
+# - name: Check node with GPU is set
+#   ansible.builtin.set_fact:
+#     node_gpu: "{{ nodes | map(attribute='gpu') | list | first | default('NOT_FOUND') }}"
+
 - name: Set nodes_interfaces
   ansible.builtin.set_fact:
     nodes_interfaces: "{{ nodes | map(attribute='net_intfs') | flatten | json_query('[*].name') }}"

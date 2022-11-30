@@ -121,3 +121,7 @@
 - name: Install podman
   package:
     name: podman
+
+# - name: Disable SELinux
+#   ansible.posix.selinux:
+#     state: disabled

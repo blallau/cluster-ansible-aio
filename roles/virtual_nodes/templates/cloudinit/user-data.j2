@@ -121,6 +121,7 @@ runcmd:
 {% endif %}
 {% if item.os_type in ['centos'] %}
   - localectl set-keymap fr
+  - head -n1 /etc/redhat-release | awk '{print $4}' > /etc/yum/vars/releasever
 {% endif %}
   - systemctl enable --now iscsid
 {% if debug_tools %}

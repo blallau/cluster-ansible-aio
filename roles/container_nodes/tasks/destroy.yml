@@ -1,7 +1,7 @@
 ---
 - name: Load cluster_nodes variables
   set_fact:
-    cluster_nodes: "{{ lookup('template','nodes.j2') | from_yaml }}"
+    cluster_nodes: "{{ lookup('template', 'nodes.j2') | from_yaml }}"
 
 # TODO(bl) destroy snapshots if present
 - name: Steps to destroy containers

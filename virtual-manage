@@ -345,10 +345,10 @@ function precheck() {
         echo -en "Error: \$GROUP variable must be defined\n\n"
         exit 0
     fi
-    if [[ ! ${GROUP} =~ ^[[:upper:]]+$ ]]; then
-        echo -en "Error: \$GROUP must be uppercase, but get: ${GROUP}\n\n"
-        exit 0
-    fi
+#    if [[ ! ${GROUP} =~ ^[[:upper:]]+$ ]]; then
+#        echo -en "Error: \$GROUP must be uppercase, but get: ${GROUP}\n\n"
+#        exit 0
+#    fi
 }
 
 LONG_OPTS="all,clone:,renew-dhcp,cleanup,restart,start,shutdown,status,snap-delete:,snap-create:,snap-revert:,snap-list,add-disk:,remove-disk:,help"

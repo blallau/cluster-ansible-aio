@@ -1,7 +1,7 @@
 ---
 - name: Check storage is available
   block:
-    - name: check physical_disks is set
+    - name: Check physical_disks is set
       fail:
         msg: "when vm_volumes|length > 0, physical_disks MUST be set"
       when: physical_disks is not defined

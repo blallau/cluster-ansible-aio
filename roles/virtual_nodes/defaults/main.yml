@@ -11,7 +11,7 @@ host_ip: "{{ networks | selectattr('forward', 'defined') | selectattr('forward',
 # Globals #
 ###########
 home_dir: "{{ ansible_user_dir }}"
-tmp_dir: "{{ home_dir}}/.cluster"
+tmp_dir: "{{ home_dir }}/.cluster"
 
 #########
 # Guest #

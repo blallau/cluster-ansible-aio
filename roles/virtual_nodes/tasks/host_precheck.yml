@@ -46,7 +46,7 @@
 
         - name: "[KVM host] Advise unable to start libvirtd"
           ansible.builtin.set_fact:
-            validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to start and enable libvirtd'] }}"
+            validations_failed: "{{ validations_failed | default([]) + ['KVM host: Failed to start and enable libvirtd'] }}"
           when:
             - result_libvirtd.failed
           changed_when: true
@@ -62,7 +62,7 @@
 
         - name: "[KVM host] Advise libvirtd not contactable"
           ansible.builtin.set_fact:
-            validations_failed: "{{ validations_failed|default([]) + ['KVM host: libvirtd connection failed on KVM host'] }}"
+            validations_failed: "{{ validations_failed | default([]) + ['KVM host: libvirtd connection failed on KVM host'] }}"
           when:
             - result_libvirtd.list_vms is not defined
           changed_when: true
@@ -114,7 +114,7 @@
 
         - name: "[KVM host] Advise unable to remove virtualbmc host package"
           ansible.builtin.set_fact:
-            validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to remove vbmc host package'] }}"
+            validations_failed: "{{ validations_failed | default([]) + ['KVM host: Failed to remove vbmc host package'] }}"
           when:
             - vbmc | bool and vbmc_pip
             - result_vbmc_remove.failed
@@ -123,7 +123,7 @@
         - name: "[KVM host] Install virtualbmc with pip"
           become: true
           ansible.builtin.pip:
-            name: virtualbmc  {%- if vbmc_pip_version is defined %}=={{ vbmc_pip_version }}{% endif %}
+            name: virtualbmc {%- if vbmc_pip_version is defined %}=={{ vbmc_pip_version }}{% endif %}
             extra_args: "--prefix /usr/local"
           register: result_vbmc_pip
           ignore_errors: true
@@ -143,7 +143,7 @@
 
         - name: "[KVM host] Advise unable to find virtualbmc"
           ansible.builtin.set_fact:
-            validations_failed: "{{ validations_failed|default([]) + ['KVM host: Cannot find vbmc binary, is it installed?'] }}"
+            validations_failed: "{{ validations_failed | default([]) + ['KVM host: Cannot find vbmc binary, is it installed?'] }}"
           when:
             - vbmc | bool
             - result_vbmc_path.failed is defined
@@ -152,7 +152,7 @@
 
         - name: "[KVM host] Advise unable to install virtualbmc"
           ansible.builtin.set_fact:
-            validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to install virtualbmc with pip'] }}"
+            validations_failed: "{{ validations_failed | default([]) + ['KVM host: Failed to install virtualbmc with pip'] }}"
           when:
             - vbmc | bool and vbmc_pip
             - result_vbmc_pip.failed
@@ -171,7 +171,7 @@
 
         - name: "[KVM host] Advise unable to create virtualbmc service"
           ansible.builtin.set_fact:
-            validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to create virtualbmc service'] }}"
+            validations_failed: "{{ validations_failed | default([]) + ['KVM host: Failed to create virtualbmc service'] }}"
           when:
             - vbmc | bool and vbmc_pip
             - result_vbmc_service.failed
@@ -222,7 +222,7 @@
 
         - name: "[KVM host] Advise unable to start virtualbmc"
           ansible.builtin.set_fact:
-            validations_failed: "{{ validations_failed|default([]) + ['KVM host: Failed to start and enable virtualbmc'] }}"
+            validations_failed: "{{ validations_failed | default([]) + ['KVM host: Failed to start and enable virtualbmc'] }}"
           when:
             - vbmc | bool
             - result_virtualbmc.status.ActiveState is defined

@@ -10,7 +10,7 @@ cloud_init_disk: "vdz"
 host_ip: "{{ networks | selectattr('forward', 'defined') | selectattr('forward', 'equalto', 'nat') | map(attribute='cidr') | ipaddr('1') | ipaddr('address') | first }}"
 
 home_dir: "{{ ansible_user_dir }}"
-tmp_dir: "{{ home_dir}}/.cluster"
+tmp_dir: "{{ home_dir }}/.cluster"
 
 ###########
 # Libvirt #

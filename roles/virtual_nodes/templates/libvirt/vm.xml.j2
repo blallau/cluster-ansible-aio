@@ -114,5 +114,12 @@
       <alias name='rng0'/>
       <backend model='random'>/dev/urandom</backend>
     </rng>
+    {% if item.gpu_passthrough is defined and item.gpu_passthrough %}
+    <hostdev mode="subsystem" type="pci" managed="yes">
+      <source>
+        <address domain="0" bus="1" slot="0" function="0"/>
+      </source>
+    </hostdev>
+    {% endif %}
   </devices>
 </domain>
